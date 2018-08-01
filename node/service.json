@@ -1,0 +1,16 @@
+{
+  "stack": "nodejs",
+  "memory": 512,
+  "ttl": 60,
+  "timeout": 60,
+  "routes": {
+    "sitemap": {
+      "path": "/sitemap.xml",
+      "public": true
+    },
+    "robots": {
+      "path": "/robots.txt",
+      "public": true
+    }
+  }
+}

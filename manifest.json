@@ -1,0 +1,34 @@
+{
+  "name": "sitemap",
+  "vendor": "basedevmkp",
+  "version": "0.1.0-beta",
+  "title": "Sitemap",
+  "description": "Proxy to sitemap.xml",
+  "mustUpdateAt": "2019-08-01",
+  "categories": [],
+  "registries": [
+    "smartcheckout"
+  ],
+  "settingsSchema": {},
+  "dependencies": {},
+  "builders": {
+    "node": "3.x"
+  },
+  "policies": [
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/*.xml"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "janus-edge.vtex.com.br",
+        "path": "/robots.txt"
+      }
+    }
+  ],
+  "credentialType": "absolute"
+}
