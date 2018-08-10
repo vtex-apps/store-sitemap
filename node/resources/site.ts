@@ -5,16 +5,15 @@ const client = axios.create({
 })
 
 export async function getSiteMapXML (account: string, authToken: string, path: string) {
-  const url = `http://${account}.vtexcommercestable.com.br/${path}.xml`
+  const url = `http://${account}.vtexcommercestable.com.br${path}`
   const headers = {
-    Authorization: `bearer ${authToken}`,
     'Proxy-Authorization': authToken,
   }
   return client.get(url, {headers})
 }
 
 export async function getRobotsTxt (originalHost: string) {
-  const url = `http://janus-edge.vtex.com.br/robots.txt`
+  const url = 'http://janus-edge.vtex.com.br/robots.txt'
   const headers = {
     Host: originalHost
   }

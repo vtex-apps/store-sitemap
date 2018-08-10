@@ -1,16 +1,19 @@
 {
-  "name": "vtex.sitemap",
+  "name": "vtex.store-sitemap",
   "version": null,
   "dependencies": {
     "@vtex/api": "^0.32.0",
-    "axios": "^0.18.0"
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "ramda": "^0.25.0"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/node": "^7.0.8",
-    "tslint": "^5.8.0",
+    "@types/ramda": "types/npm-ramda#dist",
+    "tslint": "^5.11.0",
     "tslint-config-vtex": "^2.0.0",
-    "typescript": "^2.4.2"
+    "typescript": "^3.0.1"
   },
   "scripts": {
     "lint": "tsc --noEmit && tslint -c tslint.json './**/*.ts'"

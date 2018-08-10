@@ -8,6 +8,18 @@
       "path": "/sitemap.xml",
       "public": true
     },
+    "departments": {
+      "path": "/sitemap-departamentos.xml",
+      "public": true
+    },
+    "brands": {
+      "path": "/sitemap-marcas.xml",
+      "public": true
+    },
+    "products": {
+      "path": "/sitemap-produtos-1.xml",
+      "public": true
+    },
     "robots": {
       "path": "/robots.txt",
       "public": true

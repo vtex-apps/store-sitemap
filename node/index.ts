@@ -1,5 +1,7 @@
-import {getSiteMapXML, getRobotsTxt} from './resources/site'
+import {map} from 'ramda'
+
 import colossus from './resources/colossus'
+import {getRobotsTxt, getSiteMapXML} from './resources/site'
 
 const errorResponse = (err) => {
   if (err.response) {
@@ -11,7 +13,7 @@ const errorResponse = (err) => {
   return {status: 500, body: err, details: {}}
 }
 
-const prepare = (middleware: Function) => {
+const prepare = (middleware: (ctx: ColossusContext) => Promise<void>) => {
   return async (ctx) => {
     const {vtex: {account, workspace, authToken}} = ctx
     const logger = colossus(account, workspace, authToken)
@@ -35,25 +37,34 @@ const prepare = (middleware: Function) => {
   }
 }
 
+const robots = async function robotsTxtMiddleware (ctx) {
+  const forwardedHost = ctx.get('x-forwarded-host')
+  const {data} = await getRobotsTxt(forwardedHost)
+
+  ctx.set('Content-Type', 'text/plain')
+  ctx.body = data
+  ctx.status = 200
+}
+
+const sitemap = async function siteXMLMiddleware (ctx) {
+  const {vtex: {account, authToken, route}} = ctx
+  const path = ctx.headers['x-forwarded-path']
+  const {data} = await getSiteMapXML(account, authToken, path)
+  console.log('received sitemap:', data)
+  const forwardedHost = ctx.get('x-forwarded-host')
+  const body = data.replace(new RegExp(`${account}.vtexcommercestable.com.br`, 'g'), forwardedHost)
+
+  ctx.set('Content-Type', 'text/xml')
+  ctx.body = body
+  ctx.status = 200
+}
+
 export default {
-  routes: {
-    sitemap: prepare(async function siteXMLMiddleware (ctx) {
-      const {vtex: {account, authToken, route: {params: {catchAll}}}} = ctx
-      const {data} = await getSiteMapXML(account, authToken, catchAll)
-      const forwardedHost = ctx.get('x-forwarded-host')
-      const body = data.replace(new RegExp(`${account}.vtexcommercestable.com.br`, 'g'), forwardedHost)
-
-      ctx.set('Content-Type', 'text/xml')
-      ctx.body = body
-      ctx.status = 200
-    }),
-    robots: prepare(async function robotsTxtMiddleware (ctx) {
-      const forwardedHost = ctx.get('x-forwarded-host')
-      const {data} = await getRobotsTxt(forwardedHost)
-
-      ctx.set('Content-Type', 'text/plain')
-      ctx.body = data
-      ctx.status = 200
-    })
-  },
+  routes: map(prepare, {
+    brands: sitemap,
+    departments: sitemap,
+    products: sitemap,
+    robots,
+    sitemap,
+  }),
 }

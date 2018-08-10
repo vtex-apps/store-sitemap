@@ -1,6 +1,6 @@
 {
-  "name": "sitemap",
-  "vendor": "basedevmkp",
+  "name": "store-sitemap",
+  "vendor": "vtex",
   "version": "0.1.0-beta",
   "title": "Sitemap",
   "description": "Proxy to sitemap.xml",
