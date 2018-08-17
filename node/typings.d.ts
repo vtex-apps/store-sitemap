@@ -1,6 +1,8 @@
 import {Context} from 'koa'
 
 declare global {
+  type LogLevel = 'info' | 'error' | 'warning' | 'debug'
+
   type Middleware = (ctx: ColossusContext) => Promise<void>
 
   interface IOContext {

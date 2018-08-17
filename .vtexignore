@@ -14,5 +14,3 @@ typings.d.ts
 yarn.lock
 node/node_modules/
 node/yarn.lock
-node/tsconfig.json
-node/tslint.json
