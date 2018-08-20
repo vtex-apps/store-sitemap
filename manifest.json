@@ -35,5 +35,8 @@
       "name": "vtex.render-server:upload-canonical-routes"
     }
   ],
-  "credentialType": "absolute"
+  "credentialType": "absolute",
+  "scripts": {
+    "postreleasy": "vtex publish --verbose"
+  }
 }
