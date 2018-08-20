@@ -25,13 +25,10 @@ export const sitemap = async (ctx: ColossusContext) => {
 
   $('loc').each((_, loc) => {
     const canonicalUrl = $(loc).text()
-    let systemUrl = canonicalUrl
     if (canonical) {
       const route = new Route(ctx, canonicalUrl)
       routeList.push(route)
-      systemUrl = systemUrl.replace(route.canonical, route.path)
     }
-    $(loc).text(systemUrl)
   })
 
   if (routeList.length > 0) {
