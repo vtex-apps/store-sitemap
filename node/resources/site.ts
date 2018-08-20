@@ -1,21 +1,23 @@
 import axios from 'axios'
 
-const client = axios.create({
+const http = axios.create({
   timeout: 4000,
 })
 
-export async function getSiteMapXML (account: string, authToken: string, path: string) {
-  const url = `http://${account}.vtexcommercestable.com.br${path}`
-  const headers = {
-    'Proxy-Authorization': authToken,
+export const getSiteMapXML = async (ctx: ColossusContext) => http.get(
+  `http://${ctx.vtex.account}.vtexcommercestable.com.br${ctx.get('x-forwarded-path')}`,
+  {
+    headers: {
+      'Proxy-Authorization': ctx.vtex.authToken,
+    }
   }
-  return client.get(url, {headers})
-}
+)
 
-export async function getRobotsTxt (originalHost: string) {
-  const url = 'http://janus-edge.vtex.com.br/robots.txt'
-  const headers = {
-    Host: originalHost
+export const getRobotsTxt = async (ctx: ColossusContext) => http.get(
+  `http://janus-edge.vtex.com.br/robots.txt?an=${ctx.vtex.account}`,
+  {
+    headers: {
+      Authorization: ctx.vtex.authToken
+    }
   }
-  return client.get(url, {headers})
-}
+)

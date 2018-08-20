@@ -1,7 +1,7 @@
 {
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "0.1.0-beta",
+  "version": "0.1.1",
   "title": "Sitemap",
   "description": "Proxy to sitemap.xml",
   "mustUpdateAt": "2019-08-01",
@@ -10,7 +10,9 @@
     "smartcheckout"
   ],
   "settingsSchema": {},
-  "dependencies": {},
+  "dependencies": {
+    "vtex.render-server": "7.x"
+  },
   "builders": {
     "node": "3.x"
   },
@@ -28,7 +30,13 @@
         "host": "janus-edge.vtex.com.br",
         "path": "/robots.txt"
       }
+    },
+    {
+      "name": "vtex.render-server:upload-canonical-routes"
     }
   ],
-  "credentialType": "absolute"
+  "credentialType": "absolute",
+  "scripts": {
+    "postreleasy": "vtex publish --verbose"
+  }
 }

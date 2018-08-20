@@ -17,7 +17,11 @@
       "public": true
     },
     "products": {
-      "path": "/sitemap-produtos-1.xml",
+      "path": "/sitemap-produtos-:page:.xml",
+      "public": true
+    },
+    "category": {
+      "path": "/sitemap-categoria-:specifier:.xml",
       "public": true
     },
     "robots": {
