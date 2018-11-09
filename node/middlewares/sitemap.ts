@@ -1,17 +1,15 @@
-import { HttpClient } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import { retry } from '../resources/retry'
 import { isCanonical, Route } from '../resources/route'
 import { getSiteMapXML } from '../resources/site'
 
-const updateRouteList = async (ctx: ColossusContext, route: Route[]) => {
+const updateRouteList = async (ctx: ServiceContext, route: Route[]) => {
   if (route.length > 0) {
-    const http = HttpClient.forWorkspace('render-server.vtex', ctx.vtex)
-    return http.post('/canonical', {entries: route})
+    return ctx.renderClient.post('/canonical', {entries: route})
   }
 }
 
-export const sitemap = async (ctx: ColossusContext) => {
+export const sitemap = async (ctx: ServiceContext) => {
   const {vtex: {account}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   const routeList: Route[] = []
@@ -34,15 +32,12 @@ export const sitemap = async (ctx: ColossusContext) => {
   if (routeList.length > 0) {
     retry(updateRouteList.bind(null, ctx, routeList))
     .catch(err => {
-      console.log(err)
-      if (err.response) {
-        ctx.colossusLogger.log(err.respose.message, 'error', err.response.data)
-        return
-      }
+      console.error(err)
+      ctx.logger.error(err, {message: 'Could not update route list'})
+      return
     })
   }
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
-  ctx.status = 200
 }

@@ -2,7 +2,7 @@
   "name": "vtex.store-sitemap",
   "version": null,
   "dependencies": {
-    "@vtex/api": "^0.32.0",
+    "@vtex/api": "^1.5.1",
     "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "ramda": "^0.25.0",

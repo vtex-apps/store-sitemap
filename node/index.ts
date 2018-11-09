@@ -1,40 +1,45 @@
+import {hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
+
 import {map} from 'ramda'
-import colossus from './resources/colossus'
 
 import {robots} from './middlewares/robots'
 import {sitemap} from './middlewares/sitemap'
 
-const errorResponse = (err) => {
-  if (err.response) {
-    const status = err.response.status
-    const {url = null, method = null, data = null} = err.response.config || {}
-    const {error = null, operationId = null, responseStatus = null} = err.response.data || {}
-    return {status, body: error, details: {url, method, data, operationId, responseStatus}}
-  }
-  return {status: 500, body: err, details: {}}
-}
+(global as any).metrics = new MetricsAccumulator()
 
-const prepare = (middleware: Middleware) => async (ctx: ColossusContext) => {
-  const {vtex: {account, workspace, authToken, route: {id}}} = ctx
-  ctx.colossusLogger =   colossus(account, workspace, authToken)
+const TEN_MINUTES_S = 10 * 60
+const TEN_SECONDS_S = 10
+const TEN_SECONDS_MS = 10 * 1000
+
+const statusLabel = (status: number) =>
+  `${Math.floor(status/100)}xx`
+
+const log = (
+  {vtex: {account, workspace, route: {id}}, url, method, status}: ServiceContext,
+  millis: number,
+) =>
+  `${new Date().toISOString()}\t${account}/${workspace}:${id}\t${status}\t${method}\t${url}\t${millis}ms`
+
+const prepare = (middleware: Middleware) => async (ctx: ServiceContext) => {
+  const {vtex: {production, route: {id}}} = ctx
+  const start = process.hrtime()
+  ctx.logger = new Logger(ctx.vtex, {timeout: 3000})
+  ctx.renderClient = HttpClient.forWorkspace('render-server.vtex', ctx.vtex, {timeout: TEN_SECONDS_MS})
+
   try {
     await middleware(ctx)
+    ctx.status = 200
+    ctx.set('cache-control', production ? `public, max-age=${TEN_MINUTES_S}`: 'no-cache')
   } catch (err) {
     console.error(err)
-
-    const errorMessage = `Error processing route ${id}`
-    ctx.set('cache-control', `no-cache`)
-
-    const {status, details, body} = errorResponse(ctx)
-    if (err.response) {
-      ctx.status = status
-      ctx.body = {error: {body, details}}
-      ctx.colossusLogger.log(errorMessage, 'error', details)
-      return
-    }
-    ctx.colossusLogger.log(errorMessage, 'error', {errorMessage: err.message})
-    ctx.body = err
-    ctx.status = status
+    ctx.status = 500
+    ctx.set('cache-control', `public, max-age=${TEN_SECONDS_S}`)
+    ctx.logger.error(err, {handler: id})
+    ctx.body = err.message
+  } finally {
+    const end = process.hrtime(start)
+    console.log(log(ctx, hrToMillis(end)))
+    metrics.batchHrTimeMetricFromEnd(`${id}-http-${statusLabel(ctx.status)}`, end, production)
   }
 }
 
@@ -47,4 +52,5 @@ export default {
     robots,
     sitemap,
   }),
+  statusTrack: metrics.statusTrack,
 }

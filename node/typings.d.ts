@@ -1,29 +1,16 @@
-import {Context} from 'koa'
+import { HttpClient, Logger, MetricsAccumulator, ServiceContext as ColossusServiceContext } from '@vtex/api'
+import { Context } from 'koa'
 
 declare global {
+  const metrics: MetricsAccumulator
+
   type LogLevel = 'info' | 'error' | 'warning' | 'debug'
 
-  type Middleware = (ctx: ColossusContext) => Promise<void>
+  type Middleware = (ctx: ServiceContext) => Promise<void>
 
-  interface IOContext {
-    account: string
-    workspace: string
-    production: boolean
-    authToken: string
-    region: string
-    route: {
-      id: string
-      declarer: string
-      params: {
-        [param: string]: string
-      }
-    }
-    userAgent: string
-  }
-
-  interface ColossusContext extends Context {
-    vtex: IOContext
-    colossusLogger: any
+  interface ServiceContext extends ColossusServiceContext {
+    logger: Logger
+    renderClient: HttpClient
   }
 }
 
