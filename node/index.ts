@@ -1,15 +1,28 @@
-import {HttpClient, Logger} from '@vtex/api'
+import {hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
+
 import {map} from 'ramda'
 
 import {robots} from './middlewares/robots'
 import {sitemap} from './middlewares/sitemap'
 
+(global as any).metrics = new MetricsAccumulator()
+
 const TEN_MINUTES_S = 10 * 60
 const TEN_SECONDS_S = 10
 const TEN_SECONDS_MS = 10 * 1000
 
+const statusLabel = (status: number) =>
+  `${Math.floor(status/100)}xx`
+
+const log = (
+  {vtex: {account, workspace, route: {id}}, url, method, status}: ServiceContext,
+  millis: number,
+) =>
+  `${new Date().toISOString()}\t${account}/${workspace}:${id}\t${status}\t${method}\t${url}\t${millis}ms`
+
 const prepare = (middleware: Middleware) => async (ctx: ServiceContext) => {
   const {vtex: {production, route: {id}}} = ctx
+  const start = process.hrtime()
   ctx.logger = new Logger(ctx.vtex, {timeout: 3000})
   ctx.renderClient = HttpClient.forWorkspace('render-server.vtex', ctx.vtex, {timeout: TEN_SECONDS_MS})
 
@@ -23,6 +36,10 @@ const prepare = (middleware: Middleware) => async (ctx: ServiceContext) => {
     ctx.set('cache-control', `public, max-age=${TEN_SECONDS_S}`)
     ctx.logger.error(err, {handler: id})
     ctx.body = err.message
+  } finally {
+    const end = process.hrtime(start)
+    console.log(log(ctx, hrToMillis(end)))
+    metrics.batchHrTimeMetricFromEnd(`${id}-http-${statusLabel(ctx.status)}`, end, production)
   }
 }
 
@@ -35,4 +52,5 @@ export default {
     robots,
     sitemap,
   }),
+  statusTrack: metrics.statusTrack,
 }
