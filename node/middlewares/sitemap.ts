@@ -33,10 +33,8 @@ export const sitemap = async (ctx: ServiceContext) => {
     retry(updateRouteList.bind(null, ctx, routeList))
     .catch(err => {
       console.error(err)
-      if (err.response) {
-        ctx.logger.error(err, {message: 'Could not update route list'})
-        return
-      }
+      ctx.logger.error(err, {message: 'Could not update route list'})
+      return
     })
   }
 
