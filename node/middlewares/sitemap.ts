@@ -42,5 +42,4 @@ export const sitemap = async (ctx: ServiceContext) => {
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
-  ctx.status = 200
 }

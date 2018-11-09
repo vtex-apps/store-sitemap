@@ -15,6 +15,7 @@ const prepare = (middleware: Middleware) => async (ctx: ServiceContext) => {
 
   try {
     await middleware(ctx)
+    ctx.status = 200
     ctx.set('cache-control', production ? `public, max-age=${TEN_MINUTES_S}`: 'no-cache')
   } catch (err) {
     console.error(err)
