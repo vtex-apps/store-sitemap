@@ -17,7 +17,7 @@ const routeIdToStoreRoute = {
 
 const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPath.indexOf(host) + host.length)
 
-export const isCanonical = (ctx: ColossusContext) => routeIdToStoreRoute[ctx.vtex.route.id] != null
+export const isCanonical = (ctx: ServiceContext) => routeIdToStoreRoute[ctx.vtex.route.id] != null
 
 export class Route {
   public params: Record<string, any>
@@ -26,7 +26,7 @@ export class Route {
   public canonical?: string
 
   constructor(
-    ctx: ColossusContext,
+    ctx: ServiceContext,
     path: string,
   ) {
     const forwardedHost = ctx.get('x-forwarded-host')
