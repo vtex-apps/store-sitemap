@@ -1,14 +1,11 @@
-import { HttpClient, Logger, MetricsAccumulator, ServiceContext as ColossusServiceContext } from '@vtex/api'
-import { Context } from 'koa'
+import { HttpClient, Logger, MetricsAccumulator, ServiceContext } from '@vtex/api'
 
 declare global {
   const metrics: MetricsAccumulator
 
-  type LogLevel = 'info' | 'error' | 'warning' | 'debug'
+  type Middleware = (ctx: Context) => Promise<void>
 
-  type Middleware = (ctx: ServiceContext) => Promise<void>
-
-  interface ServiceContext extends ColossusServiceContext {
+  interface Context extends ServiceContext {
     logger: Logger
     renderClient: HttpClient
   }

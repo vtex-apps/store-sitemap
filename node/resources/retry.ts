@@ -1,6 +1,6 @@
 const RETRY_COUNT = 3
 
-export const retry = async (requestFn, retries = 0) => {
+export const retry = async (requestFn: any, retries = 0): Promise<any> => {
   try {
     return await requestFn()
   } catch (error) {

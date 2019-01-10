@@ -1,5 +1,4 @@
 {
-  "stack": "nodejs",
   "memory": 512,
   "ttl": 60,
   "timeout": 60,
@@ -9,19 +8,19 @@
       "public": true
     },
     "departments": {
-      "path": "/sitemap-departamentos.xml",
+      "path": "/sitemap-departments.xml",
       "public": true
     },
     "brands": {
-      "path": "/sitemap-marcas.xml",
+      "path": "/sitemap-brands.xml",
       "public": true
     },
     "products": {
-      "path": "/sitemap-produtos-:page:.xml",
+      "path": "/sitemap-products-:page:.xml",
       "public": true
     },
     "category": {
-      "path": "/sitemap-categoria-:specifier:.xml",
+      "path": "/sitemap-category-:specifier:.xml",
       "public": true
     },
     "robots": {

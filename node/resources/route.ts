@@ -1,8 +1,8 @@
 import * as RouteParser from 'route-parser'
 
-const identity = (x) => x
+const identity = <T>(x: T) => x
 
-const routeIdToStoreRoute = {
+const routeIdToStoreRoute: any = {
   brands: {
     id: 'store/brand',
     originalSitemapPathToSystem: (path: string) => `${path}/b`,
@@ -17,16 +17,16 @@ const routeIdToStoreRoute = {
 
 const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPath.indexOf(host) + host.length)
 
-export const isCanonical = (ctx: ServiceContext) => routeIdToStoreRoute[ctx.vtex.route.id] != null
+export const isCanonical = (ctx: Context) => routeIdToStoreRoute[ctx.vtex.route.id] != null
 
 export class Route {
-  public params: Record<string, any>
+  public params?: Record<string, any>
   public id: string
   public path: string
   public canonical?: string
 
   constructor(
-    ctx: ServiceContext,
+    ctx: Context,
     path: string,
   ) {
     const forwardedHost = ctx.get('x-forwarded-host')

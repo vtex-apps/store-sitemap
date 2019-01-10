@@ -1,8 +1,6 @@
 {
-  "name": "vtex.store-sitemap",
-  "version": null,
   "dependencies": {
-    "@vtex/api": "^1.5.1",
+    "@vtex/api": "^1.5.2",
     "axios": "^0.18.0",
     "cheerio": "^1.0.0-rc.2",
     "ramda": "^0.25.0",
@@ -11,7 +9,7 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/cheerio": "^0.22.8",
-    "@types/koa": "^2.0.46",
+    "@types/koa": "^2.0.48",
     "@types/node": "^7.0.8",
     "@types/ramda": "types/npm-ramda#dist",
     "@types/route-parser": "^0.1.1",
