@@ -61,8 +61,8 @@
     "@types/serve-static" "*"
 
 "@types/http-assert@*":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@types/http-assert/-/http-assert-1.3.0.tgz#5e932606153da28e1d04f9043f4912cf61fd55dd"
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@types/http-assert/-/http-assert-1.4.0.tgz#41d173466e396e99a14d75f7160cc997f2f9ed8b"
 
 "@types/keygrip@*":
   version "1.0.1"
@@ -72,13 +72,12 @@
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@types/koa-compose/-/koa-compose-3.2.2.tgz#dc106e000bbf92a3ac900f756df47344887ee847"
 
-"@types/koa@^2.0.46":
-  version "2.0.46"
-  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-2.0.46.tgz#24bc3cd405d10fcde81f876cd8285b44d4ddc3e9"
+"@types/koa@^2.0.48":
+  version "2.0.48"
+  resolved "https://registry.yarnpkg.com/@types/koa/-/koa-2.0.48.tgz#29162783029d3e5df8b58c55f6bf0d35f78fc39f"
   dependencies:
     "@types/accepts" "*"
     "@types/cookies" "*"
-    "@types/events" "*"
     "@types/http-assert" "*"
     "@types/keygrip" "*"
     "@types/koa-compose" "*"
@@ -113,8 +112,8 @@
   resolved "https://codeload.github.com/types/npm-ramda/tar.gz/cdd495069ca7ca9cd774510c74649745964a8096"
 
 "@types/range-parser@*":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.2.tgz#fa8e1ad1d474688a757140c91de6dace6f4abc8d"
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.3.tgz#7ee330ba7caafb98090bece86a5ee44115904c2c"
 
 "@types/route-parser@^0.1.1":
   version "0.1.1"
@@ -127,9 +126,9 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@vtex/api@^1.5.1":
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-1.5.1.tgz#0e7ccf8b9814bd67b6f59f2c5ab60f88384c2186"
+"@vtex/api@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-1.5.2.tgz#c33196c59ed3b7e5cd5694ec9e67754b325cb425"
   dependencies:
     "@types/lru-cache" "^4.1.1"
     "@types/p-queue" "^2.3.1"
@@ -867,7 +866,7 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-"stats-lite@github:vtex/node-stats-lite#dist":
+stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:

@@ -3,13 +3,13 @@ import { retry } from '../resources/retry'
 import { isCanonical, Route } from '../resources/route'
 import { getSiteMapXML } from '../resources/site'
 
-const updateRouteList = async (ctx: ServiceContext, route: Route[]) => {
+const updateRouteList = async (ctx: Context, route: Route[]) => {
   if (route.length > 0) {
     return ctx.renderClient.post('/canonical', {entries: route})
   }
 }
 
-export const sitemap = async (ctx: ServiceContext) => {
+export const sitemap = async (ctx: Context) => {
   const {vtex: {account}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   const routeList: Route[] = []
@@ -31,7 +31,7 @@ export const sitemap = async (ctx: ServiceContext) => {
 
   if (routeList.length > 0) {
     retry(updateRouteList.bind(null, ctx, routeList))
-    .catch(err => {
+    .catch((err: Error) => {
       console.error(err)
       ctx.logger.error(err, {message: 'Could not update route list'})
       return

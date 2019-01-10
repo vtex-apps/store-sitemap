@@ -1,15 +1,25 @@
 {
   "compilerOptions": {
-    "types": ["node"],
+    "types": ["node", "koa"],
     "typeRoots": ["node_modules/@types"],
     "target": "es2017",
     "module": "commonjs",
+    "moduleResolution": "node",
     "sourceMap": false,
     "outDir": "service",
-    "allowJs": true,
+    "allowJs": false,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": false,
+    "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitThis": true
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "skipLibCheck": true,
+    "strictPropertyInitialization": true
   },
   "typeAcquisition": {
     "enable": false

@@ -5,11 +5,6 @@
   "title": "Sitemap",
   "description": "Proxy to sitemap.xml",
   "mustUpdateAt": "2019-08-01",
-  "categories": [],
-  "registries": [
-    "smartcheckout"
-  ],
-  "settingsSchema": {},
   "dependencies": {
     "vtex.render-server": "7.x"
   },
@@ -40,6 +35,6 @@
   ],
   "credentialType": "absolute",
   "scripts": {
-    "postreleasy": "vtex publish --verbose"
+    "prereleasy": "bash lint.sh"
   }
 }

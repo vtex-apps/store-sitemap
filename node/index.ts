@@ -15,12 +15,12 @@ const statusLabel = (status: number) =>
   `${Math.floor(status/100)}xx`
 
 const log = (
-  {vtex: {account, workspace, route: {id}}, url, method, status}: ServiceContext,
+  {vtex: {account, workspace, route: {id}}, url, method, status}: Context,
   millis: number,
 ) =>
   `${new Date().toISOString()}\t${account}/${workspace}:${id}\t${status}\t${method}\t${url}\t${millis}ms`
 
-const prepare = (middleware: Middleware) => async (ctx: ServiceContext) => {
+const prepare = (middleware: Middleware) => async (ctx: Context) => {
   const {vtex: {production, route: {id}}} = ctx
   const start = process.hrtime()
   ctx.logger = new Logger(ctx.vtex, {timeout: 3000})
