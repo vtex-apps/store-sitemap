@@ -15,6 +15,14 @@
       "path": "/sitemap-brands.xml",
       "public": true
     },
+    "custom": {
+      "path": "/sitemap-custom.xml",
+      "public": true
+    },
+    "colossus": {
+      "path": "/sitemap-colossus.xml",
+      "public": true
+    },
     "products": {
       "path": "/sitemap-products-:page:.xml",
       "public": true

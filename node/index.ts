@@ -1,9 +1,11 @@
-import {hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
+import {Apps, hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
 
 import {map} from 'ramda'
 
 import {robots} from './middlewares/robots'
 import {sitemap} from './middlewares/sitemap'
+import {colossusSitemap} from './middlewares/colossusSitemap'
+import {customSitemap} from './middlewares/customSitemap'
 
 (global as any).metrics = new MetricsAccumulator()
 
@@ -24,6 +26,7 @@ const prepare = (middleware: Middleware) => async (ctx: Context) => {
   const {vtex: {production, route: {id}}} = ctx
   const start = process.hrtime()
   ctx.logger = new Logger(ctx.vtex, {timeout: 3000})
+  ctx.apps = new Apps(ctx.vtex, {timeout: 3000})
   ctx.renderClient = HttpClient.forWorkspace('render-server.vtex', ctx.vtex, {timeout: TEN_SECONDS_MS})
 
   try {
@@ -49,6 +52,8 @@ export default {
     category: sitemap,
     departments: sitemap,
     products: sitemap,
+    custom: customSitemap,
+    colossus: colossusSitemap,
     robots,
     sitemap,
   }),

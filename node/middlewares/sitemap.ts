@@ -9,6 +9,13 @@ const updateRouteList = async (ctx: Context, route: Route[]) => {
   }
 }
 
+const xmlSitemapItem = (loc: string) => {
+  return `<sitemap>
+    <loc>${loc}</loc>
+    <lastmod>${(new Date()).toISOString().split('T')[0]}</lastmod>
+  </sitemap>`
+}
+
 export const sitemap = async (ctx: Context) => {
   const {vtex: {account}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
@@ -19,6 +26,12 @@ export const sitemap = async (ctx: Context) => {
     decodeEntities: false,
     xmlMode: true,
   })
+  if (ctx.url === '/sitemap.xml') {
+    $('sitemapindex').append([
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-colossus.xml`)
+    ])
+  }
   const canonical = isCanonical(ctx)
 
   $('loc').each((_, loc) => {
