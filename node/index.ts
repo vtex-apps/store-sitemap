@@ -1,5 +1,6 @@
 import {Apps, hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
 
+import * as Bluebird from 'bluebird'
 import {map} from 'ramda'
 
 import {robots} from './middlewares/robots'
@@ -8,6 +9,12 @@ import {colossusSitemap} from './middlewares/colossusSitemap'
 import {customSitemap} from './middlewares/customSitemap'
 
 (global as any).metrics = new MetricsAccumulator()
+
+global.Promise = Bluebird
+Promise.config({
+  longStackTraces: true,
+  warnings: true,
+})
 
 const TEN_MINUTES_S = 10 * 60
 const TEN_SECONDS_S = 10

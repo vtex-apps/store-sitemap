@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["node", "koa"],
+    "types": ["bluebird-global", "node", "koa"],
     "typeRoots": ["node_modules/@types"],
     "target": "es2017",
     "module": "commonjs",
