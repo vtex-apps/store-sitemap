@@ -19,8 +19,8 @@
       "path": "/sitemap-custom.xml",
       "public": true
     },
-    "colossus": {
-      "path": "/sitemap-colossus.xml",
+    "user": {
+      "path": "/sitemap-user.xml",
       "public": true
     },
     "products": {

@@ -18,9 +18,13 @@ const notFound = <T>(fallback: T) => (error: any): T => {
 }
 
 const jsonToXml = (url: any): string => {
-  const xmlUrl = mapObjIndexed((value, field, _) => `<${field}>${value}</${field}>`, url)
   const $ = cheerio.load('<url></url>', cheerioOptions)
-  $('url').append(values(xmlUrl))
+  $('url').append([
+    `<loc>${url.loc}</loc>`,
+    `<lastmod>${(new Date()).toISOString().split('T')[0]}</lastmod>`,
+    '<changefreq>weekly</changefreq>',
+    '<priority>0.4</priority>'
+  ])
   return $.xml()
 }
 

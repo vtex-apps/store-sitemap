@@ -5,7 +5,7 @@ import {map} from 'ramda'
 
 import {robots} from './middlewares/robots'
 import {sitemap} from './middlewares/sitemap'
-import {colossusSitemap} from './middlewares/colossusSitemap'
+import {userSitemap} from './middlewares/userSitemap'
 import {customSitemap} from './middlewares/customSitemap'
 
 (global as any).metrics = new MetricsAccumulator()
@@ -60,7 +60,7 @@ export default {
     departments: sitemap,
     products: sitemap,
     custom: customSitemap,
-    colossus: colossusSitemap,
+    user: userSitemap,
     robots,
     sitemap,
   }),

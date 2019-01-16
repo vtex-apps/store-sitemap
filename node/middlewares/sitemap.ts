@@ -29,7 +29,7 @@ export const sitemap = async (ctx: Context) => {
   if (ctx.url === '/sitemap.xml') {
     $('sitemapindex').append([
       xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-colossus.xml`)
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-user.xml`)
     ])
   }
   const canonical = isCanonical(ctx)
