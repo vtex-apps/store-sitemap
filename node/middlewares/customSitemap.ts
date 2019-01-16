@@ -42,7 +42,6 @@ export const customSitemap = async (ctx: Context) => {
     .then(JSON.parse)
     .catch(notFound(null))
   ))
-  console.log(JSON.stringify(sitemaps))
 
   const jsonSitemaps = map(({urlset: {url}}) => url, sitemaps)
   map((sitemap) => addToSitemap($, sitemap), jsonSitemaps)
