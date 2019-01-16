@@ -11,8 +11,4 @@ export default class Routes {
   public getUserRoutes = (): Promise<UserRouteInfo> => {
     return this.http.get<UserRouteInfo>(`/_routes/user?__v=${process.env.VTEX_APP_VERSION}`)
   }
-
-  public saveUserRoute = (routes: UserRouteInfo): Promise<UserRouteInfo> => {
-    return this.http.put<UserRouteInfo>(`/routes/user?__v=${process.env.VTEX_APP_VERSION}`, routes)
-  }
 }

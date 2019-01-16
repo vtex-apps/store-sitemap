@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import {keys, map, mapObjIndexed, not, reject, values} from 'ramda'
+import {keys, map, not, reject} from 'ramda'
 
 const SITEMAP_FILE_PATH = 'dist/vtex.store-sitemap/sitemap.json'
 
