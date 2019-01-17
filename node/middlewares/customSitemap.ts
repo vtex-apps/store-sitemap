@@ -13,12 +13,12 @@ const toString = ({data}: {data: Buffer}) => data.toString()
 
 const jsonToXml = (url: any): string => {
   const $ = cheerio.load('<url></url>', cheerioOptions)
-  $('url').append([
+  $('url').append(
     `<loc>${url.loc}</loc>`,
     `<lastmod>${getCurrentDate()}</lastmod>`,
     '<changefreq>weekly</changefreq>',
     '<priority>0.4</priority>'
-  ])
+  )
   return $.xml()
 }
 

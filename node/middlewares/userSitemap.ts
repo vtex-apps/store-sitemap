@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio'
-import {map, values} from 'ramda'
+import {forEach, map, values} from 'ramda'
 import {RoutesDataSource} from '../resources/RoutesDataSource'
 import {getCurrentDate, notFound} from '../resources/utils'
 
@@ -13,13 +13,14 @@ export const userSitemap = async (ctx: Context) => {
   })
 
   if (userRoutes && userRoutes['vtex.admin-pages']) {
-    $('urlset').append(map((route: any) => `
-    <url>
-      <loc>https://${forwardedHost}${route.path}</loc>
-      <lastmod>${getCurrentDate()}</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.4</priority>
-    </url>`, values(userRoutes['vtex.admin-pages'])))
+    const xmlUserRoutes = map((route: any) =>
+      `<url>
+        <loc>https://${forwardedHost}${route.path}</loc>
+        <lastmod>${getCurrentDate()}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.4</priority>
+      </url>`, values(userRoutes['vtex.admin-pages']))
+    forEach((userRoute: string) => $('urlset').append(userRoute), xmlUserRoutes)
   }
 
   ctx.set('Content-Type', 'text/xml')
