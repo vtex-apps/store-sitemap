@@ -2,12 +2,15 @@
   "dependencies": {
     "@vtex/api": "^1.5.2",
     "axios": "^0.18.0",
+    "bluebird": "^3.5.0",
     "cheerio": "^1.0.0-rc.2",
     "ramda": "^0.25.0",
     "route-parser": "^0.0.5"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/bluebird": "^3.5.8",
+    "@types/bluebird-global": "^3.5.3",
     "@types/cheerio": "^0.22.8",
     "@types/koa": "^2.0.48",
     "@types/node": "^7.0.8",

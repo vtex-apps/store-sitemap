@@ -2,11 +2,20 @@ import * as cheerio from 'cheerio'
 import { retry } from '../resources/retry'
 import { isCanonical, Route } from '../resources/route'
 import { getSiteMapXML } from '../resources/site'
+import { getCurrentDate } from '../resources/utils'
 
 const updateRouteList = async (ctx: Context, route: Route[]) => {
   if (route.length > 0) {
     return ctx.renderClient.post('/canonical', {entries: route})
   }
+}
+
+const xmlSitemapItem = (loc: string) => {
+  return `
+  <sitemap>
+    <loc>${loc}</loc>
+    <lastmod>${getCurrentDate()}</lastmod>
+  </sitemap>`
 }
 
 export const sitemap = async (ctx: Context) => {
@@ -19,6 +28,12 @@ export const sitemap = async (ctx: Context) => {
     decodeEntities: false,
     xmlMode: true,
   })
+  if (ctx.url === '/sitemap.xml') {
+    $('sitemapindex').append(
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
+    )
+  }
   const canonical = isCanonical(ctx)
 
   $('loc').each((_, loc) => {

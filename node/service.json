@@ -15,6 +15,14 @@
       "path": "/sitemap-brands.xml",
       "public": true
     },
+    "custom": {
+      "path": "/sitemap-custom.xml",
+      "public": true
+    },
+    "user": {
+      "path": "/sitemap-user-routes.xml",
+      "public": true
+    },
     "products": {
       "path": "/sitemap-products-:page:.xml",
       "public": true
