@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio'
 import { retry } from '../resources/retry'
 import { isCanonical, Route } from '../resources/route'
 import { getSiteMapXML } from '../resources/site'
+import { getCurrentDate } from '../resources/utils'
 
 const updateRouteList = async (ctx: Context, route: Route[]) => {
   if (route.length > 0) {
@@ -13,7 +14,7 @@ const xmlSitemapItem = (loc: string) => {
   return `
   <sitemap>
     <loc>${loc}</loc>
-    <lastmod>${(new Date()).toISOString().split('T')[0]}</lastmod>
+    <lastmod>${getCurrentDate()}</lastmod>
   </sitemap>`
 }
 

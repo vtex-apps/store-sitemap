@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio'
 import {forEach, keys, map, not, reject} from 'ramda'
+import {getCurrentDate, notFound} from '../resources/utils'
 
 const SITEMAP_FILE_PATH = 'dist/vtex.store-sitemap/sitemap.json'
 
@@ -10,18 +11,11 @@ const cheerioOptions = {
 
 const toString = ({data}: {data: Buffer}) => data.toString()
 
-const notFound = <T>(fallback: T) => (error: any): T => {
-  if (error.response && error.response.status === 404) {
-    return fallback
-  }
-  throw error
-}
-
 const jsonToXml = (url: any): string => {
   const $ = cheerio.load('<url></url>', cheerioOptions)
   $('url').append([
     `<loc>${url.loc}</loc>`,
-    `<lastmod>${(new Date()).toISOString().split('T')[0]}</lastmod>`,
+    `<lastmod>${getCurrentDate()}</lastmod>`,
     '<changefreq>weekly</changefreq>',
     '<priority>0.4</priority>'
   ])
