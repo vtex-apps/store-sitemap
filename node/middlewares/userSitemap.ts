@@ -12,7 +12,7 @@ export const userSitemap = async (ctx: Context) => {
     xmlMode: true,
   })
 
-  if (userRoutes) {
+  if (userRoutes && userRoutes['vtex.admin-pages']) {
     $('urlset').append(map((route: any) => `
     <url>
       <loc>https://${forwardedHost}${route.path}</loc>
