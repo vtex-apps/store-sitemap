@@ -10,7 +10,8 @@ const updateRouteList = async (ctx: Context, route: Route[]) => {
 }
 
 const xmlSitemapItem = (loc: string) => {
-  return `<sitemap>
+  return `
+  <sitemap>
     <loc>${loc}</loc>
     <lastmod>${(new Date()).toISOString().split('T')[0]}</lastmod>
   </sitemap>`
@@ -29,7 +30,7 @@ export const sitemap = async (ctx: Context) => {
   if (ctx.url === '/sitemap.xml') {
     $('sitemapindex').append([
       xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-user.xml`)
+      xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
     ])
   }
   const canonical = isCanonical(ctx)

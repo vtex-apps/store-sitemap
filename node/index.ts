@@ -3,16 +3,16 @@ import {Apps, hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/ap
 import * as Bluebird from 'bluebird'
 import {map} from 'ramda'
 
+import {customSitemap} from './middlewares/customSitemap'
 import {robots} from './middlewares/robots'
 import {sitemap} from './middlewares/sitemap'
 import {userSitemap} from './middlewares/userSitemap'
-import {customSitemap} from './middlewares/customSitemap'
 
 (global as any).metrics = new MetricsAccumulator()
 
 global.Promise = Bluebird
 Promise.config({
-  longStackTraces: true,
+  longStackTraces: false,
   warnings: true,
 })
 
@@ -57,12 +57,12 @@ export default {
   routes: map(prepare, {
     brands: sitemap,
     category: sitemap,
+    custom: customSitemap,
     departments: sitemap,
     products: sitemap,
-    custom: customSitemap,
-    user: userSitemap,
     robots,
     sitemap,
+    user: userSitemap,
   }),
   statusTrack: metrics.statusTrack,
 }

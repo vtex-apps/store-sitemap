@@ -1,9 +1,9 @@
 import * as cheerio from 'cheerio'
 import {map, values} from 'ramda'
-import Routes from '../resources/routes'
+import {RoutesDataSource} from '../resources/RoutesDataSource'
 
 export const userSitemap = async (ctx: Context) => {
-  const routes = new Routes(ctx.vtex, {timeout: 2000})
+  const routes = new RoutesDataSource(ctx.vtex, {timeout: 2000})
   const userRoutes = values((await routes.getUserRoutes())['vtex.admin-pages'])
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
     decodeEntities: false,

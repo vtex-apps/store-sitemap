@@ -20,7 +20,7 @@
       "public": true
     },
     "user": {
-      "path": "/sitemap-user.xml",
+      "path": "/sitemap-user-routes.xml",
       "public": true
     },
     "products": {
