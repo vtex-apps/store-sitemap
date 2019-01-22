@@ -33,5 +33,8 @@ const router: Record<string, Middleware> = {
 
 export const canonical: Middleware = async (ctx: Context) => {
   const middleware = router[ctx.method.toUpperCase()]
-  return middleware && middleware(ctx)
+  if (middleware) {
+    return middleware(ctx)
+  }
+  ctx.status = 405
 }
