@@ -18,9 +18,7 @@ Promise.config({
   warnings: true,
 })
 
-const TEN_MINUTES_S = 10 * 60
 const TEN_SECONDS_S = 10
-const TEN_SECONDS_MS = 10 * 1000
 
 const statusLabel = (status: number) =>
   `${Math.floor(status/100)}xx`

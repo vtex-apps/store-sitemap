@@ -41,9 +41,14 @@ interface URLSet {
 interface Sitemap {
   urlset: URLSet
 }
-    .then(toString)
-    .then(JSON.parse)
-    .catch(notFound(null))
+
+const getAppFile = (apps: Apps) => (app: string): Promise<Maybe<Sitemap>> => apps.getAppFile(app, SITEMAP_FILE_PATH)
+  .then(toString)
+  .then(JSON.parse)
+  .catch(notFound(null))
+
+const TEN_MINUTES_S = 10 * 60
+
 export const customSitemap: Middleware = async (ctx: Context) => {
   const {dataSources: {apps}, vtex: {production}} = ctx
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', cheerioOptions)
@@ -54,5 +59,7 @@ export const customSitemap: Middleware = async (ctx: Context) => {
   forEach((ulrs: Maybe<URL[]>) => Array.isArray(urls) && addToSitemap($, ulrs!), urls)
 
   ctx.set('Content-Type', 'text/xml')
+  ctx.set('cache-control', production ? `public, max-age=${TEN_MINUTES_S}`: 'no-cache')
   ctx.body = $.xml()
+  ctx.status = 200
 }

@@ -43,4 +43,6 @@ export const sitemap: Middleware = async (ctx: Context) => {
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
+  ctx.status = 200
+  ctx.set('cache-control', production ? `public, max-age=${TEN_MINUTES_S}`: 'no-cache')
 }
