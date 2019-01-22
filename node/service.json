@@ -39,7 +39,8 @@
     },
     "canonical": {
       "path": "/canonical",
-      "public": false
+      "public": false,
+      "smartcache": true
     }
   }
 }
