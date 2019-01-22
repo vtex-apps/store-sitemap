@@ -20,6 +20,8 @@ const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPa
 
 export const isCanonical = (ctx: Context) => routeIdToStoreRoute[ctx.vtex.route.id] != null
 
+export const isValid = (route: Route) => route.id && route.path && route.canonical && route.pathId
+
 export class Route {
   public params?: Record<string, string>
   public id: string
@@ -29,7 +31,7 @@ export class Route {
 
   constructor(
     ctx: Context,
-    path: string
+    canonicalPath: string
   ) {
     const forwardedHost = ctx.get('x-forwarded-host')
     const route = {
@@ -38,7 +40,7 @@ export class Route {
       ...routeIdToStoreRoute[ctx.vtex.route.id],
     }
 
-    const pathNoHost = removeHost(path, forwardedHost)
+    const pathNoHost = removeHost(canonicalPath, forwardedHost)
 
     this.id = route.id
     this.path = route.originalSitemapPathToSystem(pathNoHost)

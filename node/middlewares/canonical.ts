@@ -14,15 +14,9 @@ const getCanonical: Middleware = async (ctx: Context) => {
 }
 
 const saveCanonical: Middleware = async (ctx: Context) => {
-  const {dataSources: {canonicals, logger}} = ctx
-  try {
-    const canonicalRoute: Route = await parseBody(ctx)
-    await canonicals.save(canonicalRoute)
-  }
-  catch (err) {
-    console.error(err)
-    logger.error(err)
-  }
+  const {dataSources: {canonicals}} = ctx
+  const canonicalRoute: Route = await parseBody(ctx)
+  await canonicals.save(canonicalRoute)
   ctx.status = 204
 }
 
