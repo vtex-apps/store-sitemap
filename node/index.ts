@@ -13,7 +13,6 @@ import { Context, Middleware } from './utils/helpers'
 
 (global as any).metrics = new MetricsAccumulator()
 
-global.Promise = Bluebird
 Promise.config({
   longStackTraces: false,
   warnings: true,
