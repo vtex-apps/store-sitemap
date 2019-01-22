@@ -1,28 +1,23 @@
 import * as cheerio from 'cheerio'
-import { retry } from '../resources/retry'
+import { forEach } from 'ramda'
+
 import { isCanonical, Route } from '../resources/route'
-import { getSiteMapXML } from '../resources/site'
-import { getCurrentDate } from '../resources/utils'
+import { currentDate } from '../resources/utils'
+import { Context, Middleware } from '../utils/helpers'
 
-const updateRouteList = async (ctx: Context, route: Route[]) => {
-  if (route.length > 0) {
-    return ctx.renderClient.post('/canonical', {entries: route})
-  }
-}
-
-const xmlSitemapItem = (loc: string) => {
-  return `
+const xmlSitemapItem = (loc: string) => `
   <sitemap>
     <loc>${loc}</loc>
-    <lastmod>${getCurrentDate()}</lastmod>
-  </sitemap>`
-}
+    <lastmod>${currentDate()}</lastmod>
+  </sitemap>
+`
 
-export const sitemap = async (ctx: Context) => {
-  const {vtex: {account}} = ctx
+const TEN_MINUTES_S = 10 * 60
+
+export const sitemap: Middleware = async (ctx: Context) => {
+  const {vtex: {account, production}, dataSources: {sitemap: sitemapDataSource, canonicals}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
-  const routeList: Route[] = []
-  const {data: originalXML} = await getSiteMapXML(ctx)
+  const originalXML = await sitemapDataSource.fromLegacy()
   const normalizedXML = originalXML.replace(new RegExp(`${account}.vtexcommercestable.com.br`, 'g'), forwardedHost)
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
@@ -34,24 +29,17 @@ export const sitemap = async (ctx: Context) => {
       xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
     )
   }
-  const canonical = isCanonical(ctx)
 
+  const routeList: Route[] = []
+  const canonical = isCanonical(ctx)
   $('loc').each((_, loc) => {
     const canonicalUrl = $(loc).text()
     if (canonical) {
-      const route = new Route(ctx, canonicalUrl)
-      routeList.push(route)
+      routeList.push(new Route(ctx, canonicalUrl))
     }
   })
 
-  if (routeList.length > 0) {
-    retry(updateRouteList.bind(null, ctx, routeList))
-    .catch((err: Error) => {
-      console.error(err)
-      ctx.logger.error(err, {message: 'Could not update route list'})
-      return
-    })
-  }
+  forEach(canonicals.save, routeList)
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
