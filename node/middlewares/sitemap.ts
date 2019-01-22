@@ -15,7 +15,7 @@ const xmlSitemapItem = (loc: string) => `
 const TEN_MINUTES_S = 10 * 60
 
 export const sitemap: Middleware = async (ctx: Context) => {
-  const {vtex: {account, production}, dataSources: {sitemap: sitemapDataSource, canonicals}} = ctx
+  const {vtex: {account, production}, dataSources: {sitemap: sitemapDataSource, canonicals, logger}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   const originalXML = await sitemapDataSource.fromLegacy()
   const normalizedXML = originalXML.replace(new RegExp(`${account}.vtexcommercestable.com.br`, 'g'), forwardedHost)
@@ -39,7 +39,7 @@ export const sitemap: Middleware = async (ctx: Context) => {
     }
   })
 
-  forEach(canonicals.save, routeList)
+  forEach((route: Route) => canonicals.save(route).catch(err => logger.error(err)), routeList)
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
