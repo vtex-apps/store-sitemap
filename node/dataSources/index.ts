@@ -10,7 +10,7 @@ import { Routes } from './routes'
 import { SiteMap } from './sitemap'
 
 const TEN_SECONDS_MS = 10 * 1000
-const THREE_SECONDS_MS = 10 * 1000
+const THREE_SECONDS_MS = 3 * 1000
 
 export interface DataSources extends Dictionary<DataSource<Context>> {
   apps: Apps,
