@@ -1,18 +1,19 @@
+import { identity } from 'ramda'
 import * as RouteParser from 'route-parser'
 
-const identity = <T>(x: T) => x
+import { Context } from '../utils/helpers'
 
 const routeIdToStoreRoute: any = {
   brands: {
-    id: 'store/brand',
+    id: 'store.search#brand',
     originalSitemapPathToSystem: (path: string) => `${path}/b`,
-    path: '/:brand/b',
+    pathId: '/:p1/b',
   },
   departments: {
-    id: 'store/department',
+    id: 'store.search#department',
     originalSitemapPathToSystem: (path: string) => `${path}/d`,
-    path: '/:department/d',
-  }
+    pathId: '/:p1/d',
+  },
 }
 
 const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPath.indexOf(host) + host.length)
@@ -20,14 +21,15 @@ const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPa
 export const isCanonical = (ctx: Context) => routeIdToStoreRoute[ctx.vtex.route.id] != null
 
 export class Route {
-  public params?: Record<string, any>
+  public params?: Record<string, string>
   public id: string
   public path: string
-  public canonical?: string
+  public canonical: string
+  public pathId: string
 
   constructor(
     ctx: Context,
-    path: string,
+    path: string
   ) {
     const forwardedHost = ctx.get('x-forwarded-host')
     const route = {
@@ -41,8 +43,9 @@ export class Route {
     this.id = route.id
     this.path = route.originalSitemapPathToSystem(pathNoHost)
     this.canonical = route.originalSitemapPathToCanonical(pathNoHost)
+    this.pathId = route.pathId
 
-    const parsedParams = new RouteParser(route.path).match(this.path)
+    const parsedParams = new RouteParser(route.pathId).match(this.path)
     if (parsedParams) {
       this.params = parsedParams
     }

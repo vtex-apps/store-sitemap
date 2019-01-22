@@ -54,6 +54,7 @@ const prepare = (middleware: Middleware) => async (ctx: Context) => {
 export default {
   routes: map(prepare, {
     brands: sitemap,
+    canonical,
     category: sitemap,
     custom: customSitemap,
     departments: sitemap,
