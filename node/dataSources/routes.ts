@@ -1,4 +1,4 @@
-import {forWorkspace, IODataSource} from '@vtex/api'
+import { forWorkspace, IODataSource } from '@vtex/api'
 
 interface UserRouteItem {
   handler: string,
@@ -11,15 +11,13 @@ interface UserRoute {
   [routeId: string]: UserRouteItem
 }
 
-interface UserRouteInfo {
+interface UserRoutes {
   [app: string]: UserRoute
 }
 
-export class RoutesDataSource extends IODataSource {
+export class Routes extends IODataSource {
   protected httpClientFactory = forWorkspace
   protected service = 'colossus'
 
-  public getUserRoutes = (): Promise<UserRouteInfo> => {
-    return this.http.get<UserRouteInfo>(`/_routes/user?__v=${process.env.VTEX_APP_VERSION}`)
-  }
+  public userRoutes = () => this.http.get<UserRoutes>(`/_routes/user?__v=${process.env.VTEX_APP_VERSION}`)
 }

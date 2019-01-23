@@ -1,11 +1,14 @@
 import * as cheerio from 'cheerio'
-import {forEach, map, values} from 'ramda'
-import {RoutesDataSource} from '../resources/RoutesDataSource'
-import {getCurrentDate, notFound} from '../resources/utils'
+import { forEach, map, values } from 'ramda'
 
-export const userSitemap = async (ctx: Context) => {
-  const routes = new RoutesDataSource(ctx.vtex, {timeout: 2000})
-  const userRoutes = await routes.getUserRoutes().catch(notFound(null))
+import { currentDate } from '../resources/utils'
+import { Context, Middleware } from '../utils/helpers'
+
+const TEN_MINUTES_S = 10 * 60
+
+export const userSitemap: Middleware = async (ctx: Context) => {
+  const {dataSources: {routes}, vtex: {production}} = ctx
+  const userRoutes = await routes.userRoutes().catch(() => null)
   const forwardedHost = ctx.get('x-forwarded-host')
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
     decodeEntities: false,
@@ -16,7 +19,7 @@ export const userSitemap = async (ctx: Context) => {
     const xmlUserRoutes = map((route: any) =>
       `<url>
         <loc>https://${forwardedHost}${route.path}</loc>
-        <lastmod>${getCurrentDate()}</lastmod>
+        <lastmod>${currentDate()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.4</priority>
       </url>`, values(userRoutes['vtex.admin-pages']))
@@ -25,4 +28,6 @@ export const userSitemap = async (ctx: Context) => {
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
+  ctx.status = 200
+  ctx.set('cache-control', production ? `public, max-age=${TEN_MINUTES_S}`: 'no-cache')
 }

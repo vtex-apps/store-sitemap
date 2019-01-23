@@ -1,0 +1,14 @@
+[
+  {
+    "name": "canonicals-read-write",
+    "description": "Allows read write access to canonical routes",
+    "statements": [
+      {
+        "actions": ["put", "get"],
+        "effect": "allow",
+        "resource":
+          "vrn:vtex.store-sitemap:{{region}}:{{account}}:{{workspace}}:/canonical"
+      }
+    ]
+  }
+]
