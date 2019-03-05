@@ -1,6 +1,5 @@
-import { Apps, Logger } from '@vtex/api'
+import { Apps, Logger, LRUCache } from '@vtex/api'
 import { DataSource } from 'apollo-datasource'
-import { InMemoryLRUCache } from 'apollo-server-caching'
 import { Dictionary, forEachObjIndexed } from 'ramda'
 
 import { Context } from '../utils/helpers'
@@ -30,11 +29,11 @@ export const dataSources = (): DataSources => ({
   sitemap: new SiteMap(),
 })
 
-const cache = new InMemoryLRUCache({
-  maxSize: 100,
+const cache = new LRUCache<string, string>({
+  max: 100,
 })
 
 export const initialize = (context: Context) => forEachObjIndexed<DataSource<Context>, DataSources>(
-  (dataSource) => dataSource && dataSource.initialize && dataSource.initialize({context, cache}),
+  (dataSource) => dataSource && dataSource.initialize && dataSource.initialize({context, cache} as any),
   context.dataSources
 )
