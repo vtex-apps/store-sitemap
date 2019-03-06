@@ -1,6 +1,6 @@
 import { Apps } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import { compose, forEach, keys, map, not, path, reject } from 'ramda'
+import { forEach, keys, map, not, path, reject } from 'ramda'
 
 import { currentDate, notFound } from '../resources/utils'
 import { Context, Maybe, Middleware } from '../utils/helpers'
@@ -25,10 +25,8 @@ const jsonToXml = (url: URL): string => {
   return $.xml()
 }
 
-const addToSitemap = ($: any, urls: URL[]): void => compose<URL[], string[], void>(
-  $('urlset').append,
-  map(jsonToXml)
-)(urls)
+const addToSitemap = ($: any, urls: URL[]): void =>
+  $('urlset').append(map(jsonToXml, urls))
 
 interface URL {
   loc: string

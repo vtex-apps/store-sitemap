@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@vtex/api": "^1.5.4",
+    "@vtex/api": "^1.9.0",
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server-caching": "^0.2.1",
     "bluebird": "^3.5.0",
