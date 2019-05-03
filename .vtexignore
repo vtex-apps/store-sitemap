@@ -13,4 +13,3 @@ tslint.json
 typings.d.ts
 yarn.lock
 node/node_modules/
-node/yarn.lock

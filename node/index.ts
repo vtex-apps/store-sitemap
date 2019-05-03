@@ -1,17 +1,17 @@
 import 'bluebird-global'
 
-import { hrToMillis, MetricsAccumulator } from '@vtex/api'
+import './globals'
+
+import { hrToMillis, Service } from '@vtex/api'
 import { map } from 'ramda'
 
-import { dataSources, initialize } from './dataSources'
+import { clients } from './clients'
 import { canonical } from './middlewares/canonical'
 import { customSitemap } from './middlewares/customSitemap'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { userSitemap } from './middlewares/userSitemap'
-import { Context, Middleware } from './utils/helpers'
-
-(global as any).metrics = new MetricsAccumulator()
+import { Middleware } from './utils/helpers'
 
 Promise.config({
   longStackTraces: false,
@@ -30,11 +30,8 @@ const log = (
   `${new Date().toISOString()}\t${account}/${workspace}:${id}\t${status}\t${method}\t${url}\t${millis}ms`
 
 const prepare = (middleware: Middleware) => async (ctx: Context) => {
-  const {vtex: {production, route: {id}}} = ctx
+  const {vtex: {route: {id}}} = ctx
   const start = process.hrtime()
-
-  ctx.dataSources = dataSources()
-  initialize(ctx)
 
   try {
     await middleware(ctx)
@@ -42,16 +39,17 @@ const prepare = (middleware: Middleware) => async (ctx: Context) => {
     console.error(err)
     ctx.status = 500
     ctx.set('cache-control', `public, max-age=${TEN_SECONDS_S}`)
-    ctx.dataSources.logger.error(err, {handler: id})
+    ctx.clients.logger.error({...err, details: {handler: id}})
     ctx.body = err.message
   } finally {
     const end = process.hrtime(start)
     console.log(log(ctx, hrToMillis(end)))
-    metrics.batchHrTimeMetricFromEnd(`${id}-http-${statusLabel(ctx.status)}`, end, production)
+    metrics.batch(`${id}-http-${statusLabel(ctx.status)}`, end)
   }
 }
 
-export default {
+export default new Service ({
+  clients,
   routes: map(prepare, {
     brands: sitemap,
     canonical,
@@ -63,5 +61,4 @@ export default {
     sitemap,
     user: userSitemap,
   }),
-  statusTrack: metrics.statusTrack,
-}
+})

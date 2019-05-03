@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@vtex/api": "^1.9.0",
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server-caching": "^0.2.1",
     "bluebird": "^3.5.0",
@@ -19,10 +18,14 @@
     "@types/koa": "^2.0.48",
     "@types/node": "^7.0.8",
     "@types/ramda": "types/npm-ramda#dist",
-    "@types/route-parser": "^0.1.1",
+    "@types/route-parser": "^0.1.2",
+    "@vtex/api": "^3.9.2",
     "tslint": "^5.11.0",
     "tslint-config-vtex": "^2.1.0",
     "typescript": "^3.2.2"
+  },
+  "resolutions": {
+    "**/lodash": "^4.17.11"
   },
   "scripts": {
     "lint": "tsc --noEmit && tslint -c tslint.json './**/*.ts'"

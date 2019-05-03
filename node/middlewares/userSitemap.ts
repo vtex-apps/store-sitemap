@@ -2,12 +2,12 @@ import * as cheerio from 'cheerio'
 import { forEach, map, values } from 'ramda'
 
 import { currentDate } from '../resources/utils'
-import { Context, Middleware } from '../utils/helpers'
+import { Middleware } from '../utils/helpers'
 
 const TEN_MINUTES_S = 10 * 60
 
 export const userSitemap: Middleware = async (ctx: Context) => {
-  const {dataSources: {routes}, vtex: {production}} = ctx
+  const {clients: {routes}, vtex: {production}} = ctx
   const userRoutes = await routes.userRoutes().catch(() => null)
   const forwardedHost = ctx.get('x-forwarded-host')
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
