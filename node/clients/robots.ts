@@ -1,6 +1,6 @@
 import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 
-export default class Robots extends ExternalClient {
+export class Robots extends ExternalClient {
   constructor (context: IOContext, options?: InstanceOptions) {
     super('http://janus-edge.vtex.com.br', context, options)
   }

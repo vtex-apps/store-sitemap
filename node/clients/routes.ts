@@ -15,7 +15,7 @@ interface UserRoutes {
   [app: string]: UserRoute
 }
 
-export default class Routes extends InfraClient {
+export class Routes extends InfraClient {
   constructor (context: IOContext, options?: InstanceOptions) {
     super('colossus', context, options)
   }

@@ -1,9 +1,9 @@
 import { Apps, Logger } from '@vtex/api'
+import { map as mapP } from 'bluebird'
 import * as cheerio from 'cheerio'
 import { forEach, includes, keys, map, not, path, reject, startsWith } from 'ramda'
 
 import { currentDate } from '../resources/utils'
-import { Maybe, Middleware } from '../utils/helpers'
 
 const SITEMAP_FILE_PATH = 'dist/vtex.store-sitemap/sitemap.json'
 
@@ -53,7 +53,7 @@ export const customSitemap: Middleware = async (ctx: Context) => {
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', cheerioOptions)
   const deps = await apps.getDependencies()
   const depList = reject(startsWith('infra:'), keys(deps))
-  const sitemaps = await Promise.map(depList, getAppSitemap(apps, deps, logger)).then(reject(not)) as Maybe<Sitemap[]> || []
+  const sitemaps = await mapP(depList, getAppSitemap(apps, deps, logger)).then(reject(not)) as Maybe<Sitemap[]> || []
 
   const urls = map<Sitemap, Maybe<URL[]>>(path(['urlset', 'url']), sitemaps)
   forEach((ulrs: Maybe<URL[]>) => Array.isArray(urls) && addToSitemap($, ulrs!), urls)

@@ -2,7 +2,6 @@ import * as cheerio from 'cheerio'
 import { forEach, map, values } from 'ramda'
 
 import { currentDate } from '../resources/utils'
-import { Middleware } from '../utils/helpers'
 
 const TEN_MINUTES_S = 10 * 60
 

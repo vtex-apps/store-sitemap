@@ -1,12 +1,9 @@
-import { ClientsConfig, IOClients } from '@vtex/api'
+import { IOClients } from '@vtex/api'
 
-import Canonicals from './canonicals'
-import Robots from './robots'
-import Routes from './routes'
-import SiteMap from './sitemap'
-
-const TEN_SECONDS_MS = 10 * 1000
-const THREE_SECONDS_MS = 3 * 1000
+import { Canonicals } from './canonicals'
+import { Robots } from './robots'
+import { Routes } from './routes'
+import { SiteMap } from './sitemap'
 
 export class Clients extends IOClients {
   public get canonicals() {
@@ -24,22 +21,4 @@ export class Clients extends IOClients {
   public get sitemap() {
     return this.getOrSet('sitemap', SiteMap)
   }
-}
-
-export const clients: ClientsConfig<Clients> = {
-  implementation: Clients,
-  options: {
-    apps: {
-      timeout: THREE_SECONDS_MS,
-    },
-    canonicals: {
-      timeout: TEN_SECONDS_MS,
-    },
-    logger: {
-      timeout: THREE_SECONDS_MS,
-    },
-    routes: {
-      timeout: THREE_SECONDS_MS,
-    },
-  },
 }

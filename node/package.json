@@ -3,7 +3,6 @@
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server-caching": "^0.2.1",
     "bluebird": "^3.5.0",
-    "bluebird-global": "^1.0.1",
     "cheerio": "^1.0.0-rc.2",
     "co-body": "^6.0.0",
     "graphql": "^14.1.1",
@@ -12,7 +11,6 @@
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.8",
-    "@types/bluebird-global": "^3.5.3",
     "@types/cheerio": "^0.22.8",
     "@types/co-body": "^0.0.3",
     "@types/koa": "^2.0.48",

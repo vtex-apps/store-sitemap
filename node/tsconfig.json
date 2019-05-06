@@ -20,7 +20,7 @@
     "strictPropertyInitialization": true,
     "target": "es2017",
     "typeRoots": ["node_modules/@types"],
-    "types": ["bluebird-global", "node", "koa"]
+    "types": ["node", "koa"]
   },
   "typeAcquisition": {
     "enable": false
