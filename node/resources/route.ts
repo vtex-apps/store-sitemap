@@ -1,4 +1,4 @@
-import { identity, last, split } from 'ramda'
+import { equals, identity, last, split } from 'ramda'
 import RouteParser = require('route-parser')
 
 const routeIdToStoreRoute: any = {
@@ -25,10 +25,13 @@ export const isValid = (route: Route) => route.id && route.path && route.canonic
  * Precedence rules can be found in `https://help.vtex.com/tutorial/como-funciona-a-busca-da-vtex/`
  */
 export const precedence = (r1: Route, r2: Route) => {
+  const deepEquals = equals(r1, r2)
   const lastSegmentR1 = last(split('/', r1.path))
   const lastSegmentR2 = last(split('/', r2.path))
 
-  if (lastSegmentR1 === lastSegmentR2) {
+  if (deepEquals) {
+    return false
+  } else if (lastSegmentR1 === lastSegmentR2) {
     return true
   } else if(lastSegmentR1 === 'b') {
     return true
