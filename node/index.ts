@@ -10,7 +10,6 @@ import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { userSitemap } from './middlewares/userSitemap'
 
-const TEN_SECONDS_MS = 10 * 1000
 const THREE_SECONDS_MS = 3 * 1000
 const ONE_SECOND_MS = 1 * 1000
 
@@ -21,7 +20,7 @@ const clients: ClientsConfig<Clients> = {
       timeout: ONE_SECOND_MS,
     },
     canonicals: {
-      timeout: TEN_SECONDS_MS,
+      timeout: ONE_SECOND_MS,
     },
     logger: {
       timeout: THREE_SECONDS_MS,
