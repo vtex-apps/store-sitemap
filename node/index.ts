@@ -50,7 +50,7 @@ const prepare = (middleware: Middleware) => async (ctx: Context) => {
 
 export default new Service ({
   clients,
-  routes: map(prepare, {
+  routes: map<any, any>(prepare, {
     brands: sitemap,
     canonical,
     category: sitemap,

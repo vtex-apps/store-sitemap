@@ -7,7 +7,7 @@
     "cheerio": "^1.0.0-rc.2",
     "co-body": "^6.0.0",
     "graphql": "^14.1.1",
-    "ramda": "^0.25.0",
+    "ramda": "^0.26.1",
     "route-parser": "^0.0.5"
   },
   "devDependencies": {
@@ -17,7 +17,7 @@
     "@types/co-body": "^0.0.3",
     "@types/koa": "^2.0.48",
     "@types/node": "^7.0.8",
-    "@types/ramda": "types/npm-ramda#dist",
+    "@types/ramda": "^0.26.8",
     "@types/route-parser": "^0.1.2",
     "@vtex/api": "^3.9.2",
     "tslint": "^5.11.0",
