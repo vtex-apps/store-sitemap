@@ -1,4 +1,4 @@
-import { forWorkspace, IODataSource } from '@vtex/api'
+import { InfraClient, InstanceOptions, IOContext } from '@vtex/api'
 
 interface UserRouteItem {
   handler: string,
@@ -15,9 +15,10 @@ interface UserRoutes {
   [app: string]: UserRoute
 }
 
-export class Routes extends IODataSource {
-  protected httpClientFactory = forWorkspace
-  protected service = 'colossus'
+export class Routes extends InfraClient {
+  constructor (context: IOContext, options?: InstanceOptions) {
+    super('colossus', context, options)
+  }
 
   public userRoutes = () => this.http.get<UserRoutes>(`/_routes/user?__v=${process.env.VTEX_APP_VERSION}`)
 }

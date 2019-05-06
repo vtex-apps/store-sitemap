@@ -1,7 +1,5 @@
 import { identity } from 'ramda'
-import * as RouteParser from 'route-parser'
-
-import { Context } from '../utils/helpers'
+import RouteParser = require('route-parser')
 
 const routeIdToStoreRoute: any = {
   brands: {

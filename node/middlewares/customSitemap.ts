@@ -1,9 +1,9 @@
-import { Apps } from '@vtex/api'
+import { Apps, Logger } from '@vtex/api'
+import { map as mapP } from 'bluebird'
 import * as cheerio from 'cheerio'
-import { forEach, keys, map, not, path, reject } from 'ramda'
+import { forEach, includes, keys, map, not, path, reject, startsWith } from 'ramda'
 
-import { currentDate, notFound } from '../resources/utils'
-import { Context, Maybe, Middleware } from '../utils/helpers'
+import { currentDate } from '../resources/utils'
 
 const SITEMAP_FILE_PATH = 'dist/vtex.store-sitemap/sitemap.json'
 
@@ -11,8 +11,6 @@ const cheerioOptions = {
   decodeEntities: false,
   xmlMode: true,
 }
-
-const toString = ({data}: {data: Buffer}) => data.toString()
 
 const jsonToXml = (url: URL): string => {
   const $ = cheerio.load('<url></url>', cheerioOptions)
@@ -40,18 +38,22 @@ interface Sitemap {
   urlset: URLSet
 }
 
-const getAppFile = (apps: Apps) => (app: string): Promise<Maybe<Sitemap>> => apps.getAppFile(app, SITEMAP_FILE_PATH)
-  .then(toString)
-  .then(JSON.parse)
-  .catch(notFound(null))
-
 const TEN_MINUTES_S = 10 * 60
 
+const getAppSitemap = (apps: Apps, deps: Record<string, string[]>, logger: Logger) => async (appName: string) => {
+  const sitemap = await apps.getAppJSON(appName, SITEMAP_FILE_PATH, true)
+  if (sitemap && !includes('vtex.store-sitemap@1.x', deps[appName])) {
+    logger.warn({message: `App ${appName} exports a sitemap, but does not depend on vtex.store-sitemap@1.x`})
+  }
+  return sitemap
+}
+
 export const customSitemap: Middleware = async (ctx: Context) => {
-  const {dataSources: {apps}, vtex: {production}} = ctx
+  const {clients: {apps, logger}, vtex: {production}} = ctx
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', cheerioOptions)
-  const deps = await apps.getDependencies().then(keys)
-  const sitemaps = await Promise.map(deps, getAppFile(apps)).then(reject(not)) as Maybe<Sitemap[]> || []
+  const deps = await apps.getDependencies()
+  const depList = reject(startsWith('infra:'), keys(deps))
+  const sitemaps = await mapP(depList, getAppSitemap(apps, deps, logger)).then(reject(not)) as Maybe<Sitemap[]> || []
 
   const urls = map<Sitemap, Maybe<URL[]>>(path(['urlset', 'url']), sitemaps)
   forEach((ulrs: Maybe<URL[]>) => Array.isArray(urls) && addToSitemap($, ulrs!), urls)

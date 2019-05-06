@@ -1,7 +1,6 @@
 import { VBase } from '@vtex/api'
 
 import { isValid, Route } from '../resources/route'
-import { Maybe } from '../utils/helpers'
 
 export class Canonicals extends VBase {
   private BUCKET = 'canonicals'

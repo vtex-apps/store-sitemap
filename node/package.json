@@ -1,28 +1,29 @@
 {
   "dependencies": {
-    "@vtex/api": "^1.9.0",
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server-caching": "^0.2.1",
     "bluebird": "^3.5.0",
-    "bluebird-global": "^1.0.1",
     "cheerio": "^1.0.0-rc.2",
     "co-body": "^6.0.0",
     "graphql": "^14.1.1",
-    "ramda": "^0.25.0",
+    "ramda": "^0.26.1",
     "route-parser": "^0.0.5"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.8",
-    "@types/bluebird-global": "^3.5.3",
     "@types/cheerio": "^0.22.8",
     "@types/co-body": "^0.0.3",
     "@types/koa": "^2.0.48",
     "@types/node": "^7.0.8",
-    "@types/ramda": "types/npm-ramda#dist",
-    "@types/route-parser": "^0.1.1",
+    "@types/ramda": "^0.26.8",
+    "@types/route-parser": "^0.1.2",
+    "@vtex/api": "^3.9.2",
     "tslint": "^5.11.0",
     "tslint-config-vtex": "^2.1.0",
     "typescript": "^3.2.2"
+  },
+  "resolutions": {
+    "**/lodash": "^4.17.11"
   },
   "scripts": {
     "lint": "tsc --noEmit && tslint -c tslint.json './**/*.ts'"

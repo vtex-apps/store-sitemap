@@ -1,11 +1,9 @@
-import { Context } from '../utils/helpers'
-
 const TEN_MINUTES_S = 10 * 60
 
 export const robots = async (ctx: Context) => {
-  const {vtex: {production}} = ctx
-  const {dataSources: {robots: robotsDataSource}} = ctx
-  const {data} = await robotsDataSource.fromLegacy()
+  const {vtex: {account, production}} = ctx
+  const {clients: {robots: robotsDataSource}} = ctx
+  const data = await robotsDataSource.fromLegacy(account)
   ctx.set('Content-Type', 'text/plain')
   ctx.body = data
   ctx.status = 200
