@@ -29,7 +29,7 @@ export const precedence = (r1: Route, r2: Route) => {
   const lastSegmentR2 = last(split('/', r2.path))
 
   if (lastSegmentR1 === lastSegmentR2) {
-    return false
+    return true
   } else if(lastSegmentR1 === 'b') {
     return true
   } else if(lastSegmentR2 === 'b') {
