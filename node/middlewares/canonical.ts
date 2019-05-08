@@ -1,10 +1,11 @@
 import { json as parseBody } from 'co-body'
 
-import { precedence, Route } from '../resources/route'
+import { precedence, removeQuerystring, Route } from '../resources/route'
 
 export const getCanonical: Middleware = async (ctx: Context) => {
   const {clients: {canonicals}, query: {canonicalPath}} = ctx
-  const maybeRoute = await canonicals.load(canonicalPath)
+  const path = removeQuerystring(canonicalPath)
+  const maybeRoute = await canonicals.load(path)
   if (maybeRoute) {
     ctx.body = maybeRoute
     ctx.status = 200
@@ -14,10 +15,10 @@ export const getCanonical: Middleware = async (ctx: Context) => {
 
 export const saveCanonical: Middleware = async (ctx: Context) => {
   const {clients: {canonicals}} = ctx
-  const newRoute: Route = await parseBody(ctx)
+  const newRoute = Route.from(await parseBody(ctx))
   const {canonical: canonicalPath} = newRoute
-  const savedRoute = await canonicals.load(canonicalPath)
-
+  const path = removeQuerystring(canonicalPath)
+  const savedRoute = await canonicals.load(path)
   if (!savedRoute || precedence(newRoute, savedRoute)) {
     await canonicals.save(newRoute)
   }
