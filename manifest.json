@@ -12,6 +12,13 @@
     {
       "name": "outbound-access",
       "attrs": {
+        "host": "{{workspace}}--{{account}}.mygocommerce.com",
+        "path": "/*.xml"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
         "host": "portal.vtexcommercestable.com.br",
         "path": "/*.xml"
       }

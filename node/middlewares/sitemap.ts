@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import { Functions } from '@gocommerce/utils'
 import { forEach } from 'ramda'
 
 import { isCanonical, Route } from '../resources/route'
@@ -14,16 +15,23 @@ const xmlSitemapItem = (loc: string) => `
 const TEN_MINUTES_S = 10 * 60
 
 export const sitemap: Middleware = async (ctx: Context) => {
-  const {vtex: {production}, clients: {sitemap: sitemapDataSource, canonicals, logger}} = ctx
+  const { vtex: { production, account, workspace }, clients: { sitemap: sitemapDataSource, canonicals, logger } } = ctx
+  const baseDomain = Functions.isGoCommerceAcc(account)
+    ? `${workspace}--${account}.mygocommerce.com`
+    : 'portal.vtexcommercestable.com.br'
   const forwardedHost = ctx.get('x-forwarded-host')
   const forwardedPath = ctx.get('x-forwarded-path')
-  const originalXML = await sitemapDataSource.fromLegacy(forwardedPath)
-  const normalizedXML = originalXML.replace(new RegExp('portal.vtexcommercestable.com.br', 'g'), forwardedHost)
+
+  const originalXML = Functions.isGoCommerceAcc(account)
+    ? await sitemapDataSource.fromLegacy(forwardedPath.replace('/', 'gc-'))
+    : await sitemapDataSource.fromLegacy(forwardedPath)
+  const normalizedXML = originalXML.replace(new RegExp(baseDomain, 'g'), forwardedHost)
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
     xmlMode: true,
   })
-  if (ctx.url === '/sitemap.xml') {
+
+  if (ctx.url === '/sitemap.xml' && !Functions.isGoCommerceAcc(account)) {
     $('sitemapindex').append(
       xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
       xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)

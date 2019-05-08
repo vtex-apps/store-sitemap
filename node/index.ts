@@ -43,6 +43,10 @@ export default new Service({
       GET: getCanonical,
       PUT: saveCanonical,
     }),
+    categories: method({
+      DEFAULT: methodNotAllowed,
+      GET: sitemap,
+    }),
     category: method({
       DEFAULT: methodNotAllowed,
       GET: sitemap,
