@@ -1,4 +1,4 @@
-import { equals, identity, last, split } from 'ramda'
+import { compose, equals, head, identity, last, split } from 'ramda'
 import RouteParser = require('route-parser')
 
 const routeIdToStoreRoute: any = {
@@ -45,7 +45,18 @@ export const precedence = (r1: Route, r2: Route) => {
   return true
 }
 
+export const removeQuerystring = (path: string) => compose<string, string[], string>(
+  head,
+  split('?')
+)(path)
+
 export class Route {
+  public static from = (route: Route): Route => ({
+    ...route,
+    canonical: removeQuerystring(route.canonical),
+    path: removeQuerystring(route.path),
+  })
+
   public params?: Record<string, string>
   public id: string
   public path: string
