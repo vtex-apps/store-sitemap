@@ -3,7 +3,7 @@ import { Functions } from '@gocommerce/utils'
 import { forEach } from 'ramda'
 
 import { isCanonical, Route } from '../resources/route'
-import { currentDate } from '../resources/utils'
+import { currentDate, baseDomain } from '../resources/utils'
 
 const xmlSitemapItem = (loc: string) => `
   <sitemap>
@@ -16,16 +16,13 @@ const TEN_MINUTES_S = 10 * 60
 
 export const sitemap: Middleware = async (ctx: Context) => {
   const { vtex: { production, account, workspace }, clients: { sitemap: sitemapDataSource, canonicals, logger } } = ctx
-  const baseDomain = Functions.isGoCommerceAcc(account)
-    ? `${workspace}--${account}.mygocommerce.com`
-    : 'portal.vtexcommercestable.com.br'
   const forwardedHost = ctx.get('x-forwarded-host')
   const forwardedPath = ctx.get('x-forwarded-path')
 
   const originalXML = Functions.isGoCommerceAcc(account)
     ? await sitemapDataSource.fromLegacy(forwardedPath.replace('/', 'gc-'))
     : await sitemapDataSource.fromLegacy(forwardedPath)
-  const normalizedXML = originalXML.replace(new RegExp(baseDomain, 'g'), forwardedHost)
+  const normalizedXML = originalXML.replace(new RegExp(baseDomain(account, workspace), 'g'), forwardedHost)
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
     xmlMode: true,

@@ -1,21 +1,18 @@
 import { ExternalClient, IOContext, InstanceOptions } from '@vtex/api'
 import { Functions } from '@gocommerce/utils'
 
+import { baseURL } from '../resources/utils'
+
 export class SiteMap extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
     const { account, workspace } = context
-    const baseURL = Functions.isGoCommerceAcc(account)
-    ? `https://${workspace}--${account}.mygocommerce.com`
-    : 'http://portal.vtexcommercestable.com.br'
 
     super(
-      baseURL,
+      baseURL(account, workspace),
       context,
       {
         ...options,
-        params: {
-          an: account,
-        },
+        ...(!Functions.isGoCommerceAcc(account) ? { params: { an: account } } : {}),
       }
     )
   }
