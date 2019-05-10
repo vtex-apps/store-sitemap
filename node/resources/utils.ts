@@ -14,8 +14,3 @@ export const baseDomain = (account: string, workspace: string) => {
     ? `${workspace}--${account}.mygocommerce.com`
     : 'portal.vtexcommercestable.com.br'
 }
-
-export const baseURL = (account: string, workspace: string) => {
-  const protocol = Functions.isGoCommerceAcc(account) ? 'https' : 'http'
-  return `${protocol}://${baseDomain(account, workspace)}`
-}
