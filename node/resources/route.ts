@@ -20,14 +20,18 @@ export const isCanonical = (ctx: Context) => routeIdToStoreRoute[ctx.vtex.route.
 
 export const isValid = (route: Route) => route.id && route.path && route.canonical && route.pathId
 
+const lastSegment = (path: string | undefined) => path && last(split('/', path))
+
+export const isSearch = ({path}: {path?: string}) => lastSegment(path) === 's'
+
 /**
  * Returns true if route r1 takes precedence over route r2
  * Precedence rules can be found in `https://help.vtex.com/tutorial/como-funciona-a-busca-da-vtex/`
  */
 export const precedence = (r1: Route, r2: Route) => {
   const deepEquals = equals(r1, r2)
-  const lastSegmentR1 = last(split('/', r1.path))
-  const lastSegmentR2 = last(split('/', r2.path))
+  const lastSegmentR1 = lastSegment(r1.path)
+  const lastSegmentR2 = lastSegment(r2.path)
 
   if (deepEquals) {
     return false

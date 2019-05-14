@@ -1,6 +1,6 @@
 import { json as parseBody } from 'co-body'
 
-import { precedence, removeQuerystring, Route } from '../resources/route'
+import { isSearch, precedence, removeQuerystring, Route } from '../resources/route'
 
 export const getCanonical: Middleware = async (ctx: Context) => {
   const {clients: {canonicals}, query: {canonicalPath}} = ctx
@@ -19,7 +19,7 @@ export const saveCanonical: Middleware = async (ctx: Context) => {
   const {canonical: canonicalPath} = newRoute
   const path = removeQuerystring(canonicalPath)
   const savedRoute = await canonicals.load(path)
-  if (!savedRoute || precedence(newRoute, savedRoute)) {
+  if (!isSearch(newRoute) && (!savedRoute || precedence(newRoute, savedRoute))) {
     await canonicals.save(newRoute)
   }
 
