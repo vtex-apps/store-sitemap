@@ -15,20 +15,21 @@ const xmlSitemapItem = (loc: string) => `
 const TEN_MINUTES_S = 10 * 60
 
 export const sitemap: Middleware = async (ctx: Context) => {
-  const { vtex: { production, account, workspace }, clients: { sitemap: sitemapDataSource, canonicals, logger } } = ctx
+  const { vtex: { production, account, workspace }, clients: { sitemap: sitemapDataSource, canonicals, logger, sitemapGC } } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   const forwardedPath = ctx.get('x-forwarded-path')
 
   const originalXML = Functions.isGoCommerceAcc(account)
-    ? await sitemapDataSource.fromLegacy(forwardedPath.replace('/', 'gc-'))
+    ? await sitemapGC.fromLegacy(forwardedPath)
     : await sitemapDataSource.fromLegacy(forwardedPath)
+
   const normalizedXML = originalXML.replace(new RegExp(baseDomain(account, workspace), 'g'), forwardedHost)
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
     xmlMode: true,
   })
 
-  if (ctx.url === '/sitemap.xml' && !Functions.isGoCommerceAcc(account)) {
+  if (ctx.url === '/sitemap.xml') {
     $('sitemapindex').append(
       xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
       xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
