@@ -29,6 +29,10 @@
       "path": "/sitemap-products-:page:.xml",
       "public": true
     },
+    "categories": {
+      "path": "/sitemap-categories.xml",
+      "public": true
+    },
     "category": {
       "path": "/sitemap-category-:specifier:.xml",
       "public": true

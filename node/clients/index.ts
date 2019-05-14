@@ -3,7 +3,7 @@ import { IOClients } from '@vtex/api'
 import { Canonicals } from './canonicals'
 import { Robots } from './robots'
 import { Routes } from './routes'
-import { SiteMap } from './sitemap'
+import { SiteMap, SiteMapGC } from './sitemap'
 
 export class Clients extends IOClients {
   public get canonicals() {
@@ -20,5 +20,9 @@ export class Clients extends IOClients {
 
   public get sitemap() {
     return this.getOrSet('sitemap', SiteMap)
+  }
+
+  public get sitemapGC() {
+    return this.getOrSet('sitemapGC', SiteMapGC)
   }
 }

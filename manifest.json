@@ -8,6 +8,9 @@
   "builders": {
     "node": "4.x"
   },
+  "dependencies": {
+    "gocommerce.sitemap-app": "1.x"
+  },
   "policies": [
     {
       "name": "outbound-access",
@@ -40,6 +43,9 @@
     },
     {
       "name": "read-private-registry-assets"
+    },
+    {
+      "name": "gocommerce.sitemap-app:sitemap-read"
     }
   ],
   "credentialType": "absolute",
