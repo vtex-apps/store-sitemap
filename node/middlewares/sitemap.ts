@@ -18,7 +18,7 @@ export const sitemap: Middleware = async (ctx: Context) => {
   const { vtex: { production }, clients: { canonicals, logger } } = ctx
   const sitemapClient = sitemapClientFromCtx(ctx)
   const forwardedHost = ctx.get('x-forwarded-host')
-  const forwardedPath = ctx.get('x-forwarded-path')
+  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
 
   const originalXML = await sitemapClient.fromLegacy(forwardedPath)
   const normalizedXML = sitemapClient.replaceHost(originalXML, forwardedHost)
@@ -28,7 +28,7 @@ export const sitemap: Middleware = async (ctx: Context) => {
     xmlMode: true,
   })
 
-  if (ctx.url === '/sitemap.xml') {
+  if (forwardedPath === '/sitemap.xml') {
     $('sitemapindex').append(
       xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-custom.xml`),
       xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-user-routes.xml`)
