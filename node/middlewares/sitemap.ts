@@ -20,9 +20,8 @@ export const sitemap: Middleware = async (ctx: Context) => {
   const forwardedHost = ctx.get('x-forwarded-host')
   const forwardedPath = ctx.get('x-forwarded-path')
 
-  const normalizedXML = await sitemapClient.fromLegacy(forwardedPath)
-    .then(xml => sitemapClient.replaceHost(xml, forwardedHost))
-    .then(xml => sitemapClient.replacePath(xml, '/'))
+  const originalXML = await sitemapClient.fromLegacy(forwardedPath)
+  const normalizedXML = sitemapClient.replaceHost(originalXML, forwardedHost)
 
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
@@ -31,8 +30,8 @@ export const sitemap: Middleware = async (ctx: Context) => {
 
   if (ctx.url === '/sitemap.xml') {
     $('sitemapindex').append(
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
+      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-custom.xml`),
+      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-user-routes.xml`)
     )
   }
 
