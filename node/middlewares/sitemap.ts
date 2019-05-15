@@ -30,8 +30,8 @@ export const sitemap = async (ctx: Context) => {
   })
   if (ctx.url === '/sitemap.xml') {
     $('sitemapindex').append(
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-custom.xml`),
-      xmlSitemapItem(`https://${forwardedHost}/sitemap-user-routes.xml`)
+      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-custom.xml`),
+      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-user-routes.xml`)
     )
   }
   const canonical = isCanonical(ctx)

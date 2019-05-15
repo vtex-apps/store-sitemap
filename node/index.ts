@@ -1,5 +1,4 @@
 import {Apps, hrToMillis, HttpClient, Logger, MetricsAccumulator} from '@vtex/api'
-
 import * as Bluebird from 'bluebird'
 import {map} from 'ramda'
 
@@ -55,13 +54,10 @@ const prepare = (middleware: Middleware) => async (ctx: Context) => {
 
 export default {
   routes: map(prepare, {
-    brands: sitemap,
-    category: sitemap,
     custom: customSitemap,
-    departments: sitemap,
-    products: sitemap,
     robots,
     sitemap,
+    sitemapXML: sitemap,
     user: userSitemap,
   }),
   statusTrack: metrics.statusTrack,

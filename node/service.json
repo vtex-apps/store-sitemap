@@ -3,32 +3,20 @@
   "ttl": 60,
   "timeout": 60,
   "routes": {
-    "sitemap": {
-      "path": "/sitemap.xml",
-      "public": true
-    },
-    "departments": {
-      "path": "/sitemap-departments.xml",
-      "public": true
-    },
-    "brands": {
-      "path": "/sitemap-brands.xml",
-      "public": true
-    },
     "custom": {
-      "path": "/sitemap-custom.xml",
+      "path": "/sitemap/sitemap-custom.xml",
       "public": true
     },
     "user": {
-      "path": "/sitemap-user-routes.xml",
+      "path": "/sitemap/sitemap-user-routes.xml",
       "public": true
     },
-    "products": {
-      "path": "/sitemap-products-:page:.xml",
+    "sitemap": {
+      "path": "/sitemap/:path",
       "public": true
     },
-    "category": {
-      "path": "/sitemap-category-:specifier:.xml",
+    "sitemapXML": {
+      "path": "/sitemap.xml",
       "public": true
     },
     "robots": {
