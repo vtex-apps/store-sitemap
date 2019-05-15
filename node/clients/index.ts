@@ -3,7 +3,8 @@ import { IOClients } from '@vtex/api'
 import { Canonicals } from './canonicals'
 import { Robots } from './robots'
 import { Routes } from './routes'
-import { SiteMap, SiteMapGC } from './sitemap'
+import { SitemapGC } from './sitemap/gocommerce'
+import { SitemapPortal } from './sitemap/portal'
 
 export class Clients extends IOClients {
   public get canonicals() {
@@ -18,11 +19,11 @@ export class Clients extends IOClients {
     return this.getOrSet('routes', Routes)
   }
 
-  public get sitemap() {
-    return this.getOrSet('sitemap', SiteMap)
+  public get sitemapPortal() {
+    return this.getOrSet('sitemapPortal', SitemapPortal)
   }
 
   public get sitemapGC() {
-    return this.getOrSet('sitemapGC', SiteMapGC)
+    return this.getOrSet('sitemapGC', SitemapGC)
   }
 }

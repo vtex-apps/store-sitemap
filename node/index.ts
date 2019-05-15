@@ -71,6 +71,10 @@ export default new Service({
       DEFAULT: methodNotAllowed,
       GET: sitemap,
     }),
+    sitemapXML: method({
+      DEFAULT: methodNotAllowed,
+      GET: sitemap,
+    }),
     user: method({
       DEFAULT: methodNotAllowed,
       GET: userSitemap,

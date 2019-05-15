@@ -5,7 +5,7 @@
   "minReplicas": 2,
   "maxReplicas": 10,
   "routes": {
-    "sitemap": {
+    "sitemapXML": {
       "path": "/sitemap.xml",
       "public": true
     },
@@ -18,11 +18,11 @@
       "public": true
     },
     "custom": {
-      "path": "/sitemap-custom.xml",
+      "path": "/sitemap/sitemap-custom.xml",
       "public": true
     },
     "user": {
-      "path": "/sitemap-user-routes.xml",
+      "path": "/sitemap/sitemap-user-routes.xml",
       "public": true
     },
     "products": {
@@ -35,6 +35,10 @@
     },
     "category": {
       "path": "/sitemap-category-:specifier:.xml",
+      "public": true
+    },
+    "sitemap": {
+      "path": "/sitemap/:path",
       "public": true
     },
     "robots": {
