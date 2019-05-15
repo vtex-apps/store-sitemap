@@ -21,6 +21,7 @@ const xmlSitemapItem = (loc: string) => {
 export const sitemap = async (ctx: Context) => {
   const {vtex: {account}} = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
+  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   const routeList: Route[] = []
   const {data: originalXML} = await getSiteMapXML(ctx)
   const normalizedXML = originalXML.replace(new RegExp(`${account}.vtexcommercestable.com.br`, 'g'), forwardedHost)
@@ -28,7 +29,8 @@ export const sitemap = async (ctx: Context) => {
     decodeEntities: false,
     xmlMode: true,
   })
-  if (ctx.url === '/sitemap.xml') {
+
+  if (forwardedPath === '/sitemap.xml') {
     $('sitemapindex').append(
       xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-custom.xml`),
       xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-user-routes.xml`)
