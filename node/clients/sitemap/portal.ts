@@ -6,7 +6,7 @@ export class SitemapPortal extends JanusClient implements SiteMap {
   public fromLegacy = async (forwardedPath: string) => {
     const normalizedPath = forwardedPath.startsWith('/sitemap.xml')
       ? forwardedPath
-      : `/sitemap/${forwardedPath}`
+      : `/sitemap${forwardedPath}`
     return this.http.get<string>(normalizedPath)
   }
 
