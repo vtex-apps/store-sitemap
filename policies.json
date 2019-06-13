@@ -6,8 +6,9 @@
       {
         "actions": ["put", "get"],
         "effect": "allow",
-        "resource":
+        "resources": [
           "vrn:vtex.store-sitemap:{{region}}:{{account}}:{{workspace}}:/canonical"
+        ]
       }
     ]
   }
