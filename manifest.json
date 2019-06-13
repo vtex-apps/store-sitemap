@@ -1,7 +1,7 @@
 {
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
