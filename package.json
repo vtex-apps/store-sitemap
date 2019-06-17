@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@vtex/api": "^3.24.0"
+  }
+}

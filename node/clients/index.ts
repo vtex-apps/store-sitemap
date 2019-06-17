@@ -1,6 +1,7 @@
 import { IOClients } from '@vtex/api'
 
 import { Canonicals } from './canonicals'
+import { Catalog } from './catalog'
 import { Robots } from './robots'
 import { Routes } from './routes'
 import { SitemapGC } from './sitemap/gocommerce'
@@ -9,6 +10,10 @@ import { SitemapPortal } from './sitemap/portal'
 export class Clients extends IOClients {
   public get canonicals() {
     return this.getOrSet('canonicals', Canonicals)
+  }
+
+  public get catalog() {
+    return this.getOrSet('catalog', Catalog)
   }
 
   public get robots() {

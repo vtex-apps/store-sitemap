@@ -27,6 +27,13 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/pub/portal/pagetype/*"
+      }
+    },
+    {
       "name": "colossus-write-logs"
     },
     {
@@ -51,5 +58,6 @@
   "credentialType": "absolute",
   "scripts": {
     "prereleasy": "bash lint.sh"
-  }
+  },
+  "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }
