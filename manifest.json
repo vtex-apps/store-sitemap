@@ -52,7 +52,7 @@
     {
       "name": "vtex.catalog-api-proxy:catalog-proxy"
     }
- ],
+  ],
   "credentialType": "absolute",
   "scripts": {
     "prereleasy": "bash lint.sh"
