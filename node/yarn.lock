@@ -258,10 +258,10 @@
     "@types/events" "*"
     "@types/node" "*"
 
-"@vtex/api@^3.9.2":
-  version "3.9.2"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-3.9.2.tgz#195dac18eadd7a59f84d08a9ce90697669d71c37"
-  integrity sha512-vT/Zd87w7k8mygu4z9qZTCkhMqD+CgZVrn87A27HPgqv8jPWuaLNrOTS//50M+NUjtztSDsb1OV5qB6VszToPA==
+"@vtex/api@^3.24.1":
+  version "3.24.1"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-3.24.1.tgz#8c0e0de688a5e295089bd4ad0511a5e035323cb1"
+  integrity sha512-tLc2YFwmBfMxN89HLa3ocOjjoED37koM87i32jTos2L4GxZ0/Q/PS42ysjvQ9NBEM3msMwZdhrCXuZcI2m+zjA==
   dependencies:
     "@types/koa" "^2.0.48"
     "@types/koa-compose" "^3.2.3"
@@ -271,6 +271,7 @@
     archiver "^3.0.0"
     axios "^0.18.0"
     axios-retry "^3.1.2"
+    bluebird "^3.5.4"
     co-body "^6.0.0"
     cookie "^0.3.1"
     dataloader "^1.4.0"
@@ -1386,6 +1387,11 @@ bl@^3.0.0:
 bluebird@^3.5.0:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
+
+bluebird@^3.5.4:
+  version "3.5.5"
+  resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
+  integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
 
 boolbase@~1.0.0:
   version "1.0.0"
@@ -3510,7 +3516,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:

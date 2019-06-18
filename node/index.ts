@@ -14,9 +14,9 @@ import { userSitemap } from './middlewares/userSitemap'
 const THREE_SECONDS_MS = 3 * 1000
 const ONE_SECOND_MS = 1 * 1000
 
-// const catalogCacheStorage = new LRUCache<string, any>({
-  // max: 30000,
-// })
+const catalogCacheStorage = new LRUCache<string, any>({
+  max: 30000,
+})
 
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
@@ -28,7 +28,7 @@ const clients: ClientsConfig<Clients> = {
       timeout: ONE_SECOND_MS,
     },
     catalog: {
-      // memoryCache: catalogCacheStorage,
+      memoryCache: catalogCacheStorage,
     },
     logger: {
       timeout: THREE_SECONDS_MS,
