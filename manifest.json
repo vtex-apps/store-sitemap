@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
   "version": "1.4.1",
@@ -9,7 +10,8 @@
     "node": "4.x"
   },
   "dependencies": {
-    "gocommerce.sitemap-app": "1.x"
+    "gocommerce.sitemap-app": "1.x",
+    "vtex.catalog-api-proxy": "0.x"
   },
   "policies": [
     {
@@ -24,13 +26,6 @@
       "attrs": {
         "host": "janus-edge.vtex.com.br",
         "path": "/robots.txt"
-      }
-    },
-    {
-      "name": "outbound-access",
-      "attrs": {
-        "host": "{{account}}.vtexcommercestable.com.br",
-        "path": "/pub/portal/pagetype/*"
       }
     },
     {
@@ -53,11 +48,13 @@
     },
     {
       "name": "gocommerce.sitemap-app:sitemap-read"
+    },
+    {
+      "name": "vtex.catalog-api-proxy:catalog-proxy"
     }
-  ],
+ ],
   "credentialType": "absolute",
   "scripts": {
     "prereleasy": "bash lint.sh"
-  },
-  "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
+  }
 }
