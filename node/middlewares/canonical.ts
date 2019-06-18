@@ -41,7 +41,6 @@ const routeFromCatalogPageType = (
 ) => {
   console.log(catalogPageTypeResponse)
   const pageType = prop('pageType', catalogPageTypeResponse)
-  //console.log(`Returned pageType: ${pageType}`)
   const routeGenerator = routeTypeToStoreRoute[pageType] || routeTypeToStoreRoute.FullText
   return routeGenerator(canonicalPath)
 }
