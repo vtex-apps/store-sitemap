@@ -57,8 +57,6 @@ export const getCanonical: Middleware = async (ctx: Context) => {
 
     const catalogRoutePath = prop('path', catalogRoute)
     const vbaseRoutePath = prop('path', maybeRoute as any)
-    console.log(`catalog route path: ${catalogRoutePath} `)
-    console.log(`vbase route path: ${vbaseRoutePath} `)
     logger.debug(
       `catalog pagetype API returned route path ${catalogRoutePath} but route stored in vbase was ${vbaseRoutePath}`
     )
