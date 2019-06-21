@@ -44,7 +44,7 @@ export const sitemap: Middleware = async (ctx: Context) => {
     }
   })
 
-  forEach((route: Route) => canonicals.save(route).catch(err => logger.error(err)), routeList)
+  forEach((route: Route) => canonicals.save(route).catch((err: any) => logger.error(err)), routeList)
 
   ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()

@@ -1,7 +1,7 @@
 import { compose, equals, head, identity, last, split } from 'ramda'
 import RouteParser = require('route-parser')
 
-const routeIdToStoreRoute: any = {
+export const routeIdToStoreRoute: any = {
   brands: {
     id: 'store.search#brand',
     originalSitemapPathToSystem: (path: string) => `${path}/b`,

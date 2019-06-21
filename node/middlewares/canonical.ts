@@ -1,11 +1,68 @@
 import { json as parseBody } from 'co-body'
+import { prop, split, toLower } from 'ramda'
 
-import { isSearch, precedence, removeQuerystring, Route } from '../resources/route'
+import { isSearch, precedence, removeQuerystring, Route, routeIdToStoreRoute } from '../resources/route'
+
+const isVtex = (platform: string | undefined) => platform && toLower(platform) === 'vtex'
+
+const cleanPath = (path: string) => split('/', path)[1]
+
+const routeTypeToStoreRoute: any = {
+  'Brand': (path: string) => ({
+    ...routeIdToStoreRoute.brands,
+    domain: 'store',
+    params: {
+      p1: path,
+    },
+    path:`${path}/b`,
+  }),
+  'Department': (path: string) => ({
+    ...routeIdToStoreRoute.departments,
+    domain: 'store',
+    params: {
+      p1: path,
+    },
+    path:`${path}/d`,
+  }),
+  'FullText': (path: string) => ({
+    domain: 'store',
+    id: 'store.search',
+    params: {
+      p1: path,
+    },
+    path:`${path}/s`,
+    pathId: '/:p1/s',
+  }),
+}
+
+const routeFromCatalogPageType = (
+  catalogPageTypeResponse: CatalogPageTypeResponse,
+  canonicalPath: string
+) => {
+  const pageType = prop('pageType', catalogPageTypeResponse)
+  const routeGenerator = routeTypeToStoreRoute[pageType] || routeTypeToStoreRoute.FullText
+  return routeGenerator(canonicalPath)
+}
 
 export const getCanonical: Middleware = async (ctx: Context) => {
-  const {clients: {canonicals}, query: {canonicalPath}} = ctx
+  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}, state: {platform}} = ctx
   const path = removeQuerystring(canonicalPath)
-  const maybeRoute = await canonicals.load(path)
+  let maybeRoute = await canonicals.load(path)
+  if (isVtex(platform)) {
+    const cleanCanonicalPath = cleanPath(canonicalPath)
+    const catalogRoute = routeFromCatalogPageType(
+      await catalog.pageType(cleanCanonicalPath),
+      cleanCanonicalPath
+    )
+
+    const catalogRoutePath = prop('path', catalogRoute)
+    const vbaseRoutePath = prop('path', maybeRoute as any)
+    logger.debug(
+      `catalog pagetype API returned route path ${catalogRoutePath} but route stored in vbase was ${vbaseRoutePath}`
+    )
+
+    maybeRoute = catalogRoute
+  }
   if (maybeRoute) {
     ctx.body = maybeRoute
     ctx.status = 200
