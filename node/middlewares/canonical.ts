@@ -1,9 +1,8 @@
+import { Functions } from '@gocommerce/utils'
 import { json as parseBody } from 'co-body'
-import { prop, split, toLower } from 'ramda'
+import { prop, split } from 'ramda'
 
 import { isSearch, precedence, removeQuerystring, Route, routeIdToStoreRoute } from '../resources/route'
-
-const isVtex = (platform: string | undefined) => platform && toLower(platform) === 'vtex'
 
 const cleanPath = (path: string) => split('/', path)[1]
 
@@ -45,10 +44,10 @@ const routeFromCatalogPageType = (
 }
 
 export const getCanonical: Middleware = async (ctx: Context) => {
-  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}, state: {platform}} = ctx
+  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}} = ctx
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
-  if (isVtex(platform)) {
+  if (!Functions.isGoCommerceAcc(ctx)) {
     const cleanCanonicalPath = cleanPath(canonicalPath)
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanCanonicalPath),
