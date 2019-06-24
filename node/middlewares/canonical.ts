@@ -27,7 +27,7 @@ const routeTypeToStoreRoute: any = {
     domain: 'store',
     id: 'store.search',
     params: {
-      p1: path,
+      p1: split('?', path)[0],
     },
     path:`${path}/s`,
     pathId: '/:p1/s',
