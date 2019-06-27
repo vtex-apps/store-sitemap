@@ -5,8 +5,8 @@ export class Catalog extends AppClient {
     super('vtex.catalog-api-proxy', ctx, opts)
   }
 
-  public pageType = (path: string) => this.get<CatalogPageTypeResponse>(
-    `/pub/portal/pagetype/${path}`,
+  public pageType = (path: string, query: string) => this.get<CatalogPageTypeResponse>(
+    `/pub/portal/pagetype/${path}${query}`,
     { metric: 'catalog-pagetype' }
   )
 
