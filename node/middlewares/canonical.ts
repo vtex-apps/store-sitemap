@@ -1,46 +1,63 @@
 import { Functions } from '@gocommerce/utils'
 import { json as parseBody } from 'co-body'
-import { prop, split } from 'ramda'
+import { prop } from 'ramda'
 
 import { isSearch, precedence, removeQuerystring, Route, routeIdToStoreRoute } from '../resources/route'
 
-const cleanPath = (path: string) => split('/', path)[1]
+interface CleanPathAndQuery {
+  path: string
+  query: string
+}
+
+const getCleanPathAndQuery = (path: string): CleanPathAndQuery => {
+  const slashFreePath = path.split('/')[1] || path
+  const queryIndex = slashFreePath.indexOf('?')
+  if (queryIndex === -1) {
+    return {path: slashFreePath, query: ''}
+  }
+
+  return {
+    path: slashFreePath.substr(0, queryIndex),
+    query: slashFreePath.substr(queryIndex)
+  }
+}
 
 const routeTypeToStoreRoute: any = {
-  'Brand': (path: string) => ({
+  'Brand': (path: string, query: string) => ({
     ...routeIdToStoreRoute.brands,
     domain: 'store',
     params: {
       p1: path,
     },
-    path:`${path}/b`,
+    path:`${path}/b${query}`,
   }),
-  'Department': (path: string) => ({
+  'Department': (path: string, query: string) => ({
     ...routeIdToStoreRoute.departments,
     domain: 'store',
     params: {
       p1: path,
     },
-    path:`${path}/d`,
+    path:`${path}/d${query}`,
   }),
-  'FullText': (path: string) => ({
+  'FullText': (path: string, query: string) => ({
     domain: 'store',
     id: 'store.search',
     params: {
-      p1: split('?', path)[0],
+      p1: path,
     },
-    path:`${path}/s`,
+    path:`${path}/s${query}`,
     pathId: '/:p1/s',
   }),
 }
 
 const routeFromCatalogPageType = (
   catalogPageTypeResponse: CatalogPageTypeResponse,
-  canonicalPath: string
+  canonicalPath: string,
+  query: string
 ) => {
   const pageType = prop('pageType', catalogPageTypeResponse)
   const routeGenerator = routeTypeToStoreRoute[pageType] || routeTypeToStoreRoute.FullText
-  return routeGenerator(canonicalPath)
+  return routeGenerator(canonicalPath, query)
 }
 
 export const getCanonical: Middleware = async (ctx: Context) => {
@@ -48,10 +65,11 @@ export const getCanonical: Middleware = async (ctx: Context) => {
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
   if (!Functions.isGoCommerceAcc(ctx)) {
-    const cleanCanonicalPath = cleanPath(canonicalPath)
+    const {path: cleanPath, query} = getCleanPathAndQuery(canonicalPath)
     const catalogRoute = routeFromCatalogPageType(
-      await catalog.pageType(cleanCanonicalPath),
-      cleanCanonicalPath
+      await catalog.pageType(cleanPath, query),
+      cleanPath,
+      query,
     )
 
     const catalogRoutePath = prop('path', catalogRoute)
