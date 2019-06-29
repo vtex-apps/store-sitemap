@@ -3,6 +3,7 @@ import { IOClients } from '@vtex/api'
 import { Canonicals } from './canonicals'
 import { Catalog } from './catalog'
 import { Robots } from './robots'
+import { RobotsGC } from './robotsGC'
 import { Routes } from './routes'
 import { SitemapGC } from './sitemap/gocommerce'
 import { SitemapPortal } from './sitemap/portal'
@@ -18,6 +19,10 @@ export class Clients extends IOClients {
 
   public get robots() {
     return this.getOrSet('robots', Robots)
+  }
+
+  public get robotsGC() {
+    return this.getOrSet('robotsGC', RobotsGC)
   }
 
   public get routes() {
