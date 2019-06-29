@@ -3,14 +3,6 @@ import { forEach } from 'ramda'
 
 import { sitemapClientFromCtx } from '../clients/sitemap'
 import { isCanonical, Route } from '../resources/route'
-import { currentDate } from '../resources/utils'
-
-const xmlSitemapItem = (loc: string) => `
-  <sitemap>
-    <loc>${loc}</loc>
-    <lastmod>${currentDate()}</lastmod>
-  </sitemap>
-`
 
 const TEN_MINUTES_S = 10 * 60
 
@@ -29,10 +21,10 @@ export const sitemap: Middleware = async (ctx: Context) => {
   })
 
   if (forwardedPath === '/sitemap.xml') {
-    $('sitemapindex').append(
-      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-custom.xml`),
-      xmlSitemapItem(`https://${forwardedHost}/sitemap/sitemap-user-routes.xml`)
-    )
+    await sitemapClient.appendSitemapItems($('sitemapindex'), [
+      `https://${forwardedHost}/sitemap/sitemap-custom.xml`,
+      `https://${forwardedHost}/sitemap/sitemap-user-routes.xml`,
+    ])
   }
 
   const routeList: Route[] = []

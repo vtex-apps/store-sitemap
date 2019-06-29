@@ -14,4 +14,6 @@ export class SitemapGC extends AppClient implements SiteMap {
     const regex = new RegExp(`${workspace}--${account}.mygocommerce.com`, 'g')
     return str.replace(regex, forwardedHost)
   }
+
+  public appendSitemapItems = async (_currSitemap: any, _items: string[]) => {}
 }
