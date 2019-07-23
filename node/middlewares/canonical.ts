@@ -18,7 +18,7 @@ const getCleanPathAndQuery = (path: string): CleanPathAndQuery => {
 
   return {
     path: slashFreePath.substr(0, queryIndex),
-    query: slashFreePath.substr(queryIndex)
+    query: slashFreePath.substr(queryIndex),
   }
 }
 
@@ -69,7 +69,7 @@ export async function getCanonical (ctx: Context) {
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),
       cleanPath,
-      query,
+      query
     )
 
     const catalogRoutePath = prop('path', catalogRoute)

@@ -27,6 +27,6 @@
     "**/lodash": "^4.17.11"
   },
   "scripts": {
-    "lint": "tsc --noEmit && tslint -c tslint.json './**/*.ts'"
+    "lint": "tsc --noEmit && tslint --fix -c tslint.json './**/*.ts'"
   }
 }

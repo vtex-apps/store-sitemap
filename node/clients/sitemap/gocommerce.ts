@@ -15,5 +15,6 @@ export class SitemapGC extends AppClient implements SiteMap {
     return str.replace(regex, `${forwardedHost}${rootPath}`)
   }
 
+  // tslint:disable-next-line
   public appendSitemapItems = async (_currSitemap: any, _items: string[]) => {}
 }
