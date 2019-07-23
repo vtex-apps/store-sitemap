@@ -9,10 +9,10 @@ export class SitemapGC extends AppClient implements SiteMap {
 
   public fromLegacy = (forwardedPath: string) => this.http.get(forwardedPath)
 
-  public replaceHost = (str: string, forwardedHost: string) => {
+  public replaceHost = (str: string, forwardedHost: string, rootPath: string = '') => {
     const { account, workspace } = this.context
     const regex = new RegExp(`${workspace}--${account}.mygocommerce.com`, 'g')
-    return str.replace(regex, forwardedHost)
+    return str.replace(regex, `${forwardedHost}${rootPath}`)
   }
 
   public appendSitemapItems = async (_currSitemap: any, _items: string[]) => {}

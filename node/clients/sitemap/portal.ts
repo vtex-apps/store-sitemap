@@ -8,9 +8,9 @@ export class SitemapPortal extends JanusClient implements SiteMap {
   public fromLegacy = async (forwardedPath: string) =>
     this.http.get<string>(forwardedPath)
 
-  public replaceHost = (str: string, newHost: string) => {
+  public replaceHost = (str: string, newHost: string, rootPath: string = '') => {
     const regex = new RegExp('portal.vtexcommercestable.com.br', 'g')
-    return str.replace(regex, newHost)
+    return str.replace(regex, `${newHost}${rootPath}`)
   }
 
   public appendSitemapItems = async (currSitemap: any, items: string[]) => {

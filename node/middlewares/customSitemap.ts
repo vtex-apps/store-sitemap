@@ -48,7 +48,7 @@ const getAppSitemap = (apps: Apps, deps: Record<string, string[]>, logger: Logge
   return sitemap
 }
 
-export const customSitemap: Middleware = async (ctx: Context) => {
+export async function customSitemap (ctx: Context) {
   const {clients: {apps, logger}, vtex: {production}} = ctx
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', cheerioOptions)
   const deps = await apps.getDependencies()

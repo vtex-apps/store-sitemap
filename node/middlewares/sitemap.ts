@@ -6,14 +6,19 @@ import { isCanonical, Route } from '../resources/route'
 
 const TEN_MINUTES_S = 10 * 60
 
-export const sitemap: Middleware = async (ctx: Context) => {
+export async function sitemap (ctx: Context) {
   const { vtex: { production }, clients: { canonicals, logger } } = ctx
   const sitemapClient = sitemapClientFromCtx(ctx)
   const forwardedHost = ctx.get('x-forwarded-host')
+  let rootPath = ctx.get('x-vtex-root-path')
+  // Defend against malformed root path. It should always start with `/`.
+  if (rootPath && !rootPath.startsWith('/')) {
+    rootPath = `/${rootPath}`
+  }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
 
   const originalXML = await sitemapClient.fromLegacy(forwardedPath)
-  const normalizedXML = sitemapClient.replaceHost(originalXML, forwardedHost)
+  const normalizedXML = sitemapClient.replaceHost(originalXML, forwardedHost, rootPath)
 
   const $ = cheerio.load(normalizedXML, {
     decodeEntities: false,
@@ -22,14 +27,14 @@ export const sitemap: Middleware = async (ctx: Context) => {
 
   if (forwardedPath === '/sitemap.xml') {
     await sitemapClient.appendSitemapItems($('sitemapindex'), [
-      `https://${forwardedHost}/sitemap/sitemap-custom.xml`,
-      `https://${forwardedHost}/sitemap/sitemap-user-routes.xml`,
+      `https://${forwardedHost}${rootPath}/sitemap/sitemap-custom.xml`,
+      `https://${forwardedHost}${rootPath}/sitemap/sitemap-user-routes.xml`,
     ])
   }
 
   const routeList: Route[] = []
   const canonical = isCanonical(ctx)
-  $('loc').each((_, loc) => {
+  $('loc').each((_: any, loc: any) => {
     const canonicalUrl = $(loc).text()
     if (canonical) {
       routeList.push(new Route(ctx, canonicalUrl))
