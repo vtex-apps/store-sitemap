@@ -22,9 +22,11 @@ const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
     apps: {
+      retries: 2,
       timeout: ONE_SECOND_MS,
     },
     canonicals: {
+      retries: 2,
       timeout: ONE_SECOND_MS,
     },
     catalog: {

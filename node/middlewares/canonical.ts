@@ -18,7 +18,7 @@ const getCleanPathAndQuery = (path: string): CleanPathAndQuery => {
 
   return {
     path: slashFreePath.substr(0, queryIndex),
-    query: slashFreePath.substr(queryIndex)
+    query: slashFreePath.substr(queryIndex),
   }
 }
 
@@ -60,7 +60,7 @@ const routeFromCatalogPageType = (
   return routeGenerator(canonicalPath, query)
 }
 
-export const getCanonical: Middleware = async (ctx: Context) => {
+export async function getCanonical (ctx: Context) {
   const {clients: {canonicals, catalog, logger}, query: {canonicalPath}} = ctx
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
@@ -69,7 +69,7 @@ export const getCanonical: Middleware = async (ctx: Context) => {
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),
       cleanPath,
-      query,
+      query
     )
 
     const catalogRoutePath = prop('path', catalogRoute)
@@ -87,7 +87,7 @@ export const getCanonical: Middleware = async (ctx: Context) => {
   }
 }
 
-export const saveCanonical: Middleware = async (ctx: Context) => {
+export async function saveCanonical (ctx: Context) {
   const {clients: {canonicals}} = ctx
   const newRoute = Route.from(await parseBody(ctx))
   const {canonical: canonicalPath} = newRoute

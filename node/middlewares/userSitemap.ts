@@ -5,10 +5,15 @@ import { currentDate } from '../resources/utils'
 
 const TEN_MINUTES_S = 10 * 60
 
-export const userSitemap: Middleware = async (ctx: Context) => {
+export async function userSitemap (ctx: Context) {
   const {clients: {routes}, vtex: {production}} = ctx
   const userRoutes = await routes.userRoutes().catch(() => null)
   const forwardedHost = ctx.get('x-forwarded-host')
+  let rootPath = ctx.get('x-vtex-root-path')
+  // Defend against malformed root path. It should always start with `/`.
+  if (rootPath && !rootPath.startsWith('/')) {
+    rootPath = `/${rootPath}`
+  }
   const $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
     decodeEntities: false,
     xmlMode: true,
@@ -17,7 +22,7 @@ export const userSitemap: Middleware = async (ctx: Context) => {
   if (userRoutes && userRoutes['vtex.admin-pages']) {
     const xmlUserRoutes = map((route: any) =>
       `<url>
-        <loc>https://${forwardedHost}${route.path}</loc>
+        <loc>https://${forwardedHost}${rootPath}${route.path}</loc>
         <lastmod>${currentDate()}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.4</priority>

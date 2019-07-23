@@ -2,7 +2,7 @@ import { Functions } from '@gocommerce/utils'
 
 const TEN_MINUTES_S = 10 * 60
 
-export const robots = async (ctx: Context) => {
+export async function robots (ctx: Context) {
   const {vtex: {account, production}} = ctx
   const { clients } = ctx
   const robotsDataSource = Functions.isGoCommerceAcc(account) ? clients.robotsGC : clients.robots
