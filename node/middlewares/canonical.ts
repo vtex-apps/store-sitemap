@@ -1,5 +1,6 @@
 import { Functions } from '@gocommerce/utils'
 import { json as parseBody } from 'co-body'
+import { parse as parseQs } from 'querystring'
 import { prop } from 'ramda'
 
 import { isSearch, precedence, removeQuerystring, Route, routeIdToStoreRoute } from '../resources/route'
@@ -9,16 +10,18 @@ interface CleanPathAndQuery {
   query: string
 }
 
-const getCleanPathAndQuery = (path: string): CleanPathAndQuery => {
+const getCleanPathAndRelevantQuery = (path: string): CleanPathAndQuery => {
   const slashFreePath = path.split('/')[1] || path
   const queryIndex = slashFreePath.indexOf('?')
   if (queryIndex === -1) {
     return {path: slashFreePath, query: ''}
   }
 
+  const queryString = slashFreePath.substr(queryIndex + 1).toLowerCase()
+  const query = parseQs(queryString)
   return {
     path: slashFreePath.substr(0, queryIndex),
-    query: slashFreePath.substr(queryIndex),
+    query: query.map ? `?map=${query.map}` : '',
   }
 }
 
@@ -65,7 +68,7 @@ export async function getCanonical (ctx: Context) {
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
   if (!Functions.isGoCommerceAcc(ctx)) {
-    const {path: cleanPath, query} = getCleanPathAndQuery(canonicalPath)
+    const {path: cleanPath, query} = getCleanPathAndRelevantQuery(canonicalPath)
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),
       cleanPath,
