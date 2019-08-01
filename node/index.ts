@@ -31,6 +31,8 @@ const clients: ClientsConfig<Clients> = {
     },
     catalog: {
       memoryCache: catalogCacheStorage,
+      retries: 1,
+      timeout: THREE_SECONDS_MS,
     },
     logger: {
       timeout: THREE_SECONDS_MS,
