@@ -7,7 +7,8 @@
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
   "builders": {
-    "node": "4.x"
+    "node": "4.x",
+    "docs": "0.x"
   },
   "dependencies": {
     "gocommerce.sitemap-app": "1.x",
