@@ -34,12 +34,21 @@ const clients: ClientsConfig<Clients> = {
       retries: 1,
       timeout: THREE_SECONDS_MS,
     },
+    default: {
+      timeout: THREE_SECONDS_MS,
+    },
     logger: {
       timeout: THREE_SECONDS_MS,
     },
     routes: {
       timeout: THREE_SECONDS_MS,
     },
+    sitemapPortal: {
+      timeout: THREE_SECONDS_MS,
+    },
+    sitemapGC: {
+      timeout: THREE_SECONDS_MS,
+    }
   },
 }
 
