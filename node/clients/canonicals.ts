@@ -16,6 +16,7 @@ export class Canonicals extends VBase {
     if (!canonicalPath) {
       throw new Error('Cannot get canonical route from empty string')
     }
+    console.log({canonicalPath: this.canonicalToVBase(canonicalPath)})
     return this.getJSON<Maybe<Route>>(this.BUCKET, this.canonicalToVBase(canonicalPath), true)
   }
 

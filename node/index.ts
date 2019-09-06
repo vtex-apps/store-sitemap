@@ -32,7 +32,7 @@ const clients: ClientsConfig<Clients> = {
     catalog: {
       memoryCache: catalogCacheStorage,
       retries: 1,
-      timeout: THREE_SECONDS_MS,
+      timeout: ONE_SECOND_MS,
     },
     default: {
       timeout: THREE_SECONDS_MS,
@@ -43,12 +43,12 @@ const clients: ClientsConfig<Clients> = {
     routes: {
       timeout: THREE_SECONDS_MS,
     },
+    sitemapGC: {
+      timeout: THREE_SECONDS_MS,
+    },
     sitemapPortal: {
       timeout: THREE_SECONDS_MS,
     },
-    sitemapGC: {
-      timeout: THREE_SECONDS_MS,
-    }
   },
 }
 

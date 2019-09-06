@@ -64,30 +64,37 @@ const routeFromCatalogPageType = (
 }
 
 export async function getCanonical (ctx: Context) {
-  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}} = ctx
-  const path = removeQuerystring(canonicalPath)
-  let maybeRoute = await canonicals.load(path)
-  if (!Functions.isGoCommerceAcc(ctx)) {
-    const {path: cleanPath, query} = getCleanPathAndRelevantQuery(canonicalPath)
-    const catalogRoute = routeFromCatalogPageType(
-      await catalog.pageType(cleanPath, query),
-      cleanPath,
-      query
-    )
+  const { clients: { canonicals, catalog }, vtex: { logger }, query: { canonicalPath } } = ctx
+  const { path: cleanPath, query } = getCleanPathAndRelevantQuery(canonicalPath)
+  const isGoCommerce = Functions.isGoCommerceAcc(ctx)
 
+  const vbaseRoute = await canonicals.load(`/${cleanPath}`)
+
+  const pageType = !isGoCommerce
+    ? await catalog.pageType(cleanPath, query).catch(_ => null) || { pageType: 'FullText' }
+    : { pageType: 'FullText' }
+
+  const catalogRoute = routeFromCatalogPageType(
+    pageType,
+    cleanPath,
+    query
+  )
+
+  if (!isGoCommerce && vbaseRoute) {
+    const vbaseRoutePath = prop('path', vbaseRoute)
     const catalogRoutePath = prop('path', catalogRoute)
-    const vbaseRoutePath = prop('path', maybeRoute as any)
+
     logger.debug(
       `catalog pagetype API returned route path ${catalogRoutePath} but route stored in vbase was ${vbaseRoutePath}`
     )
+  }
 
-    maybeRoute = catalogRoute
-  }
-  if (maybeRoute) {
-    ctx.body = maybeRoute
-    ctx.status = 200
-    ctx.set('content-type', 'application/json')
-  }
+  const shouldUseVbase = vbaseRoute && catalogRoute.id === 'store.search'
+  ctx.body = shouldUseVbase ? vbaseRoute : catalogRoute
+  ctx.status = 200
+  ctx.set('content-type', 'application/json')
+
+  ctx.set('cache-control', 'no-cache, no-store')
 }
 
 export async function saveCanonical (ctx: Context) {
