@@ -46,6 +46,9 @@ const clients: ClientsConfig<Clients> = {
     sitemapPortal: {
       timeout: THREE_SECONDS_MS,
     },
+    sitemapGC: {
+      timeout: THREE_SECONDS_MS,
+    }
   },
 }
 
