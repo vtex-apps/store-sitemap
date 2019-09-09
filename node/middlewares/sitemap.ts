@@ -5,6 +5,7 @@ import { sitemapClientFromCtx } from '../clients/sitemap'
 import { isCanonical, Route } from '../resources/route'
 
 const TEN_MINUTES_S = 10 * 60
+const BLACK_LIST_TERMS = ['specificationFilter_']
 
 export async function sitemap (ctx: Context) {
   const { vtex: { production }, clients: { canonicals, logger } } = ctx
@@ -38,6 +39,11 @@ export async function sitemap (ctx: Context) {
     const canonicalUrl = $(loc).text()
     if (canonical) {
       routeList.push(new Route(ctx, canonicalUrl))
+    }else{
+      const shouldRemove = BLACK_LIST_TERMS.some((term) => canonicalUrl.indexOf(term) !== -1)
+      if(shouldRemove){
+        $(loc.parentNode).remove()
+      }
     }
   })
 
