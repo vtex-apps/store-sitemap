@@ -1,11 +1,9 @@
-import { Functions } from '@gocommerce/utils'
-
 import { SiteMap } from './base'
 
 export const sitemapClientFromCtx = ({
-  vtex: { account },
+  vtex: { platform },
   clients,
 }: Context): SiteMap =>
-  Functions.isGoCommerceAcc(account)
+  platform === 'gocommerce'
     ? clients.sitemapGC
     : clients.sitemapPortal
