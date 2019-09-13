@@ -9,6 +9,8 @@ interface CleanPathAndQuery {
   query: string
 }
 
+const PLATFORM_GOCOMMERCE = 'gocommerce'
+
 const getCleanPathAndRelevantQuery = (path: string): CleanPathAndQuery => {
   const slashFreePath = path.split('/')[1] || path
   const queryIndex = slashFreePath.indexOf('?')
@@ -66,7 +68,7 @@ export async function getCanonical (ctx: Context) {
   const {clients: {canonicals, catalog, logger}, query: {canonicalPath}, vtex: { platform }} = ctx
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
-  if (platform !== 'gocommerce') {
+  if (platform !== PLATFORM_GOCOMMERCE) {
     const {path: cleanPath, query} = getCleanPathAndRelevantQuery(canonicalPath)
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),
