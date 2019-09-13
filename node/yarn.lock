@@ -216,13 +216,14 @@
     "@types/events" "*"
     "@types/node" "*"
 
-"@vtex/api@^3.24.1":
-  version "3.24.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-3.24.1.tgz#8c0e0de688a5e295089bd4ad0511a5e035323cb1"
-  integrity sha512-tLc2YFwmBfMxN89HLa3ocOjjoED37koM87i32jTos2L4GxZ0/Q/PS42ysjvQ9NBEM3msMwZdhrCXuZcI2m+zjA==
+"@vtex/api@^3.50.2":
+  version "3.50.2"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-3.50.2.tgz#a9b014c22d078527422638496dd952d9a24bd68c"
+  integrity sha512-GH49eUuRn4VpwTuZV9HsoHCoOeirbqrjlrcd/bSuKke1e/pdopCj6qHIcrjVy1uJuWyiJGzQ+yoYeJVaqKRFZQ==
   dependencies:
     "@types/koa" "^2.0.48"
     "@types/koa-compose" "^3.2.3"
+    "@wry/equality" "^0.1.9"
     apollo-datasource "^0.3.1"
     apollo-server-core "^2.4.8"
     apollo-server-errors "^2.2.1"
@@ -230,6 +231,7 @@
     axios "^0.18.0"
     axios-retry "^3.1.2"
     bluebird "^3.5.4"
+    chalk "^2.4.2"
     co-body "^6.0.0"
     cookie "^0.3.1"
     dataloader "^1.4.0"
@@ -250,7 +252,7 @@
     stats-lite vtex/node-stats-lite#dist
     tar-fs "^2.0.0"
 
-"@wry/equality@^0.1.2":
+"@wry/equality@^0.1.2", "@wry/equality@^0.1.9":
   version "0.1.9"
   resolved "https://registry.yarnpkg.com/@wry/equality/-/equality-0.1.9.tgz#b13e18b7a8053c6858aa6c85b54911fb31e3a909"
   integrity sha512-mB6ceGjpMGz1ZTza8HYnrPGos2mC6So4NhS1PtZ8s4Qt0K7fBiIGhpSxUbQmhwcSWE3no+bYxmI2OL6KuXYmoQ==
@@ -638,6 +640,15 @@ chalk@^1.1.3:
 chalk@^2.3.0:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.1.tgz#18c49ab16a037b6eb0152cc83e3471338215b66e"
+  dependencies:
+    ansi-styles "^3.2.1"
+    escape-string-regexp "^1.0.5"
+    supports-color "^5.3.0"
+
+chalk@^2.4.2:
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
+  integrity sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==
   dependencies:
     ansi-styles "^3.2.1"
     escape-string-regexp "^1.0.5"
@@ -1480,7 +1491,7 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
