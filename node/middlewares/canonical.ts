@@ -1,4 +1,3 @@
-import { Functions } from '@gocommerce/utils'
 import { json as parseBody } from 'co-body'
 import { parse as parseQs } from 'querystring'
 import { prop } from 'ramda'
@@ -9,6 +8,8 @@ interface CleanPathAndQuery {
   path: string
   query: string
 }
+
+const PLATFORM_GOCOMMERCE = 'gocommerce'
 
 const getCleanPathAndRelevantQuery = (path: string): CleanPathAndQuery => {
   const slashFreePath = path.split('/')[1] || path
@@ -64,10 +65,10 @@ const routeFromCatalogPageType = (
 }
 
 export async function getCanonical (ctx: Context) {
-  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}} = ctx
+  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}, vtex: { platform }} = ctx
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
-  if (!Functions.isGoCommerceAcc(ctx)) {
+  if (platform !== PLATFORM_GOCOMMERCE) {
     const {path: cleanPath, query} = getCleanPathAndRelevantQuery(canonicalPath)
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),

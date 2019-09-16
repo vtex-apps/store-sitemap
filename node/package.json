@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@gocommerce/utils": "^0.6.0",
     "apollo-datasource-rest": "^0.2.1",
     "apollo-server-caching": "^0.2.1",
     "bluebird": "^3.5.0",
@@ -18,7 +17,7 @@
     "@types/node": "^7.0.8",
     "@types/ramda": "^0.26.8",
     "@types/route-parser": "^0.1.2",
-    "@vtex/api": "^3.24.1",
+    "@vtex/api": "^3.50.2",
     "tslint": "^5.11.0",
     "tslint-config-vtex": "^2.1.0",
     "typescript": "3.5.2"
