@@ -3,6 +3,7 @@ import './globals'
 import { ClientsConfig, LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
+import { cache } from './middlewares/cache'
 import { getCanonical, saveCanonical } from './middlewares/canonical'
 import { customSitemap } from './middlewares/customSitemap'
 import { methodNotAllowed } from './middlewares/methods'
@@ -11,8 +12,17 @@ import { sitemap } from './middlewares/sitemap'
 import { prepareState } from './middlewares/state'
 import { userSitemap } from './middlewares/userSitemap'
 
-const THREE_SECONDS_MS = 3 * 1000
 const ONE_SECOND_MS = 1 * 1000
+const THREE_SECONDS_MS = 3 * 1000
+const FIVE_SECONDS_MS = 5 * 1000
+
+const sitemapXML = method({
+  DEFAULT: methodNotAllowed,
+  GET: [
+    cache,
+    sitemap,
+  ],
+})
 
 const catalogCacheStorage = new LRUCache<string, any>({
   max: 30000,
@@ -35,7 +45,7 @@ const clients: ClientsConfig<Clients> = {
       timeout: THREE_SECONDS_MS,
     },
     default: {
-      timeout: THREE_SECONDS_MS,
+      timeout: FIVE_SECONDS_MS,
     },
     logger: {
       timeout: THREE_SECONDS_MS,
@@ -43,62 +53,41 @@ const clients: ClientsConfig<Clients> = {
     routes: {
       timeout: THREE_SECONDS_MS,
     },
-    sitemapPortal: {
-      timeout: THREE_SECONDS_MS,
-    },
     sitemapGC: {
-      timeout: THREE_SECONDS_MS,
-    }
+      timeout: FIVE_SECONDS_MS,
+    },
+    sitemapPortal: {
+      timeout: FIVE_SECONDS_MS,
+    },
   },
 }
 
 export default new Service<Clients, State>({
   clients,
   routes: {
-    brands: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
+    brands: sitemapXML,
     canonical: method({
       DEFAULT: methodNotAllowed,
-      GET: [prepareState, getCanonical],
+      GET: [cache, prepareState, getCanonical],
       PUT: saveCanonical,
     }),
-    categories: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
-    category: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
+    categories: sitemapXML,
+    category: sitemapXML,
     custom: method({
       DEFAULT: methodNotAllowed,
-      GET: customSitemap,
+      GET: [cache, customSitemap],
     }),
-    departments: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
-    products: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
+    departments: sitemapXML,
+    products: sitemapXML,
     robots: method({
       DEFAULT: methodNotAllowed,
-      GET: robots,
+      GET: [cache, robots],
     }),
-    sitemap: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
-    sitemapXML: method({
-      DEFAULT: methodNotAllowed,
-      GET: sitemap,
-    }),
+    sitemap: sitemapXML,
+    sitemapXML,
     user: method({
       DEFAULT: methodNotAllowed,
-      GET: userSitemap,
+      GET: [cache, userSitemap],
     }),
   },
 })
