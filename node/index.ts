@@ -14,7 +14,7 @@ import { userSitemap } from './middlewares/userSitemap'
 
 const ONE_SECOND_MS = 1 * 1000
 const THREE_SECONDS_MS = 3 * 1000
-const FIVE_SECONDS_MS = 5 * 1000
+const FIFTY_SECONDS_MS = 50 * 1000
 
 const sitemapXML = method({
   DEFAULT: methodNotAllowed,
@@ -45,7 +45,7 @@ const clients: ClientsConfig<Clients> = {
       timeout: THREE_SECONDS_MS,
     },
     default: {
-      timeout: FIVE_SECONDS_MS,
+      timeout: FIFTY_SECONDS_MS,
     },
     logger: {
       timeout: THREE_SECONDS_MS,
@@ -54,10 +54,10 @@ const clients: ClientsConfig<Clients> = {
       timeout: THREE_SECONDS_MS,
     },
     sitemapGC: {
-      timeout: FIVE_SECONDS_MS,
+      timeout: FIFTY_SECONDS_MS,
     },
     sitemapPortal: {
-      timeout: FIVE_SECONDS_MS,
+      timeout: FIFTY_SECONDS_MS,
     },
   },
 }
