@@ -2,6 +2,7 @@ import { IOClients } from '@vtex/api'
 
 import { Canonicals } from './canonicals'
 import { Catalog } from './catalog'
+import { Rewriter } from './rewriter'
 import { Robots } from './robots'
 import { RobotsGC } from './robotsGC'
 import { Routes } from './routes'
@@ -35,5 +36,9 @@ export class Clients extends IOClients {
 
   public get sitemapGC() {
     return this.getOrSet('sitemapGC', SitemapGC)
+  }
+
+  public get rewriter() {
+    return this.getOrSet('rewriter', Rewriter)
   }
 }

@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "gocommerce.sitemap-app": "1.x",
-    "vtex.catalog-api-proxy": "0.x"
+    "vtex.catalog-api-proxy": "0.x",
+    "vtex.rewriter": "1.x"
   },
   "policies": [
     {
@@ -52,6 +53,9 @@
     },
     {
       "name": "vtex.catalog-api-proxy:catalog-proxy"
+    },
+    {
+      "name": "vtex.rewriter:resolve-graphql"
     }
   ],
   "credentialType": "absolute",
