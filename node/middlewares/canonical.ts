@@ -97,7 +97,7 @@ export async function saveCanonical (ctx: Context) {
   const {canonical: canonicalPath} = newRoute
   const path = removeQuerystring(canonicalPath)
   const savedRoute = await canonicals.load(path)
-  if (!isSearch(newRoute) && (!savedRoute || precedence(newRoute, savedRoute))) {
+  if (!isSearch(newRoute) && (!savedRoute || precedence(newRoute, savedRoute as Route))) {
     await canonicals.save(newRoute)
   }
 

@@ -24,6 +24,8 @@ export interface Internal {
   query: JSON | null // {subtype: 'default'}
   bindings: string[] | null // binding where this route is appliable
   endDate: string | null // When the internal route expires
+  imagePath: string | null
+  imageTitle: string | null
 }
 
 export class Rewriter extends AppGraphQLClient {
@@ -66,6 +68,8 @@ export class Rewriter extends AppGraphQLClient {
             from
             type
             endDate
+            imagePath
+            imageTitle
           }
         }
       }
