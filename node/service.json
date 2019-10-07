@@ -41,6 +41,10 @@
       "path": "/sitemap/:path",
       "public": true
     },
+    "newSitemap": {
+      "path": "/newsitemap/:path",
+      "public": true
+    },
     "robots": {
       "path": "/robots.txt",
       "public": true
