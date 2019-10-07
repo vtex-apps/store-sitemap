@@ -32,6 +32,7 @@ const URLEntry = (forwardedHost: string, rootPath: string, route: Internal): str
       <priority>0.4</priority>
     `
   if (route.imagePath && route.imageTitle) {
+    // add image metainfo
     entry = `
     <image:image>
       <image:loc>${route.imagePath}</image:loc>
@@ -51,7 +52,6 @@ export async function sitemap (ctx: Context) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
-  console.log(`forwardedPath: ` + forwardedPath)
 
   const indexArray = await rewriter.routesIndexFiles().then(prop('routeIndexFiles'))
   const indexTable = mergeAll(map((obj: RouteIndexFileEntry) => ({ [obj.fileName]: obj.fileSize }), indexArray))
@@ -61,7 +61,6 @@ export async function sitemap (ctx: Context) {
       xmlMode: true,
     })
     const indexTitles = keys(indexTable) as string[]
-    console.log('these are the entities: ' + JSON.stringify(indexTitles))
     indexTitles.forEach((entity: string) => {
       const indexSize = indexTable[entity]
       if (indexSize <= MAX_ROUTES_PER_REQUEST) {
@@ -80,10 +79,8 @@ export async function sitemap (ctx: Context) {
       xmlMode: true,
     })
     const [entity, startIndex=0, maybeLastIndex] = replace(/^\/newsitemap\/(.+?)\.xml$/, '$1', forwardedPath).split('-')
-    console.log('these are the guys:' + JSON.stringify([entity, startIndex, maybeLastIndex]))
     const lastIndex = maybeLastIndex ? Number(maybeLastIndex) : Number(indexTable[entity]) - 1
     const routes = await rewriter.listInternals(Number(startIndex), lastIndex as number, entity)
-    console.log('these are the routes: ' + JSON.stringify(routes))
     routes.forEach((route: Internal) => $('urlset').append(URLEntry(forwardedHost, rootPath, route)))
   }
 
