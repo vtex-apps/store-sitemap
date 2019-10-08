@@ -62,7 +62,7 @@ export class Rewriter extends AppGraphQLClient {
       .query<Internal[], { from: number; to: number, indexFile: string }>(
         {
           query: `
-      query ListRedirects($from: Int!, $to: Int!, $indexFile: String) {
+      query ListInternals($from: Int!, $to: Int!, $indexFile: String) {
         internal {
           list(from: $from, to: $to, indexFile: $indexFile) {
             from
