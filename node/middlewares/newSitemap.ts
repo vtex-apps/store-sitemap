@@ -66,12 +66,10 @@ export async function sitemap (ctx: Context) {
       if (indexSize <= MAX_ROUTES_PER_REQUEST) {
         $('sitemapindex').append(sitemapIndexEntry(forwardedHost, rootPath, entity))
       } else {
-        const indexBatches = map(
-          x => [x*MAX_ROUTES_PER_REQUEST, (x+1)*MAX_ROUTES_PER_REQUEST-1],
-          range(0, Math.floor(indexSize/MAX_ROUTES_PER_REQUEST))
-        )
-        indexBatches.forEach(([firstIndex, lastIndex]) =>
-          $('sitemapindex').append(sitemapIndexEntry(forwardedHost, rootPath, entity, firstIndex, lastIndex)))
+        range(0, Math.floor(indexSize/MAX_ROUTES_PER_REQUEST)).forEach(x => {
+          const [firstIndex, lastIndex] = [x*MAX_ROUTES_PER_REQUEST, (x+1)*MAX_ROUTES_PER_REQUEST-1]
+          $('sitemapindex').append(sitemapIndexEntry(forwardedHost, rootPath, entity, firstIndex, lastIndex))
+        })
       }
     })
   } else {
