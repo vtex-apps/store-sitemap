@@ -11,14 +11,14 @@ const sitemapIndexEntry = (forwardedHost: string, rootPath: string, entity: stri
   if (firstIndex && lastIndex) {
     return `
       <sitemap>
-        <loc>https://${forwardedHost}${rootPath}/newsitemap/${entity}-${firstIndex}-${lastIndex}.xml</loc>
+        <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${entity}-${firstIndex}-${lastIndex}.xml</loc>
         <lastmod>${currentDate()}</lastmod>
       </sitemap>
     `
   }
   return `
     <sitemap>
-      <loc>https://${forwardedHost}${rootPath}/newsitemap/${entity}.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${entity}.xml</loc>
       <lastmod>${currentDate()}</lastmod>
     </sitemap>
   `
@@ -26,7 +26,7 @@ const sitemapIndexEntry = (forwardedHost: string, rootPath: string, entity: stri
 
 const URLEntry = (forwardedHost: string, rootPath: string, route: Internal): string => {
   let entry = `
-      <loc>https://${forwardedHost}/${rootPath}${route.from}</loc>
+      <loc>https://${forwardedHost}${rootPath}${route.from}</loc>
       <lastmod>${currentDate()}</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.4</priority>
@@ -56,7 +56,7 @@ export async function sitemap (ctx: Context) {
   const indexArray = await rewriter.routesIndexFiles().then(prop('routeIndexFiles'))
   const indexTable = mergeAll(map((obj: RouteIndexFileEntry) => ({ [obj.fileName]: obj.fileSize }), indexArray))
   let $: any
-  if (forwardedPath === '/newsitemap/sitemap.xml') {
+  if (forwardedPath === '/_v/public/newsitemap/sitemap.xml') {
     $ = cheerio.load('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', {
       xmlMode: true,
     })
@@ -76,7 +76,7 @@ export async function sitemap (ctx: Context) {
     $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">', {
       xmlMode: true,
     })
-    const [entity, startIndex=0, maybeLastIndex] = replace(/^\/newsitemap\/(.+?)\.xml$/, '$1', forwardedPath).split('-')
+    const [entity, startIndex=0, maybeLastIndex] = replace(/^\/_v\/public\/newsitemap\/(.+?)\.xml$/, '$1', forwardedPath).split('-')
     const lastIndex = maybeLastIndex ? Number(maybeLastIndex) : Number(indexTable[entity]) - 1
     const routes = await rewriter.listInternals(Number(startIndex), lastIndex as number, entity)
     routes.forEach((route: Internal) => $('urlset').append(URLEntry(forwardedHost, rootPath, route)))
