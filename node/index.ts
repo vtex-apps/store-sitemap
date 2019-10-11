@@ -7,6 +7,7 @@ import { cache } from './middlewares/cache'
 import { getCanonical, saveCanonical } from './middlewares/canonical'
 import { customSitemap } from './middlewares/customSitemap'
 import { methodNotAllowed } from './middlewares/methods'
+import { sitemap as newSitemap } from './middlewares/newSitemap'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { prepareState } from './middlewares/state'
@@ -78,6 +79,7 @@ export default new Service<Clients, State>({
       GET: [cache, customSitemap],
     }),
     departments: sitemapXML,
+    newSitemap,
     products: sitemapXML,
     robots: method({
       DEFAULT: methodNotAllowed,
