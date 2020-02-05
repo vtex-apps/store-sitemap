@@ -7,8 +7,9 @@ import { currentDate } from '../resources/utils'
 const MAX_ROUTES_PER_REQUEST = 100
 const TEN_MINUTES_S = 10 * 60
 
+
 const sitemapIndexEntry = (forwardedHost: string, rootPath: string, entity: string, firstIndex?: number, lastIndex?: number): string => {
-  if (firstIndex && lastIndex) {
+  if (firstIndex != null && lastIndex != null) {
     return `
       <sitemap>
         <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${entity}-${firstIndex}-${lastIndex}.xml</loc>
@@ -44,7 +45,7 @@ const URLEntry = (forwardedHost: string, rootPath: string, route: Internal): str
 }
 
 export async function sitemap (ctx: Context) {
-  const { vtex: { production }, clients: { rewriter } } = ctx
+  const { vtex: { production }, clients: { rewriter, apps } } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
   // Defend against malformed root path. It should always start with `/`.
@@ -61,8 +62,12 @@ export async function sitemap (ctx: Context) {
       xmlMode: true,
     })
     const indexTitles = keys(indexTable) as string[]
-    indexTitles.forEach((entity: string) => {
+    console.log({indexTitles})
+    for (const entity of indexTitles){
       const indexSize = indexTable[entity]
+      if(entity.indexOf('notFoundProduct') !== -1){
+        continue
+      }
       if (indexSize <= MAX_ROUTES_PER_REQUEST) {
         $('sitemapindex').append(sitemapIndexEntry(forwardedHost, rootPath, entity))
       } else {
@@ -71,15 +76,21 @@ export async function sitemap (ctx: Context) {
           $('sitemapindex').append(sitemapIndexEntry(forwardedHost, rootPath, entity, firstIndex, lastIndex))
         })
       }
-    })
+    }
   } else {
     $ = cheerio.load('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">', {
       xmlMode: true,
     })
     const [entity, startIndex=0, maybeLastIndex] = replace(/^\/_v\/public\/newsitemap\/(.+?)\.xml$/, '$1', forwardedPath).split('-')
     const lastIndex = maybeLastIndex ? Number(maybeLastIndex) : Number(indexTable[entity]) - 1
-    const routes = await rewriter.listInternals(Number(startIndex), lastIndex as number, entity)
-    routes.forEach((route: Internal) => $('urlset').append(URLEntry(forwardedHost, rootPath, route)))
+    const today = new Date()
+    const internals = await rewriter.listInternals(Number(startIndex), lastIndex as number, entity)
+    internals.forEach((route: any) => { 
+      if(route.declarer && route.declarer.indexOf('vtex.store') !== -1 && route.endDate && new Date(route.endDate) > today){
+        const urlEntry = URLEntry(forwardedHost, rootPath, route)
+        $('urlset').append(urlEntry)
+      }
+    })
   }
 
   ctx.set('Content-Type', 'text/xml')
