@@ -1,5 +1,4 @@
 import { AppGraphQLClient, InstanceOptions, IOContext } from '@vtex/api'
-import { path } from 'ramda'
 
 export interface Internal {
   from: string
@@ -53,7 +52,7 @@ export class Rewriter extends AppGraphQLClient {
           metric: 'rewriter-get-internals',
         }
       )
-      .then(path(['data', 'internal', 'listInternals'])) as Promise<
+      .then(res => res.data?.internal?.listInternals) as Promise<
       ListInternalsResponse
     >
 }
