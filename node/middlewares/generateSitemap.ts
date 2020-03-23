@@ -1,7 +1,8 @@
-import { startsWith } from 'ramda'
-import { Internal } from 'vtex.rewriter'
-
 /* eslint-disable no-await-in-loop */
+import { startsWith } from 'ramda'
+
+import { Internal } from '../clients/rewriter'
+
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'

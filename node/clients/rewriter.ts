@@ -1,10 +1,23 @@
-import { AppGraphQLClient, InstanceOptions, IOContext } from "@vtex/api";
-import { path } from "ramda";
-import { Internal, ListInternalsResponse } from "vtex.rewriter";
+import { AppGraphQLClient, InstanceOptions, IOContext } from '@vtex/api'
+import { path } from 'ramda'
+
+export interface Internal {
+  from: string
+  type: string
+  id: string
+  endDate?: string
+  imagePath?: string
+  imageTitle?: string
+}
+
+export interface ListInternalsResponse {
+  routes?: Internal[]
+  next?: string
+}
 
 export class Rewriter extends AppGraphQLClient {
   constructor(ctx: IOContext, opts?: InstanceOptions) {
-    super("vtex.rewriter", ctx, opts);
+    super('vtex.rewriter', ctx, opts)
   }
 
   public listInternals = (
@@ -34,13 +47,13 @@ export class Rewriter extends AppGraphQLClient {
         }
       }
       `,
-          variables: { limit, next }
+          variables: { limit, next },
         },
         {
-          metric: "rewriter-get-internals"
+          metric: 'rewriter-get-internals',
         }
       )
-      .then(path(["data", "internal", "listInternals"])) as Promise<
+      .then(path(['data', 'internal', 'listInternals'])) as Promise<
       ListInternalsResponse
-    >;
+    >
 }

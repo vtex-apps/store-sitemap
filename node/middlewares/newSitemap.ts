@@ -1,8 +1,8 @@
 import { VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import { replace } from 'ramda'
-import { Internal } from 'vtex.rewriter'
 
+import { Internal } from '../clients/rewriter'
 import {
   GENERATE_SITEMAP_EVENT,
   SITEMAP_BUCKET,
