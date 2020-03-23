@@ -30,10 +30,9 @@ const generate = async (ctx: Context) => {
 
     const to = from + length
     const entry = `sitemap-${from}-${to}`
-    const index = await vbase.getJSON<string[]>(
+    const { index } = await vbase.getJSON<{ index: string[] }>(
       SITEMAP_BUCKET,
-      SITEMAP_INDEX,
-      true
+      SITEMAP_INDEX
     )
     index.push(entry)
     const lastUpdated = currentDate()
