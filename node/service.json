@@ -45,7 +45,7 @@
       "path": "/_v/public/newsitemap/:path",
       "public": true
     },
-    "sitemapGenerator": {
+    "generateSitemap": {
       "path": "/generate-sitemap",
       "public": false
     },
