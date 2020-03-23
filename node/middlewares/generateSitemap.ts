@@ -36,12 +36,16 @@ const generate = async (ctx: Context) => {
       true
     )
     index.push(entry)
+    const lastUpdated = currentDate()
     await Promise.all([
       vbase.saveJSON(SITEMAP_BUCKET, SITEMAP_INDEX, {
         index,
-        lastUpdated: currentDate(),
+        lastUpdated,
       }),
-      vbase.saveJSON(SITEMAP_BUCKET, entry, list),
+      vbase.saveJSON(SITEMAP_BUCKET, entry, {
+        lastUpdated,
+        routes: list,
+      }),
     ])
     from += length
   } while (next)
