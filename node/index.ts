@@ -1,6 +1,7 @@
 import './globals'
 
 import {
+  Cached,
   ClientsConfig,
   LRUCache,
   method,
@@ -33,6 +34,10 @@ const catalogCacheStorage = new LRUCache<string, any>({
   max: 30000,
 })
 
+const tenantCacheStorage = new LRUCache<string, Cached>({
+  max: 3000,
+})
+
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
@@ -63,6 +68,10 @@ const clients: ClientsConfig<Clients> = {
     },
     sitemapPortal: {
       timeout: FIFTY_SECONDS_MS,
+    },
+    tenant: {
+      memoryCache: tenantCacheStorage,
+      timeout: THREE_SECONDS_MS,
     },
   },
 }
