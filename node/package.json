@@ -29,7 +29,7 @@
     "**/lodash": "^4.17.11"
   },
   "scripts": {
-    "lint": "tsc --noEmit && tslint --fix -c tslint.json './**/*.ts'"
+    "lint": "tsc --noEmit --pretty && tslint -c tslint.json --fix './**/*.ts'"
   },
   "version": "1.10.0"
 }
