@@ -5,6 +5,6 @@ export const notFound = <T>(fallback: T) => (error: any): T => {
   throw error
 }
 
-export const currentDate = ():string => (new Date()).toISOString().split('T')[0]
+export const currentDate = (): string => (new Date()).toISOString().split('T')[0]
 
 export class SitemapNotFound extends Error {}

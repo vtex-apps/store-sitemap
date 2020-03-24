@@ -1,4 +1,5 @@
 import { compose, equals, head, identity, last, split } from 'ramda'
+
 import RouteParser = require('route-parser')
 
 export const routeIdToStoreRoute: any = {
@@ -14,15 +15,19 @@ export const routeIdToStoreRoute: any = {
   },
 }
 
-const removeHost = (fullPath: string, host: string) => fullPath.substring(fullPath.indexOf(host) + host.length)
+const removeHost = (fullPath: string, host: string) =>
+  fullPath.substring(fullPath.indexOf(host) + host.length)
 
-export const isCanonical = (ctx: Context) => routeIdToStoreRoute[ctx.vtex.route.id] != null
+export const isCanonical = (ctx: Context) =>
+  routeIdToStoreRoute[ctx.vtex.route.id] != null
 
-export const isValid = (route: Route) => route.id && route.path && route.canonical && route.pathId
+export const isValid = (route: Route) =>
+  route.id && route.path && route.canonical && route.pathId
 
 const lastSegment = (path: string | undefined) => path && last(split('/', path))
 
-export const isSearch = ({path}: {path?: string}) => lastSegment(path) === 's'
+export const isSearch = ({ path }: { path?: string }) =>
+  lastSegment(path) === 's'
 
 /**
  * Returns true if route r1 takes precedence over route r2
@@ -35,24 +40,27 @@ export const precedence = (r1: Route, r2: Route) => {
 
   if (deepEquals) {
     return false
-  } else if (lastSegmentR1 === lastSegmentR2) {
+  }
+  if (lastSegmentR1 === lastSegmentR2) {
     return true
-  } else if(lastSegmentR1 === 'b') {
+  }
+  if (lastSegmentR1 === 'b') {
     return true
-  } else if(lastSegmentR2 === 'b') {
+  }
+  if (lastSegmentR2 === 'b') {
     return false
-  } else if(lastSegmentR1 === 'd') {
+  }
+  if (lastSegmentR1 === 'd') {
     return true
-  } else if(lastSegmentR2 === 'd') {
+  }
+  if (lastSegmentR2 === 'd') {
     return false
   }
   return true
 }
 
-export const removeQuerystring = (path: string) => compose<string, string[], string>(
-  head,
-  split('?')
-)(path)
+export const removeQuerystring = (path: string) =>
+  compose<string, string[], string>(head, split('?'))(path)
 
 export class Route {
   public static from = (route: Route): Route => ({
@@ -67,10 +75,7 @@ export class Route {
   public canonical: string
   public pathId: string
 
-  constructor(
-    ctx: Context,
-    canonicalPath: string
-  ) {
+  constructor(ctx: Context, canonicalPath: string) {
     const forwardedHost = ctx.get('x-forwarded-host')
     const route = {
       originalSitemapPathToCanonical: identity,

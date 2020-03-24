@@ -1,8 +1,15 @@
-import { json as parseBody } from 'co-body'
 import { parse as parseQs } from 'querystring'
+
+import { json as parseBody } from 'co-body'
 import { prop } from 'ramda'
 
-import { isSearch, precedence, removeQuerystring, Route, routeIdToStoreRoute } from '../resources/route'
+import {
+  isSearch,
+  precedence,
+  removeQuerystring,
+  Route,
+  routeIdToStoreRoute,
+} from '../resources/route'
 
 interface CleanPathAndQuery {
   path: string
@@ -15,7 +22,7 @@ const getCleanPathAndRelevantQuery = (path: string): CleanPathAndQuery => {
   const slashFreePath = path.split('/')[1] || path
   const queryIndex = slashFreePath.indexOf('?')
   if (queryIndex === -1) {
-    return {path: slashFreePath, query: ''}
+    return { path: slashFreePath, query: '' }
   }
 
   const queryString = slashFreePath.substr(queryIndex + 1).toLowerCase()
@@ -27,29 +34,29 @@ const getCleanPathAndRelevantQuery = (path: string): CleanPathAndQuery => {
 }
 
 const routeTypeToStoreRoute: any = {
-  'Brand': (path: string, query: string) => ({
+  Brand: (path: string, query: string) => ({
     ...routeIdToStoreRoute.brands,
     domain: 'store',
     params: {
       p1: path,
     },
-    path:`${path}/b${query}`,
+    path: `${path}/b${query}`,
   }),
-  'Department': (path: string, query: string) => ({
+  Department: (path: string, query: string) => ({
     ...routeIdToStoreRoute.departments,
     domain: 'store',
     params: {
       p1: path,
     },
-    path:`${path}/d${query}`,
+    path: `${path}/d${query}`,
   }),
-  'FullText': (path: string, query: string) => ({
+  FullText: (path: string, query: string) => ({
     domain: 'store',
     id: 'store.search',
     params: {
       p1: path,
     },
-    path:`${path}/s${query}`,
+    path: `${path}/s${query}`,
     pathId: '/:p1/s',
   }),
 }
@@ -60,16 +67,23 @@ const routeFromCatalogPageType = (
   query: string
 ) => {
   const pageType = prop('pageType', catalogPageTypeResponse)
-  const routeGenerator = routeTypeToStoreRoute[pageType] || routeTypeToStoreRoute.FullText
+  const routeGenerator =
+    routeTypeToStoreRoute[pageType] || routeTypeToStoreRoute.FullText
   return routeGenerator(canonicalPath, query)
 }
 
-export async function getCanonical (ctx: Context) {
-  const {clients: {canonicals, catalog, logger}, query: {canonicalPath}, vtex: { platform }} = ctx
+export async function getCanonical(ctx: Context) {
+  const {
+    clients: { canonicals, catalog },
+    query: { canonicalPath },
+    vtex: { platform, logger },
+  } = ctx
   const path = removeQuerystring(canonicalPath)
   let maybeRoute = await canonicals.load(path)
   if (platform !== PLATFORM_GOCOMMERCE) {
-    const {path: cleanPath, query} = getCleanPathAndRelevantQuery(canonicalPath)
+    const { path: cleanPath, query } = getCleanPathAndRelevantQuery(
+      canonicalPath
+    )
     const catalogRoute = routeFromCatalogPageType(
       await catalog.pageType(cleanPath, query),
       cleanPath,
@@ -91,13 +105,18 @@ export async function getCanonical (ctx: Context) {
   }
 }
 
-export async function saveCanonical (ctx: Context) {
-  const {clients: {canonicals}} = ctx
+export async function saveCanonical(ctx: Context) {
+  const {
+    clients: { canonicals },
+  } = ctx
   const newRoute = Route.from(await parseBody(ctx))
-  const {canonical: canonicalPath} = newRoute
+  const { canonical: canonicalPath } = newRoute
   const path = removeQuerystring(canonicalPath)
   const savedRoute = await canonicals.load(path)
-  if (!isSearch(newRoute) && (!savedRoute || precedence(newRoute, savedRoute as Route))) {
+  if (
+    !isSearch(newRoute) &&
+    (!savedRoute || precedence(newRoute, savedRoute as Route))
+  ) {
     await canonicals.save(newRoute)
   }
 
