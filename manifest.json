@@ -31,6 +31,9 @@
       }
     },
     {
+      "name": "colossus-fire-event"
+    },
+    {
       "name": "colossus-write-logs"
     },
     {

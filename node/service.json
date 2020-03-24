@@ -45,6 +45,10 @@
       "path": "/_v/public/newsitemap/:path",
       "public": true
     },
+    "generateSitemap": {
+      "path": "/generate-sitemap",
+      "public": false
+    },
     "robots": {
       "path": "/robots.txt",
       "public": true
@@ -53,6 +57,12 @@
       "path": "/canonical",
       "public": false,
       "smartcache": true
+    }
+  },
+  "events": {
+    "generateSitemap": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate"]
     }
   }
 }

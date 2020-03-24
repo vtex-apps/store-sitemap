@@ -6,6 +6,7 @@ import { Clients } from './clients'
 import { cache } from './middlewares/cache'
 import { getCanonical, saveCanonical } from './middlewares/canonical'
 import { customSitemap } from './middlewares/customSitemap'
+import { generateSitemap } from './middlewares/generateSitemap'
 import { methodNotAllowed } from './middlewares/methods'
 import { sitemap as newSitemap } from './middlewares/newSitemap'
 import { robots } from './middlewares/robots'
@@ -19,10 +20,7 @@ const FIFTY_SECONDS_MS = 50 * 1000
 
 const sitemapXML = method({
   DEFAULT: methodNotAllowed,
-  GET: [
-    cache,
-    sitemap,
-  ],
+  GET: [cache, sitemap],
 })
 
 const catalogCacheStorage = new LRUCache<string, any>({
@@ -65,6 +63,9 @@ const clients: ClientsConfig<Clients> = {
 
 export default new Service<Clients, State>({
   clients,
+  events: {
+    generateSitemap,
+  },
   routes: {
     brands: sitemapXML,
     canonical: method({
@@ -79,6 +80,7 @@ export default new Service<Clients, State>({
       GET: [cache, customSitemap],
     }),
     departments: sitemapXML,
+    generateSitemap,
     newSitemap,
     products: sitemapXML,
     robots: method({
