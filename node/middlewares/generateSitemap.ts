@@ -2,6 +2,7 @@
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
+import { Binding } from '@vtex/api'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -20,12 +21,13 @@ export interface SitemapEntry {
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
-const generate = async (ctx: Context | EventContext) => {
+const generate = async (ctx: Context | EventContext, binding: Binding) => {
   const { vbase, rewriter } = ctx.clients
+  const bucket = `${SITEMAP_BUCKET}_${binding.id}`
   let response
   let from = 0
   let next: Maybe<string>
-  await vbase.saveJSON<SitemapIndex>(SITEMAP_BUCKET, SITEMAP_INDEX, {
+  await vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
     index: [] as string[],
     lastUpdated: '',
   })
@@ -53,11 +55,11 @@ const generate = async (ctx: Context | EventContext) => {
     index.push(entry)
     const lastUpdated = currentDate()
     await Promise.all([
-      vbase.saveJSON<SitemapIndex>(SITEMAP_BUCKET, SITEMAP_INDEX, {
+      vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
         index,
         lastUpdated,
       }),
-      vbase.saveJSON<SitemapEntry>(SITEMAP_BUCKET, entry, {
+      vbase.saveJSON<SitemapEntry>(bucket, entry, {
         lastUpdated,
         routes: list,
       }),
@@ -67,5 +69,8 @@ const generate = async (ctx: Context | EventContext) => {
 }
 
 export async function generateSitemap(ctx: Context | EventContext) {
-  generate(ctx)
+  const { tenant } = ctx.clients
+  const { bindings } = await tenant.info()
+
+  bindings.forEach(binding => generate(ctx, binding))
 }
