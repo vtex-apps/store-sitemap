@@ -109,7 +109,7 @@ export async function saveCanonical(ctx: Context) {
   const {
     clients: { canonicals },
   } = ctx
-  const newRoute = Route.from(await parseBody(ctx))
+  const newRoute = Route.from(await parseBody(ctx as any))
   const { canonical: canonicalPath } = newRoute
   const path = removeQuerystring(canonicalPath)
   const savedRoute = await canonicals.load(path)
