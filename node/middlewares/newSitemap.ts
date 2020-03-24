@@ -53,7 +53,8 @@ const URLEntry = (
 const sitemapIndex = async (
   forwardedHost: string,
   rootPath: string,
-  vbase: VBase
+  vbase: VBase,
+  bucket: string
 ) => {
   const $ = cheerio.load(
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -63,7 +64,7 @@ const sitemapIndex = async (
   )
 
   const indexData = await vbase.getJSON<SitemapIndex>(
-    SITEMAP_BUCKET,
+    bucket,
     SITEMAP_INDEX,
     true
   )
@@ -82,7 +83,7 @@ const sitemapIndex = async (
 
 export async function sitemap(ctx: Context) {
   const {
-    vtex: { production },
+    vtex: { production, binding },
     clients: { vbase, events },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
@@ -92,11 +93,14 @@ export async function sitemap(ctx: Context) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
+  const bucket = binding ? `${SITEMAP_BUCKET}_${binding.id}` : SITEMAP_BUCKET
 
   let $: any
-  if (forwardedPath === '/_v/public/newsitemap/sitemap.xml') {
+  if (
+    forwardedPath.match(/^\/_v\/public\/newsitemap\/((.+?)\/)?sitemap\.xml$/)
+  ) {
     try {
-      $ = await sitemapIndex(forwardedHost, rootPath, vbase)
+      $ = await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
     } catch (err) {
       if (err instanceof SitemapNotFound) {
         ctx.status = 404
@@ -113,12 +117,12 @@ export async function sitemap(ctx: Context) {
       }
     )
     const fileName = replace(
-      /^\/_v\/public\/newsitemap\/(.+?)\.xml$/,
+      /^\/_v\/public\/newsitemap\/((.+?)\/)?(.+?)\.xml$/,
       '$1',
       forwardedPath
     )
     const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
-      SITEMAP_BUCKET,
+      bucket,
       fileName,
       true
     )

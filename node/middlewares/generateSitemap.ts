@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
+import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { Binding } from '@vtex/api'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -21,9 +21,9 @@ export interface SitemapEntry {
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
-const generate = async (ctx: Context | EventContext, binding: Binding) => {
+const generate = async (ctx: Context | EventContext, binding?: Binding) => {
   const { vbase, rewriter } = ctx.clients
-  const bucket = `${SITEMAP_BUCKET}_${binding.id}`
+  const bucket = binding ? `${SITEMAP_BUCKET}_${binding.id}` : SITEMAP_BUCKET
   let response
   let from = 0
   let next: Maybe<string>
@@ -69,8 +69,12 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
 }
 
 export async function generateSitemap(ctx: Context | EventContext) {
-  const { tenant } = ctx.clients
-  const { bindings } = await tenant.info()
+  try {
+    const { tenant } = ctx.clients
+    const { bindings } = await tenant.info()
 
-  bindings.forEach(binding => generate(ctx, binding))
+    bindings.forEach(binding => generate(ctx, binding))
+  } catch {
+    generate(ctx)
+  }
 }
