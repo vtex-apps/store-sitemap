@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio'
 import { replace } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
+import { SitemapNotFound } from '../resources/utils'
 import {
   GENERATE_SITEMAP_EVENT,
   SITEMAP_BUCKET,
@@ -10,6 +11,7 @@ import {
   SitemapEntry,
   SitemapIndex,
 } from './generateSitemap'
+
 
 const ONE_DAY_S = 24 * 60 * 60
 
@@ -67,9 +69,7 @@ const sitemapIndex = async (
   )
 
   if (!indexData) {
-    throw new Error(
-      'Sitemap not generated, you need to do that first <LINK TO DOC>'
-    )
+    throw new SitemapNotFound('Sitemap not found')
   }
   const { index, lastUpdated } = indexData as SitemapIndex
   index.forEach(entry =>
@@ -95,7 +95,16 @@ export async function sitemap(ctx: Context) {
 
   let $: any
   if (forwardedPath === '/_v/public/newsitemap/sitemap.xml') {
-    $ = await sitemapIndex(forwardedHost, rootPath, vbase)
+    try {
+      $ = await sitemapIndex(forwardedHost, rootPath, vbase)
+    } catch (err) {
+      if (err instanceof SitemapNotFound) {
+        ctx.status = 404
+        ctx.body = 'Generating sitemap...'
+        ctx.vtex.logger.error(err.message)
+        return
+      }
+    }
   } else {
     $ = cheerio.load(
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
@@ -115,7 +124,9 @@ export async function sitemap(ctx: Context) {
     )
     if (!maybeRoutesInfo) {
       ctx.status = 404
-      throw new Error('Sitemap entry not found')
+      ctx.body = 'Sitemap entry not found'
+      ctx.vtex.logger.error('Sitemap entry not found')
+      return
     }
     const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
     routes.forEach((route: Internal) => {
