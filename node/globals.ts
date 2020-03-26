@@ -6,6 +6,7 @@ declare global {
 
   interface State {
     platform?: string
+    bindingId?: string
   }
 
   type Context = ServiceContext<Clients, State>

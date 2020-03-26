@@ -13,6 +13,7 @@ import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { prepareState } from './middlewares/state'
 import { userSitemap } from './middlewares/userSitemap'
+import { binding } from './middlewares/binding'
 
 const ONE_SECOND_MS = 1 * 1000
 const THREE_SECONDS_MS = 3 * 1000
@@ -85,7 +86,7 @@ export default new Service<Clients, State>({
     products: sitemapXML,
     robots: method({
       DEFAULT: methodNotAllowed,
-      GET: [cache, robots],
+      GET: [cache, binding, robots],
     }),
     sitemap: sitemapXML,
     sitemapXML,
