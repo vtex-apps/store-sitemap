@@ -28,15 +28,12 @@ export async function robots(ctx: Context) {
   const { vtex: { account, production, platform }, clients, state: { bindingId } } = ctx
   let data = ''
   const robotsDataSource = platform === 'gocommerce' ? clients.robotsGC : clients.robots
-
   if (bindingId) {
     const robotsList = await getRobots(clients.apps, clients.logger)
     const robotData = robotsList.find(robotConfig => robotConfig[bindingId])
-    if (!robotData) {
-      throw Error('No robot config specified for current binding')
+    if (robotData) {
+      data = robotData[bindingId]
     }
-
-    data = robotData[bindingId]
   }
   if (!data || !bindingId) {
     data = await robotsDataSource.fromLegacy(account)
