@@ -43,7 +43,7 @@
       "public": true
     },
     "newSitemap": {
-      "path": "/_v/public/newsitemap/:path",
+      "path": "/_v/public/newsitemap/:lang/:path",
       "public": true
     },
     "generateSitemap": {

@@ -1,9 +1,9 @@
 import { VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import { replace } from 'ramda'
+import RouteParser from 'route-parser'
 
 import { Internal } from '../clients/rewriter'
-import { SitemapNotFound } from '../resources/utils'
+import { SITEMAP_URL, SitemapNotFound } from '../resources/utils'
 import {
   GENERATE_SITEMAP_EVENT,
   SITEMAP_BUCKET,
@@ -17,11 +17,12 @@ const ONE_DAY_S = 24 * 60 * 60
 const sitemapIndexEntry = (
   forwardedHost: string,
   rootPath: string,
+  lang: string,
   entry: string,
   lastUpdated: string
 ) =>
   `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${entry}.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${lang}/${entry}.xml</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 
@@ -53,6 +54,7 @@ const sitemapIndex = async (
   forwardedHost: string,
   rootPath: string,
   vbase: VBase,
+  lang: string,
   bucket: string
 ) => {
   const $ = cheerio.load(
@@ -74,7 +76,7 @@ const sitemapIndex = async (
   const { index, lastUpdated } = indexData as SitemapIndex
   index.forEach(entry =>
     $('sitemapindex').append(
-      sitemapIndexEntry(forwardedHost, rootPath, entry, lastUpdated)
+      sitemapIndexEntry(forwardedHost, rootPath, lang, entry, lastUpdated)
     )
   )
   return $
@@ -82,7 +84,7 @@ const sitemapIndex = async (
 
 export async function sitemap(ctx: Context) {
   const {
-    vtex: { production, binding },
+    vtex: { production },
     clients: { vbase, events },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
@@ -92,17 +94,14 @@ export async function sitemap(ctx: Context) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
-  if (!binding) {
-    throw new Error('Binding should not be empty')
-  }
-  const bucket = `${SITEMAP_BUCKET}_${binding.id}`
+  const sitemapRoute = new RouteParser(SITEMAP_URL)
+  const { lang, path } = sitemapRoute.match(forwardedPath)
+  const bucket = `${SITEMAP_BUCKET}${lang}`
 
   let $: any
-  if (
-    forwardedPath.match(/^\/_v\/public\/newsitemap\/((.+?)\/)?sitemap\.xml$/)
-  ) {
+  if (path === 'sitemap.xml') {
     try {
-      $ = await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
+      $ = await sitemapIndex(forwardedHost, rootPath, vbase, lang, bucket)
     } catch (err) {
       if (err instanceof SitemapNotFound) {
         ctx.status = 404
@@ -118,11 +117,7 @@ export async function sitemap(ctx: Context) {
         xmlMode: true,
       }
     )
-    const fileName = replace(
-      /^\/_v\/public\/newsitemap\/((.+?)\/)?(.+?)\.xml$/,
-      '$1',
-      forwardedPath
-    )
+    const fileName = path.split('.')[0]
     const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
       bucket,
       fileName,
