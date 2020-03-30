@@ -4,6 +4,7 @@
   "timeout": 55,
   "minReplicas": 2,
   "maxReplicas": 10,
+  "workers": 4,
   "routes": {
     "sitemapXML": {
       "path": "/sitemap.xml",
