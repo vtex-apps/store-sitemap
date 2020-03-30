@@ -12,7 +12,6 @@ import {
   SitemapIndex,
 } from './generateSitemap'
 
-
 const ONE_DAY_S = 24 * 60 * 60
 
 const sitemapIndexEntry = (
@@ -93,7 +92,10 @@ export async function sitemap(ctx: Context) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
-  const bucket = binding ? `${SITEMAP_BUCKET}_${binding.id}` : SITEMAP_BUCKET
+  if (!binding) {
+    throw new Error('Binding should not be empty')
+  }
+  const bucket = `${SITEMAP_BUCKET}_${binding.id}`
 
   let $: any
   if (
