@@ -95,7 +95,13 @@ export async function sitemap(ctx: Context) {
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   const sitemapRoute = new RouteParser(SITEMAP_URL)
-  const { lang, path } = sitemapRoute.match(forwardedPath)
+  const sitemapParams = sitemapRoute.match(forwardedPath)
+  if (!sitemapParams) {
+    ctx.status = 404
+    ctx.body = `Sitemap not found the URL must be: ${SITEMAP_URL}`
+    throw new Error(`URL differs from the expected, ${forwardedPath}`)
+  }
+  const { lang, path } = sitemapParams
   const bucket = `${SITEMAP_BUCKET}${lang}`
 
   let $: any
