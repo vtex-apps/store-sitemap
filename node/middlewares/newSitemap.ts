@@ -12,7 +12,6 @@ import {
   SitemapIndex,
 } from './generateSitemap'
 
-
 const ONE_DAY_S = 24 * 60 * 60
 
 const sitemapIndexEntry = (

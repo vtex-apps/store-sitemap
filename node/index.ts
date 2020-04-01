@@ -1,6 +1,12 @@
 import './globals'
 
-import { ClientsConfig, LRUCache, method, Service } from '@vtex/api'
+import {
+  ClientsConfig,
+  LRUCache,
+  method,
+  ParamsContext,
+  Service,
+} from '@vtex/api'
 
 import { Clients } from './clients'
 import { cache } from './middlewares/cache'
@@ -61,7 +67,7 @@ const clients: ClientsConfig<Clients> = {
   },
 }
 
-export default new Service<Clients, State>({
+export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
     generateSitemap,

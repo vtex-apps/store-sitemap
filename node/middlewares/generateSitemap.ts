@@ -20,7 +20,7 @@ export interface SitemapEntry {
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
-const generate = async (ctx: Context) => {
+const generate = async (ctx: Context | EventContext) => {
   const { vbase, rewriter } = ctx.clients
   let response
   let from = 0
@@ -66,8 +66,6 @@ const generate = async (ctx: Context) => {
   } while (next)
 }
 
-export async function generateSitemap(ctx: Context) {
+export async function generateSitemap(ctx: Context | EventContext) {
   generate(ctx)
-
-  ctx.status = 200
 }
