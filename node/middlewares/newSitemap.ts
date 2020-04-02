@@ -1,9 +1,14 @@
-import { VBase } from '@vtex/api'
+import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
 import { Internal } from '../clients/rewriter'
-import { SITEMAP_URL, SitemapNotFound } from '../resources/utils'
+import {
+  currentDate,
+  getStoreBindings,
+  SITEMAP_URL,
+  SitemapNotFound,
+} from '../resources/utils'
 import {
   GENERATE_SITEMAP_EVENT,
   SITEMAP_BUCKET,
@@ -17,12 +22,25 @@ const ONE_DAY_S = 24 * 60 * 60
 const sitemapIndexEntry = (
   forwardedHost: string,
   rootPath: string,
-  lang: string,
   entry: string,
-  lastUpdated: string
+  lastUpdated: string,
+  bindingIdentifier?: string
+) => {
+  const bindingSegment = bindingIdentifier ? `${bindingIdentifier}/` : ''
+  return `<sitemap>
+      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${bindingSegment}${entry}.xml</loc>
+      <lastmod>${lastUpdated}</lastmod>
+    </sitemap>`
+}
+
+const sitemapBindingEntry = (
+  forwardedHost: string,
+  rootPath: string,
+  lastUpdated: string,
+  bindingIdentifier: string
 ) =>
   `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${lang}/${entry}.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${bindingIdentifier}/sitemap.xml</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 
@@ -54,8 +72,8 @@ const sitemapIndex = async (
   forwardedHost: string,
   rootPath: string,
   vbase: VBase,
-  lang: string,
-  bucket: string
+  bucket: string,
+  bindingIdentifier?: string
 ) => {
   const $ = cheerio.load(
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -76,7 +94,35 @@ const sitemapIndex = async (
   const { index, lastUpdated } = indexData as SitemapIndex
   index.forEach(entry =>
     $('sitemapindex').append(
-      sitemapIndexEntry(forwardedHost, rootPath, lang, entry, lastUpdated)
+      sitemapIndexEntry(
+        forwardedHost,
+        rootPath,
+        entry,
+        lastUpdated,
+        bindingIdentifier
+      )
+    )
+  )
+  return $
+}
+
+const sitemapBindingIndex = async (
+  forwardedHost: string,
+  rootPath: string,
+  bindings: Binding[]
+) => {
+  const $ = cheerio.load(
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    {
+      xmlMode: true,
+    }
+  )
+
+  const date = currentDate()
+  const bindingsIdentifiers: string[] = [] // await Promise.all(bindings.map(getIdentifer)
+  bindingsIdentifiers.forEach(bindingIdentifier =>
+    $('sitemapindex').append(
+      sitemapBindingEntry(forwardedHost, rootPath, date, bindingIdentifier)
     )
   )
   return $
@@ -85,7 +131,7 @@ const sitemapIndex = async (
 export async function sitemap(ctx: Context) {
   const {
     vtex: { production },
-    clients: { vbase, events },
+    clients: { vbase, events, tenant },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
@@ -101,13 +147,28 @@ export async function sitemap(ctx: Context) {
     ctx.body = `Sitemap not found the URL must be: ${SITEMAP_URL}`
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
-  const { lang, path } = sitemapParams
-  const bucket = `${SITEMAP_BUCKET}${lang}`
+  const { bindingIdentifier, path } = sitemapParams
+  const bucket = `${SITEMAP_BUCKET}${bindingIdentifier}`
+
+  const storeBindinigs = await getStoreBindings(tenant)
+  const hasMultipleStoreBindings = storeBindinigs.length > 1
 
   let $: any
   if (path === 'sitemap.xml') {
     try {
-      $ = await sitemapIndex(forwardedHost, rootPath, vbase, lang, bucket)
+      if (bindingIdentifier) {
+        $ = await sitemapIndex(
+          forwardedHost,
+          rootPath,
+          vbase,
+          bucket,
+          bindingIdentifier
+        )
+      } else {
+        $ = hasMultipleStoreBindings
+          ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindinigs)
+          : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
+      }
     } catch (err) {
       if (err instanceof SitemapNotFound) {
         ctx.status = 404

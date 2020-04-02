@@ -3,7 +3,7 @@ import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { getBindingIdentifier } from '../resources/utils'
+import { getBindingIdentifier, getStoreBindings } from '../resources/utils'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -23,9 +23,12 @@ export interface SitemapEntry {
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 const generate = async (ctx: Context | EventContext, binding: Binding) => {
-  const { vbase, rewriter } = ctx.clients
-  const bindingIdentifier = getBindingIdentifier(binding)
+  const { vbase, rewriter, tenant } = ctx.clients
+  const storeBindinigs = await getStoreBindings(tenant)
+  const hasMultipleStoreBindings = storeBindinigs.length > 1
+  const bindingIdentifier = hasMultipleStoreBindings ? '' : '' // Get binding identifier from binding.canonicalBaseAddress
   const bucket = `${SITEMAP_BUCKET}${bindingIdentifier}`
+
   let response
   let from = 0
   let next: Maybe<string>
