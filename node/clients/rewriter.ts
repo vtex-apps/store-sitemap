@@ -16,7 +16,7 @@ export interface ListInternalsResponse {
 
 export class Rewriter extends AppGraphQLClient {
   constructor(ctx: IOContext, opts?: InstanceOptions) {
-    super('vtex.rewriter', ctx, opts)
+    super('vtex.rewriter@1.x', ctx, opts)
   }
 
   public listInternals = (

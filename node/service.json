@@ -43,7 +43,11 @@
       "public": true
     },
     "newSitemap": {
-      "path": "/_v/public/newsitemap/(:binidingIdentifier/):path",
+      "path": "/_v/public/newsitemap/:path",
+      "public": true
+    },
+    "newSitemapWithBinding": {
+      "path": "/_v/public/newsitemap/:binidingIdentifier/:path",
       "public": true
     },
     "generateSitemap": {

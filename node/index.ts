@@ -97,6 +97,7 @@ export default new Service<Clients, State, ParamsContext>({
     departments: sitemapXML,
     generateSitemap,
     newSitemap,
+    newSitemapWithBinding: newSitemap,
     products: sitemapXML,
     robots: method({
       DEFAULT: methodNotAllowed,
