@@ -29,7 +29,7 @@ const sitemapIndexEntry = (
 ) => {
   const bindingSegment = bindingIdentifier ? `${bindingIdentifier}/` : ''
   return `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${bindingSegment}${entry}.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/${bindingSegment}sitemap/${entry}.xml</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 }
@@ -41,7 +41,7 @@ const sitemapBindingEntry = (
   bindingIdentifier: string
 ) =>
   `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/_v/public/newsitemap/${bindingIdentifier}/sitemap.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/${bindingIdentifier}sitemap/sitemap.xml</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 

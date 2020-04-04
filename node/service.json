@@ -6,7 +6,11 @@
   "maxReplicas": 10,
   "workers": 4,
   "routes": {
-    "newSitemapWithBinding": {
+    "sitemap": {
+      "path": "/sitemap/:path",
+      "public": true
+    },
+    "sitemapWithBinding": {
       "path": "/:binidingIdentifier/sitemap/:path",
       "public": true
     },
