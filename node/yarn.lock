@@ -146,10 +146,10 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@vtex/api@6.23.1":
-  version "6.23.1"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.23.1.tgz#c69cdd92726c11045f018327bf0350741f7a6ed4"
-  integrity sha512-vhQ4RhWU72If+lG/g79HHutN3Pds48oE//cUu+Jwj9Ug8zyBcRzp5Kekp+eYpvKNS8gTMVetW6+Weq6yAIkRYA==
+"@vtex/api@6.24.3":
+  version "6.24.3"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.24.3.tgz#8b60e8ddf9440528cbec6233d99a818b5afb6bb8"
+  integrity sha512-0DID7jBZfP6awgVieoKW29NcBbqwW4WBupD3WRMUzBjSLN87ucX4srY2XiQD68/ACUtP/9dByt8ijJNTEv03ZA==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"

@@ -13,7 +13,10 @@ import { Clients } from './clients'
 import { cache } from './middlewares/cache'
 import { getCanonical, saveCanonical } from './middlewares/canonical'
 import { customSitemap } from './middlewares/customSitemap'
-import { generateSitemap } from './middlewares/generateSitemap'
+import {
+  generateSitemap,
+  generateSitemapFromREST,
+} from './middlewares/generateSitemap'
 import { methodNotAllowed } from './middlewares/methods'
 import { sitemap as newSitemap } from './middlewares/newSitemap'
 import { robots } from './middlewares/robots'
@@ -95,7 +98,7 @@ export default new Service<Clients, State, ParamsContext>({
       GET: [cache, customSitemap],
     }),
     departments: sitemapXML,
-    generateSitemap,
+    generateSitemap: generateSitemapFromREST,
     newSitemap,
     newSitemapWithBinding: newSitemap,
     products: sitemapXML,

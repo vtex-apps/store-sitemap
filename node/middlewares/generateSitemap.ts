@@ -2,8 +2,8 @@
 import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
-import { getStoreBindings } from '../resources/utils'
 import { Internal } from '../clients/rewriter'
+import { getStoreBindings } from '../resources/utils'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -72,6 +72,11 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
   } while (next)
 }
 
+export async function generateSitemapFromREST(ctx: Context) {
+  await generateSitemap(ctx)
+  ctx.status = 200
+}
+
 export async function generateSitemap(ctx: Context | EventContext) {
   const { tenant } = ctx.clients
   const { bindings } = await tenant.info()
@@ -80,5 +85,4 @@ export async function generateSitemap(ctx: Context | EventContext) {
     binding =>
       binding.targetProduct === 'vtex-storefront' && generate(ctx, binding)
   )
-  ctx.status = 200
 }
