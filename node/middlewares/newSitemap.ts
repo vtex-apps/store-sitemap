@@ -2,7 +2,7 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
-import { BindingResolver } from '../resources/bindings'
+import { BindingResolver, BindingResolver } from '../resources/bindings'
 import { Internal } from '../clients/rewriter'
 import {
   currentDate,
@@ -153,9 +153,9 @@ export async function sitemap(ctx: Context) {
   const storeBindinigs = await getStoreBindings(tenant)
   const hasMultipleStoreBindings = storeBindinigs.length > 1
   const bindingResolver = new BindingResolver()
-  const bindingId = await bindingResolver.discoverId(ctx)
-
-  const bucket = hasMultipleStoreBindings ? `${bindingId}` : `${SITEMAP_BUCKET}`
+  const bucket = hasMultipleStoreBindings
+    ? ((await bindingResolver.discoverId(ctx)) as string)
+    : SITEMAP_BUCKET
 
   let $: any
   if (path === 'sitemap.xml') {
