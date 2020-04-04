@@ -2,6 +2,7 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
+import { BindingResolver } from '../resources/bindings'
 import { Internal } from '../clients/rewriter'
 import {
   currentDate,
@@ -148,10 +149,13 @@ export async function sitemap(ctx: Context) {
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
   const { bindingIdentifier, path } = sitemapParams
-  const bucket = `${SITEMAP_BUCKET}${bindingIdentifier}`
 
   const storeBindinigs = await getStoreBindings(tenant)
   const hasMultipleStoreBindings = storeBindinigs.length > 1
+  const bindingResolver = new BindingResolver()
+  const bindingId = await bindingResolver.discoverId(ctx)
+
+  const bucket = hasMultipleStoreBindings ? `${bindingId}` : `${SITEMAP_BUCKET}`
 
   let $: any
   if (path === 'sitemap.xml') {

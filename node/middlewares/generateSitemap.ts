@@ -2,8 +2,8 @@
 import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
+import { getStoreBindings } from '../resources/utils'
 import { Internal } from '../clients/rewriter'
-import { getBindingIdentifier, getStoreBindings } from '../resources/utils'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -24,10 +24,12 @@ const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 const generate = async (ctx: Context | EventContext, binding: Binding) => {
   const { vbase, rewriter, tenant } = ctx.clients
-  const storeBindinigs = await getStoreBindings(tenant)
-  const hasMultipleStoreBindings = storeBindinigs.length > 1
-  const bindingIdentifier = hasMultipleStoreBindings ? '' : '' // Get binding identifier from binding.canonicalBaseAddress
-  const bucket = `${SITEMAP_BUCKET}${bindingIdentifier}`
+  const hasMultipleStoreBindings = await getStoreBindings(tenant).then(
+    res => res.length > 1
+  )
+  const bucket = hasMultipleStoreBindings
+    ? `${binding.id}`
+    : `${SITEMAP_BUCKET}`
 
   let response
   let from = 0
@@ -78,4 +80,5 @@ export async function generateSitemap(ctx: Context | EventContext) {
     binding =>
       binding.targetProduct === 'vtex-storefront' && generate(ctx, binding)
   )
+  ctx.status = 200
 }
