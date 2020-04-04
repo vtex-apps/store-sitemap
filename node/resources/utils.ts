@@ -1,6 +1,6 @@
 import { TenantClient } from '@vtex/api'
 
-const STORE_PRODUCT = 'vtex.storefront'
+const STORE_PRODUCT = 'vtex-storefront'
 
 export const notFound = <T>(fallback: T) => (error: any): T => {
   if (error.response && error.response.status === 404) {
