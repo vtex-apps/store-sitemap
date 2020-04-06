@@ -14,6 +14,7 @@ export const currentDate = (): string => new Date().toISOString().split('T')[0]
 export class SitemapNotFound extends Error {}
 
 export const SITEMAP_URL = '(/:bindingIdentifier)/sitemap/:path'
+export const SITEMAP_INDEX_URL = '(/:bindingIdentifier)/sitemap.xml'
 
 export const getStoreBindings = async (tenant: TenantClient) => {
   const tenantInfo = await tenant.info()

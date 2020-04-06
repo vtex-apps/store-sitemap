@@ -3,7 +3,7 @@ import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { getStoreBindings, hashString } from '../resources/utils'
+import { getStoreBindings, hashString } from '../utils'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -38,6 +38,7 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
     index: [] as string[],
     lastUpdated: '',
   })
+  let count = 0
   do {
     response = await rewriter.listInternals(LIST_LIMIT, next)
     const length: number = response.routes?.length ?? 0
@@ -69,7 +70,8 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
       }),
     ])
     from += length
-  } while (next)
+    count++
+  } while (count < 2 && next)
 }
 
 export async function generateSitemapFromREST(ctx: Context) {

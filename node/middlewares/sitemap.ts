@@ -2,20 +2,18 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
+import { BindingResolver } from '../resources/bindings'
 import {
-  hashString,
   currentDate,
   getStoreBindings,
-  SITEMAP_URL,
+  hashString,
+  SITEMAP_INDEX_URL,
   SitemapNotFound,
-} from '../resources/utils'
-import { Internal } from '../clients/rewriter'
-import { BindingResolver } from '../resources/bindings'
+} from '../utils'
 import {
   GENERATE_SITEMAP_EVENT,
   SITEMAP_BUCKET,
   SITEMAP_INDEX,
-  SitemapEntry,
   SitemapIndex,
 } from './generateSitemap'
 
@@ -45,30 +43,6 @@ const sitemapBindingEntry = (
       <loc>https://${forwardedHost}${rootPath}/${bindingIdentifier}sitemap/sitemap.xml</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
-
-const URLEntry = (
-  forwardedHost: string,
-  rootPath: string,
-  route: Internal,
-  lastUpdated: string
-): string => {
-  let entry = `
-      <loc>https://${forwardedHost}${rootPath}${route.from}</loc>
-      <lastmod>${lastUpdated}</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.4</priority>
-    `
-  if (route.imagePath && route.imageTitle) {
-    // add image metainfo
-    entry = `
-    <image:image>
-      <image:loc>${route.imagePath}</image:loc>
-      <image:title>${route.imageTitle}</image:title>
-    </image:image>
-    ${entry}`
-  }
-  return `<url>${entry}</url>`
-}
 
 const sitemapIndex = async (
   forwardedHost: string,
@@ -142,14 +116,14 @@ export async function sitemap(ctx: Context) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
-  const sitemapRoute = new RouteParser(SITEMAP_URL)
+  const sitemapRoute = new RouteParser(SITEMAP_INDEX_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
     ctx.status = 404
-    ctx.body = `Sitemap not found the URL must be: ${SITEMAP_URL}`
+    ctx.body = `Sitemap not found the URL must be: ${SITEMAP_INDEX_URL}`
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
-  const { bindingIdentifier, path } = sitemapParams
+  const { bindingIdentifier } = sitemapParams
 
   const storeBindinigs = await getStoreBindings(tenant)
   const hasMultipleStoreBindings = storeBindinigs.length > 1
@@ -159,52 +133,27 @@ export async function sitemap(ctx: Context) {
     : SITEMAP_BUCKET
 
   let $: any
-  if (path === 'sitemap.xml') {
-    try {
-      if (bindingIdentifier) {
-        $ = await sitemapIndex(
-          forwardedHost,
-          rootPath,
-          vbase,
-          bucket,
-          bindingIdentifier
-        )
-      } else {
-        $ = hasMultipleStoreBindings
-          ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindinigs)
-          : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
-      }
-    } catch (err) {
-      if (err instanceof SitemapNotFound) {
-        ctx.status = 404
-        ctx.body = 'Generating sitemap...'
-        ctx.vtex.logger.error(err.message)
-        return
-      }
+  try {
+    if (bindingIdentifier) {
+      $ = await sitemapIndex(
+        forwardedHost,
+        rootPath,
+        vbase,
+        bucket,
+        bindingIdentifier
+      )
+    } else {
+      $ = hasMultipleStoreBindings
+        ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindinigs)
+        : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
     }
-  } else {
-    $ = cheerio.load(
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
-      {
-        xmlMode: true,
-      }
-    )
-    const fileName = path.split('.')[0]
-    const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
-      bucket,
-      fileName,
-      true
-    )
-    if (!maybeRoutesInfo) {
+  } catch (err) {
+    if (err instanceof SitemapNotFound) {
       ctx.status = 404
-      ctx.body = 'Sitemap entry not found'
-      ctx.vtex.logger.error('Sitemap entry not found')
+      ctx.body = 'Generating sitemap...'
+      ctx.vtex.logger.error(err.message)
       return
     }
-    const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-    routes.forEach((route: Internal) => {
-      $('urlset').append(URLEntry(forwardedHost, rootPath, route, lastUpdated))
-    })
   }
 
   ctx.set('Content-Type', 'text/xml')

@@ -18,6 +18,7 @@ import {
 import { methodNotAllowed } from './middlewares/methods'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
+import { sitemapEntry } from './middlewares/sitemapEntry'
 
 const THREE_SECONDS_MS = 3 * 1000
 
@@ -55,6 +56,8 @@ export default new Service<Clients, State, ParamsContext>({
       GET: [cache, robots],
     }),
     sitemap,
+    sitemapEntry,
+    sitemapEntryWithBinding: sitemapEntry,
     sitemapWithBinding: sitemap,
   },
 })
