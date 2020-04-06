@@ -17,11 +17,11 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   // TODO: GET Bindings that match the forwarded-path without workspace?
-  const storeBindings = await getStoreBindings(tenant)
-  const hasMultipleStoreBindings = storeBindings.length > 1
+  const matchingBindings = await getStoreBindings(tenant)
+  const hasMultipleMatchingBindings = matchingBindings.length > 1
   const bindingResolver = new BindingResolver()
 
-  const bucket = hasMultipleStoreBindings
+  const bucket = hasMultipleMatchingBindings
     ? `${hashString((await bindingResolver.discoverId(ctx)) as string)}`
     : SITEMAP_BUCKET
 
@@ -30,9 +30,9 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     bucket,
     forwardedHost,
     forwardedPath,
-    hasMultipleStoreBindings,
+    hasMultipleMatchingBindings,
+    matchingBindings,
     rootPath,
-    storeBindings,
   }
 
   await next()

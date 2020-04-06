@@ -13,9 +13,9 @@ declare global {
     bucket: string
     forwardedHost: string
     forwardedPath: string
-    hasMultipleStoreBindings: boolean
+    hasMultipleMatchingBindings: boolean
     rootPath: string
-    storeBindings: Binding[]
+    matchingBindings: Binding[]
   }
 
   type Context = ServiceContext<Clients, State>

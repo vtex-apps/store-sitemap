@@ -97,8 +97,8 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       forwardedPath,
       bucket,
       rootPath,
-      hasMultipleStoreBindings,
-      storeBindings,
+      hasMultipleMatchingBindings,
+      matchingBindings,
     },
     clients: { vbase },
   } = ctx
@@ -123,8 +123,8 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
         bindingIdentifier
       )
     } else {
-      $ = hasMultipleStoreBindings
-        ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindings)
+      $ = hasMultipleMatchingBindings
+        ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
         : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
     }
   } catch (err) {
