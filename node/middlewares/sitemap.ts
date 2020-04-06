@@ -80,7 +80,7 @@ const sitemapBindingIndex = async (
 
   const date = currentDate()
   bindings.forEach(binding => {
-    const [_, rootPath] = binding.canonicalBaseAddress.split('/')
+    const rootPath = binding.canonicalBaseAddress.split('/')[1]
     $('sitemapindex').append(sitemapBindingEntry(forwardedHost, rootPath, date))
   })
   return $
@@ -88,14 +88,7 @@ const sitemapBindingIndex = async (
 
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
-    state: {
-      forwardedHost,
-      forwardedPath,
-      bucket,
-      rootPath,
-      hasMultipleMatchingBindings,
-      matchingBindings,
-    },
+    state: { forwardedHost, forwardedPath, bucket, rootPath, matchingBindings },
     clients: { vbase },
   } = ctx
 
@@ -119,6 +112,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
         bindingIdentifier
       )
     } else {
+      const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
         ? await sitemapBindingIndex(forwardedHost, matchingBindings)
         : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)

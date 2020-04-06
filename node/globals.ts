@@ -13,7 +13,6 @@ declare global {
     bucket: string
     forwardedHost: string
     forwardedPath: string
-    hasMultipleMatchingBindings: boolean
     rootPath: string
     matchingBindings: Binding[]
   }

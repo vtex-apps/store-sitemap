@@ -1,6 +1,6 @@
 import { BindingResolver } from '../resources/bindings'
 import { getMatchingBindings, hashString } from '../utils'
-import { GENERATE_SITEMAP_EVENT, SITEMAP_BUCKET } from './generateSitemap'
+import { GENERATE_SITEMAP_EVENT } from './generateSitemap'
 
 const ONE_DAY_S = 24 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
@@ -17,19 +17,17 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   const matchingBindings = await getMatchingBindings(forwardedHost, tenant)
-  const hasMultipleMatchingBindings = matchingBindings.length > 1
   const bindingResolver = new BindingResolver()
 
-  const bucket = hasMultipleMatchingBindings
-    ? `${hashString((await bindingResolver.discoverId(ctx)) as string)}`
-    : SITEMAP_BUCKET
+  const bucket = `${hashString(
+    (await bindingResolver.discoverId(ctx)) as string
+  )}`
 
   ctx.state = {
     ...ctx.state,
     bucket,
     forwardedHost,
     forwardedPath,
-    hasMultipleMatchingBindings,
     matchingBindings,
     rootPath,
   }

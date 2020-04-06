@@ -3,9 +3,8 @@ import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { getStoreBindings, hashString } from '../utils'
+import { hashString } from '../utils'
 
-export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
 const LIST_LIMIT = 500
@@ -23,13 +22,8 @@ export interface SitemapEntry {
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 const generate = async (ctx: Context | EventContext, binding: Binding) => {
-  const { vbase, rewriter, tenant } = ctx.clients
-  const hasMultipleStoreBindings = await getStoreBindings(tenant).then(
-    res => res.length > 1
-  )
-  const bucket = hasMultipleStoreBindings
-    ? `${hashString(binding.id)}`
-    : SITEMAP_BUCKET
+  const { vbase, rewriter } = ctx.clients
+  const bucket = `${hashString(binding.id)}`
 
   let response
   let from = 0
