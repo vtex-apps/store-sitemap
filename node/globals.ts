@@ -1,4 +1,5 @@
 import {
+  Binding,
   EventContext as ColossusEventContext,
   RecorderState,
   ServiceContext,
@@ -9,6 +10,12 @@ import { Clients } from './clients'
 declare global {
   interface State extends RecorderState {
     platform?: string
+    bucket: string
+    forwardedHost: string
+    forwardedPath: string
+    hasMultipleStoreBindings: boolean
+    rootPath: string
+    storeBindings: Binding[]
   }
 
   type Context = ServiceContext<Clients, State>

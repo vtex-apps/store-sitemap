@@ -2,15 +2,8 @@ import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
 import { Internal } from '../clients/rewriter'
-import { BindingResolver } from '../resources/bindings'
-import { getStoreBindings, hashString, SITEMAP_URL } from '../utils'
-import {
-  GENERATE_SITEMAP_EVENT,
-  SITEMAP_BUCKET,
-  SitemapEntry,
-} from './generateSitemap'
-
-const ONE_DAY_S = 24 * 60 * 60
+import { SITEMAP_URL } from '../utils'
+import { SitemapEntry } from './generateSitemap'
 
 const URLEntry = (
   forwardedHost: string,
@@ -36,18 +29,11 @@ const URLEntry = (
   return `<url>${entry}</url>`
 }
 
-export async function sitemapEntry(ctx: Context) {
+export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
-    vtex: { production },
-    clients: { vbase, events, tenant },
+    state: { forwardedHost, forwardedPath, bucket, rootPath },
+    clients: { vbase },
   } = ctx
-  const forwardedHost = ctx.get('x-forwarded-host')
-  let rootPath = ctx.get('x-vtex-root-path')
-  // Defend against malformed root path. It should always start with `/`.
-  if (rootPath && !rootPath.startsWith('/')) {
-    rootPath = `/${rootPath}`
-  }
-  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
@@ -55,14 +41,7 @@ export async function sitemapEntry(ctx: Context) {
     ctx.body = `Sitemap not found the URL must be: ${SITEMAP_URL}`
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
-  const { bindingIdentifier, path } = sitemapParams
-
-  const storeBindinigs = await getStoreBindings(tenant)
-  const hasMultipleStoreBindings = storeBindinigs.length > 1
-  const bindingResolver = new BindingResolver()
-  const bucket = hasMultipleStoreBindings
-    ? `${hashString((await bindingResolver.discoverId(ctx)) as string)}`
-    : SITEMAP_BUCKET
+  const { path } = sitemapParams
 
   const $: any = cheerio.load(
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
@@ -87,14 +66,6 @@ export async function sitemapEntry(ctx: Context) {
     $('urlset').append(URLEntry(forwardedHost, rootPath, route, lastUpdated))
   })
 
-  ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
-  ctx.status = 200
-  ctx.set(
-    'cache-control',
-    production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
-  )
-  if (production) {
-    events.sendEvent('', GENERATE_SITEMAP_EVENT)
-  }
+  next()
 }

@@ -2,22 +2,8 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
-import { BindingResolver } from '../resources/bindings'
-import {
-  currentDate,
-  getStoreBindings,
-  hashString,
-  SITEMAP_INDEX_URL,
-  SitemapNotFound,
-} from '../utils'
-import {
-  GENERATE_SITEMAP_EVENT,
-  SITEMAP_BUCKET,
-  SITEMAP_INDEX,
-  SitemapIndex,
-} from './generateSitemap'
-
-const ONE_DAY_S = 24 * 60 * 60
+import { currentDate, SITEMAP_INDEX_URL, SitemapNotFound } from '../utils'
+import { SITEMAP_INDEX, SitemapIndex } from './generateSitemap'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -104,18 +90,19 @@ const sitemapBindingIndex = async (
   return $
 }
 
-export async function sitemap(ctx: Context) {
+export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
-    vtex: { production },
-    clients: { vbase, events, tenant },
+    state: {
+      forwardedHost,
+      forwardedPath,
+      bucket,
+      rootPath,
+      hasMultipleStoreBindings,
+      storeBindings,
+    },
+    clients: { vbase },
   } = ctx
-  const forwardedHost = ctx.get('x-forwarded-host')
-  let rootPath = ctx.get('x-vtex-root-path')
-  // Defend against malformed root path. It should always start with `/`.
-  if (rootPath && !rootPath.startsWith('/')) {
-    rootPath = `/${rootPath}`
-  }
-  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
+
   const sitemapRoute = new RouteParser(SITEMAP_INDEX_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
@@ -124,13 +111,6 @@ export async function sitemap(ctx: Context) {
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
   const { bindingIdentifier } = sitemapParams
-
-  const storeBindinigs = await getStoreBindings(tenant)
-  const hasMultipleStoreBindings = storeBindinigs.length > 1
-  const bindingResolver = new BindingResolver()
-  const bucket = hasMultipleStoreBindings
-    ? `${hashString((await bindingResolver.discoverId(ctx)) as string)}`
-    : SITEMAP_BUCKET
 
   let $: any
   try {
@@ -144,7 +124,7 @@ export async function sitemap(ctx: Context) {
       )
     } else {
       $ = hasMultipleStoreBindings
-        ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindinigs)
+        ? await sitemapBindingIndex(forwardedHost, rootPath, storeBindings)
         : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
     }
   } catch (err) {
@@ -156,14 +136,6 @@ export async function sitemap(ctx: Context) {
     }
   }
 
-  ctx.set('Content-Type', 'text/xml')
   ctx.body = $.xml()
-  ctx.status = 200
-  ctx.set(
-    'cache-control',
-    production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
-  )
-  if (production) {
-    events.sendEvent('', GENERATE_SITEMAP_EVENT)
-  }
+  next()
 }

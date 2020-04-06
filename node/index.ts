@@ -16,6 +16,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateSitemap'
 import { methodNotAllowed } from './middlewares/methods'
+import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
@@ -43,6 +44,8 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
+const sitemapPipeline = [prepare, sitemap]
+const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
@@ -55,9 +58,9 @@ export default new Service<Clients, State, ParamsContext>({
       DEFAULT: methodNotAllowed,
       GET: [cache, robots],
     }),
-    sitemap,
-    sitemapEntry,
-    sitemapEntryWithBinding: sitemapEntry,
-    sitemapWithBinding: sitemap,
+    sitemap: sitemapPipeline,
+    sitemapEntry: sitemapEntryPipeline,
+    sitemapEntryWithBinding: sitemapEntryPipeline,
+    sitemapWithBinding: sitemapPipeline,
   },
 })
