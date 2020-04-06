@@ -67,7 +67,7 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
 }
 
 export async function generateSitemapFromREST(ctx: Context) {
-  await generateSitemap(ctx)
+  generateSitemap(ctx)
   ctx.status = 200
 }
 
