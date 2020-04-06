@@ -1,6 +1,17 @@
-import { TenantClient } from '@vtex/api'
+import { Binding, TenantClient } from '@vtex/api'
+import { any, startsWith } from 'ramda'
 
 const STORE_PRODUCT = 'vtex-storefront'
+
+const validBinding = (path: string) => (binding: Binding) => {
+  const isStoreBinding = binding.targetProduct === STORE_PRODUCT
+  const matchesPath = any(startsWith(path), [
+    binding.canonicalBaseAddress,
+    ...binding.alternateBaseAddresses,
+  ])
+
+  return matchesPath && isStoreBinding
+}
 
 export const notFound = <T>(fallback: T) => (error: any): T => {
   if (error.response && error.response.status === 404) {
@@ -16,11 +27,14 @@ export class SitemapNotFound extends Error {}
 export const SITEMAP_URL = '(/:bindingIdentifier)/sitemap/:path'
 export const SITEMAP_INDEX_URL = '(/:bindingIdentifier)/sitemap.xml'
 
-export const getStoreBindings = async (tenant: TenantClient) => {
+export const getMatchingBindings = async (
+  path: string,
+  tenant: TenantClient
+) => {
+  const pathWithoutWorkspace = path.replace(/^(.)+--/, '')
   const tenantInfo = await tenant.info()
-  return tenantInfo.bindings.filter(
-    binding => binding.targetProduct === STORE_PRODUCT
-  )
+  // gets bindings that matches path
+  return tenantInfo.bindings.filter(validBinding(pathWithoutWorkspace))
 }
 
 export const hashString = (str: string) => {

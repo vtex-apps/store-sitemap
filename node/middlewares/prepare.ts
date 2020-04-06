@@ -1,5 +1,5 @@
 import { BindingResolver } from '../resources/bindings'
-import { getStoreBindings, hashString } from '../utils'
+import { getMatchingBindings, hashString } from '../utils'
 import { GENERATE_SITEMAP_EVENT, SITEMAP_BUCKET } from './generateSitemap'
 
 const ONE_DAY_S = 24 * 60 * 60
@@ -16,8 +16,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     rootPath = `/${rootPath}`
   }
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
-  // TODO: GET Bindings that match the forwarded-path without workspace?
-  const matchingBindings = await getStoreBindings(tenant)
+  const matchingBindings = await getMatchingBindings(forwardedHost, tenant)
   const hasMultipleMatchingBindings = matchingBindings.length > 1
   const bindingResolver = new BindingResolver()
 
