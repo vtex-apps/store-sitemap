@@ -3,7 +3,7 @@ import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { getStoreBindings } from '../resources/utils'
+import { getStoreBindings, hashString } from '../resources/utils'
 
 export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -28,8 +28,8 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
     res => res.length > 1
   )
   const bucket = hasMultipleStoreBindings
-    ? `${binding.id}`
-    : `${SITEMAP_BUCKET}`
+    ? `${hashString(binding.id)}`
+    : SITEMAP_BUCKET
 
   let response
   let from = 0

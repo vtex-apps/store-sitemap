@@ -21,3 +21,13 @@ export const getStoreBindings = async (tenant: TenantClient) => {
     binding => binding.targetProduct === STORE_PRODUCT
   )
 }
+
+export const hashString = (str: string) => {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash += (str.charCodeAt(i) * 31) ** (str.length - i)
+    // tslint:disable-next-line:no-bitwise
+    hash &= hash
+  }
+  return hash
+}
