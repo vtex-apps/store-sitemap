@@ -3,7 +3,7 @@ import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
-import { hashString } from '../utils'
+import { hashString, TENANT_CACHE_TTL_S } from '../utils'
 
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
@@ -73,7 +73,9 @@ export async function generateSitemapFromREST(ctx: Context) {
 
 export async function generateSitemap(ctx: Context | EventContext) {
   const { tenant } = ctx.clients
-  const { bindings } = await tenant.info()
+  const { bindings } = await tenant.info({
+    forceMaxAge: TENANT_CACHE_TTL_S,
+  })
 
   bindings.forEach(
     binding =>

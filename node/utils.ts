@@ -1,6 +1,8 @@
 import { Binding, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 
+export const TENANT_CACHE_TTL_S = 60 * 10
+
 const STORE_PRODUCT = 'vtex-storefront'
 
 const validBinding = (path: string) => (binding: Binding) => {
@@ -31,7 +33,9 @@ export const getMatchingBindings = async (
   tenant: TenantClient
 ) => {
   const pathWithoutWorkspace = path.replace(/^(.)+--/, '')
-  const tenantInfo = await tenant.info()
+  const tenantInfo = await tenant.info({
+    forceMaxAge: TENANT_CACHE_TTL_S,
+  })
   // gets bindings that matches path
   return tenantInfo.bindings.filter(validBinding(pathWithoutWorkspace))
 }

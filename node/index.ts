@@ -31,6 +31,9 @@ const rewriterCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
+metrics.trackCache('rewrite', rewriterCacheStorage)
+metrics.trackCache('tenant', tenantCacheStorage)
+
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
