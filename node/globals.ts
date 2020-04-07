@@ -16,6 +16,7 @@ declare global {
     forwardedPath: string
     rootPath: string
     matchingBindings: Binding[]
+    bindingAddress?: string
   }
 
   type Context = ServiceContext<Clients, State>

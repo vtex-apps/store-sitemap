@@ -1,8 +1,7 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import RouteParser from 'route-parser'
 
-import { currentDate, SITEMAP_INDEX_URL, SitemapNotFound } from '../utils'
+import { currentDate, SitemapNotFound } from '../utils'
 import { SITEMAP_INDEX, SitemapIndex } from './generateSitemap'
 
 const sitemapIndexEntry = (
@@ -10,11 +9,13 @@ const sitemapIndexEntry = (
   rootPath: string,
   entry: string,
   lastUpdated: string,
-  bindingIdentifier?: string
+  bindingAddress?: string
 ) => {
-  const bindingSegment = bindingIdentifier ? `${bindingIdentifier}/` : ''
+  const querystring = bindingAddress
+    ? `?__bindingAddress=${bindingAddress}`
+    : ''
   return `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/${bindingSegment}sitemap/${entry}.xml</loc>
+      <loc>https://${forwardedHost}${rootPath}/sitemap/${entry}.xml${querystring}</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 }
@@ -22,19 +23,24 @@ const sitemapIndexEntry = (
 const sitemapBindingEntry = (
   forwardedHost: string,
   rootPath: string,
-  lastUpdated: string
-) =>
-  `<sitemap>
-      <loc>https://${forwardedHost}/${rootPath}/sitemap.xml</loc>
+  lastUpdated: string,
+  bindingAddress?: string
+) => {
+  const querystring = bindingAddress
+    ? `?__bindingAddress=${bindingAddress}`
+    : ''
+  return `<sitemap>
+      <loc>https://${forwardedHost}/${rootPath}/sitemap.xml${querystring}</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
+}
 
 const sitemapIndex = async (
   forwardedHost: string,
   rootPath: string,
   vbase: VBase,
   bucket: string,
-  bindingIdentifier?: string
+  bindingAddress?: string
 ) => {
   const $ = cheerio.load(
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -60,7 +66,7 @@ const sitemapIndex = async (
         rootPath,
         entry,
         lastUpdated,
-        bindingIdentifier
+        bindingAddress
       )
     )
   )
@@ -69,6 +75,7 @@ const sitemapIndex = async (
 
 const sitemapBindingIndex = async (
   forwardedHost: string,
+  rootPath: string,
   bindings: Binding[]
 ) => {
   const $ = cheerio.load(
@@ -80,41 +87,45 @@ const sitemapBindingIndex = async (
 
   const date = currentDate()
   bindings.forEach(binding => {
-    const rootPath = binding.canonicalBaseAddress.split('/')[1]
-    $('sitemapindex').append(sitemapBindingEntry(forwardedHost, rootPath, date))
+    $('sitemapindex').append(
+      sitemapBindingEntry(
+        forwardedHost,
+        rootPath,
+        date,
+        rootPath ? '' : binding.canonicalBaseAddress
+      )
+    )
   })
   return $
 }
 
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
-    state: { forwardedHost, forwardedPath, bucket, rootPath, matchingBindings },
+    state: {
+      forwardedHost,
+      bucket,
+      rootPath,
+      matchingBindings,
+      bindingAddress,
+    },
     clients: { vbase },
   } = ctx
 
-  const sitemapRoute = new RouteParser(SITEMAP_INDEX_URL)
-  const sitemapParams = sitemapRoute.match(forwardedPath)
-  if (!sitemapParams) {
-    ctx.status = 404
-    ctx.body = `Sitemap not found the URL must be: ${SITEMAP_INDEX_URL}`
-    throw new Error(`URL differs from the expected, ${forwardedPath}`)
-  }
-  const { bindingIdentifier } = sitemapParams
-
+  const hasBindingIdentifier = rootPath || bindingAddress
   let $: any
   try {
-    if (bindingIdentifier) {
+    if (hasBindingIdentifier) {
       $ = await sitemapIndex(
         forwardedHost,
         rootPath,
         vbase,
         bucket,
-        bindingIdentifier
+        bindingAddress
       )
     } else {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
-        ? await sitemapBindingIndex(forwardedHost, matchingBindings)
+        ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
         : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
     }
   } catch (err) {

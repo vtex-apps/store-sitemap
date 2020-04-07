@@ -60,7 +60,5 @@ export default new Service<Clients, State, ParamsContext>({
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
-    sitemapEntryWithBinding: sitemapEntryPipeline,
-    sitemapWithBinding: sitemapPipeline,
   },
 })

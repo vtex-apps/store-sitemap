@@ -10,16 +10,8 @@
       "path": "/sitemap.xml",
       "public": true
     },
-    "sitemapWithBinding": {
-      "path": "/:binidingIdentifier/sitemap.xml",
-      "public": true
-    },
     "sitemapEntry": {
       "path": "/sitemap/:path",
-      "public": true
-    },
-    "sitemapEntryWithBinding": {
-      "path": "/:binidingIdentifier/sitemap/:path",
       "public": true
     },
     "generateSitemap": {

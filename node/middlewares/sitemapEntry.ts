@@ -10,9 +10,13 @@ const URLEntry = (
   rootPath: string,
   route: Internal,
   lastUpdated: string,
-  supportedLocations: string[]
+  supportedLocations: string[],
+  bindingAddress?: string
 ): string => {
-  const loc = `https://${forwardedHost}${rootPath}${route.from}`
+  const querystring = bindingAddress
+    ? `?__bindingAddress=${bindingAddress}`
+    : ''
+  const loc = `https://${forwardedHost}${rootPath}${route.from}${querystring}`
   const localization = supportedLocations
     .map(
       locale =>
@@ -40,7 +44,14 @@ const URLEntry = (
 
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
-    state: { binding, forwardedHost, forwardedPath, bucket, rootPath },
+    state: {
+      binding,
+      bindingAddress,
+      forwardedHost,
+      forwardedPath,
+      bucket,
+      rootPath,
+    },
     clients: { vbase },
   } = ctx
   const sitemapRoute = new RouteParser(SITEMAP_URL)
@@ -78,7 +89,8 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
         rootPath,
         route,
         lastUpdated,
-        binding.supportedLocales
+        binding.supportedLocales,
+        bindingAddress
       )
     )
   })

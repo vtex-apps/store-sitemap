@@ -1,3 +1,5 @@
+import { parse } from 'query-string'
+
 import { BindingResolver } from '../resources/bindings'
 import { getMatchingBindings, hashString } from '../utils'
 import { GENERATE_SITEMAP_EVENT } from './generateSitemap'
@@ -9,13 +11,12 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     clients: { events, tenant },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
-  // TODO :  check rootPath, maybe remove
   let rootPath = ctx.get('x-vtex-root-path')
   // Defend against malformed root path. It should always start with `/`.
   if (rootPath && !rootPath.startsWith('/')) {
     rootPath = `/${rootPath}`
   }
-  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
+  const [forwardedPath, queryString] = ctx.get('x-forwarded-path').split('?')
   const matchingBindings = await getMatchingBindings(forwardedHost, tenant)
   const bindingResolver = new BindingResolver()
   const binding = await bindingResolver.discover(ctx)
@@ -23,11 +24,14 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     throw new Error(`Binding from context not found`)
   }
 
+  const query = parse(queryString)
+
   const bucket = `${hashString(binding.id)}`
 
   ctx.state = {
     ...ctx.state,
     binding,
+    bindingAddress: query.__bindingAddress as string | undefined,
     bucket,
     forwardedHost,
     forwardedPath,

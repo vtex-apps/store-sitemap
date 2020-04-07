@@ -24,8 +24,7 @@ export const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 export class SitemapNotFound extends Error {}
 
-export const SITEMAP_URL = '(/:bindingIdentifier)/sitemap/:path'
-export const SITEMAP_INDEX_URL = '(/:bindingIdentifier)/sitemap.xml'
+export const SITEMAP_URL = '/sitemap/:path'
 
 export const getMatchingBindings = async (
   path: string,
