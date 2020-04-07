@@ -22,7 +22,7 @@ const ensureEndingSlash = (address: string) => {
 export class BindingResolver {
   constructor(private options: BindingDiscoveryOptions = defaultOptions) {}
 
-  public async discoverId(ctx: Context): Promise<string | undefined> {
+  public async discover(ctx: Context): Promise<Binding | null> {
     const {
       clients: { tenant: tenantClient },
       vtex: { account },
@@ -42,7 +42,7 @@ export class BindingResolver {
       ? this.resolve(ctx, tenantInfo.bindings)
       : null
 
-    return matchingBinding?.id
+    return matchingBinding
   }
 
   protected findMatchingBinding(

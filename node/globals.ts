@@ -10,6 +10,7 @@ import { Clients } from './clients'
 declare global {
   interface State extends RecorderState {
     platform?: string
+    binding: Binding
     bucket: string
     forwardedHost: string
     forwardedPath: string

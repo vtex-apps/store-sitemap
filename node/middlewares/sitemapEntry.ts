@@ -9,12 +9,21 @@ const URLEntry = (
   forwardedHost: string,
   rootPath: string,
   route: Internal,
-  lastUpdated: string
+  lastUpdated: string,
+  supportedLocations: string[]
 ): string => {
+  const loc = `https://${forwardedHost}${rootPath}${route.from}`
+  const localization = supportedLocations
+    .map(
+      locale =>
+        `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}?cultureInfo=${locale}"/>`
+    )
+    .join('\n')
   let entry = `
-      <loc>https://${forwardedHost}${rootPath}${route.from}</loc>
+      <loc>${loc}</loc>
+      ${localization}
       <lastmod>${lastUpdated}</lastmod>
-      <changefreq>weekly</changefreq>
+      <changefreq>daily</changefreq>
       <priority>0.4</priority>
     `
   if (route.imagePath && route.imageTitle) {
@@ -31,7 +40,7 @@ const URLEntry = (
 
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
-    state: { forwardedHost, forwardedPath, bucket, rootPath },
+    state: { binding, forwardedHost, forwardedPath, bucket, rootPath },
     clients: { vbase },
   } = ctx
   const sitemapRoute = new RouteParser(SITEMAP_URL)
@@ -44,7 +53,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const { path } = sitemapParams
 
   const $: any = cheerio.load(
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/TR/xhtml11/xhtml11_schema.html">',
     {
       xmlMode: true,
     }
@@ -63,7 +72,15 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   }
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
   routes.forEach((route: Internal) => {
-    $('urlset').append(URLEntry(forwardedHost, rootPath, route, lastUpdated))
+    $('urlset').append(
+      URLEntry(
+        forwardedHost,
+        rootPath,
+        route,
+        lastUpdated,
+        binding.supportedLocales
+      )
+    )
   })
 
   ctx.body = $.xml()

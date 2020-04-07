@@ -18,13 +18,16 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
   const matchingBindings = await getMatchingBindings(forwardedHost, tenant)
   const bindingResolver = new BindingResolver()
+  const binding = await bindingResolver.discover(ctx)
+  if (!binding) {
+    throw new Error(`Binding from context not found`)
+  }
 
-  const bucket = `${hashString(
-    (await bindingResolver.discoverId(ctx)) as string
-  )}`
+  const bucket = `${hashString(binding.id)}`
 
   ctx.state = {
     ...ctx.state,
+    binding,
     bucket,
     forwardedHost,
     forwardedPath,
