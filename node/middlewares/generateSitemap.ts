@@ -7,7 +7,7 @@ import { hashString, TENANT_CACHE_TTL_S } from '../utils'
 
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
-const LIST_LIMIT = 500
+const LIST_LIMIT = 300
 
 export interface SitemapIndex {
   index: string[]

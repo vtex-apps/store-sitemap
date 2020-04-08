@@ -2,7 +2,11 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
 import { currentDate, SitemapNotFound } from '../utils'
-import { SITEMAP_INDEX, SitemapIndex } from './generateSitemap'
+import {
+  SITEMAP_INDEX,
+  SitemapIndex,
+  GENERATE_SITEMAP_EVENT,
+} from './generateSitemap'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -108,7 +112,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       matchingBindings,
       bindingAddress,
     },
-    clients: { vbase },
+    clients: { events, vbase },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
@@ -133,6 +137,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       ctx.status = 404
       ctx.body = 'Generating sitemap...'
       ctx.vtex.logger.error(err.message)
+      events.sendEvent('', GENERATE_SITEMAP_EVENT)
       return
     }
   }
