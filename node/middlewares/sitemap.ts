@@ -3,9 +3,9 @@ import * as cheerio from 'cheerio'
 
 import { currentDate, SitemapNotFound } from '../utils'
 import {
+  GENERATE_SITEMAP_EVENT,
   SITEMAP_INDEX,
   SitemapIndex,
-  GENERATE_SITEMAP_EVENT,
 } from './generateSitemap'
 
 const sitemapIndexEntry = (
@@ -34,7 +34,7 @@ const sitemapBindingEntry = (
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   return `<sitemap>
-      <loc>https://${forwardedHost}/${rootPath}/sitemap.xml${querystring}</loc>
+      <loc>https://${forwardedHost}${rootPath}/sitemap.xml${querystring}</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 }
