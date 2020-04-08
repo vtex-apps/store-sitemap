@@ -20,7 +20,9 @@ const URLEntry = (
   const localization = supportedLocations
     .map(
       locale =>
-        `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}?cultureInfo=${locale}"/>`
+        `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}${
+          querystring ? '&' : '?'
+        }cultureInfo=${locale}"/>`
     )
     .join('\n')
   let entry = `
