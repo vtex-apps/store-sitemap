@@ -1,6 +1,7 @@
 import './globals'
 
 import {
+  Cached,
   ClientsConfig,
   LRUCache,
   method,
@@ -10,62 +11,44 @@ import {
 
 import { Clients } from './clients'
 import { cache } from './middlewares/cache'
-import { getCanonical, saveCanonical } from './middlewares/canonical'
-import { customSitemap } from './middlewares/customSitemap'
-import { generateSitemap } from './middlewares/generateSitemap'
+import {
+  generateSitemap,
+  generateSitemapFromREST,
+} from './middlewares/generateSitemap'
 import { methodNotAllowed } from './middlewares/methods'
-import { sitemap as newSitemap } from './middlewares/newSitemap'
+import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
-import { prepareState } from './middlewares/state'
-import { userSitemap } from './middlewares/userSitemap'
+import { sitemapEntry } from './middlewares/sitemapEntry'
 
-const ONE_SECOND_MS = 1 * 1000
 const THREE_SECONDS_MS = 3 * 1000
-const FIFTY_SECONDS_MS = 50 * 1000
 
-const sitemapXML = method({
-  DEFAULT: methodNotAllowed,
-  GET: [cache, sitemap],
+const tenantCacheStorage = new LRUCache<string, Cached>({
+  max: 3000,
 })
 
-const catalogCacheStorage = new LRUCache<string, any>({
-  max: 30000,
+const rewriterCacheStorage = new LRUCache<string, Cached>({
+  max: 3000,
 })
+
+metrics.trackCache('rewrite', rewriterCacheStorage)
+metrics.trackCache('tenant', tenantCacheStorage)
 
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
-    apps: {
-      retries: 2,
-      timeout: ONE_SECOND_MS,
-    },
-    canonicals: {
-      retries: 2,
-      timeout: ONE_SECOND_MS,
-    },
-    catalog: {
-      memoryCache: catalogCacheStorage,
-      retries: 1,
+    rewriter: {
+      memoryCache: rewriterCacheStorage,
       timeout: THREE_SECONDS_MS,
     },
-    default: {
-      timeout: FIFTY_SECONDS_MS,
-    },
-    logger: {
+    tenant: {
+      memoryCache: tenantCacheStorage,
       timeout: THREE_SECONDS_MS,
-    },
-    routes: {
-      timeout: THREE_SECONDS_MS,
-    },
-    sitemapGC: {
-      timeout: FIFTY_SECONDS_MS,
-    },
-    sitemapPortal: {
-      timeout: FIFTY_SECONDS_MS,
     },
   },
 }
+const sitemapPipeline = [prepare, sitemap]
+const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
@@ -73,31 +56,12 @@ export default new Service<Clients, State, ParamsContext>({
     generateSitemap,
   },
   routes: {
-    brands: sitemapXML,
-    canonical: method({
-      DEFAULT: methodNotAllowed,
-      GET: [cache, prepareState, getCanonical],
-      PUT: saveCanonical,
-    }),
-    categories: sitemapXML,
-    category: sitemapXML,
-    custom: method({
-      DEFAULT: methodNotAllowed,
-      GET: [cache, customSitemap],
-    }),
-    departments: sitemapXML,
-    generateSitemap,
-    newSitemap,
-    products: sitemapXML,
+    generateSitemap: generateSitemapFromREST,
     robots: method({
       DEFAULT: methodNotAllowed,
       GET: [cache, robots],
     }),
-    sitemap: sitemapXML,
-    sitemapXML,
-    user: method({
-      DEFAULT: methodNotAllowed,
-      GET: [cache, userSitemap],
-    }),
+    sitemap: sitemapPipeline,
+    sitemapEntry: sitemapEntryPipeline,
   },
 })

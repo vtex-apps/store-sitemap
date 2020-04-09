@@ -1,72 +1,147 @@
+import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import { forEach } from 'ramda'
 
-import { sitemapClientFromCtx } from '../clients/sitemap'
-import { isCanonical, Route } from '../resources/route'
+import { currentDate, SitemapNotFound } from '../utils'
+import {
+  GENERATE_SITEMAP_EVENT,
+  SITEMAP_INDEX,
+  SitemapIndex,
+} from './generateSitemap'
 
-const TEN_MINUTES_S = 10 * 60
-const BLACK_LIST_TERMS = ['specificationFilter_']
+const sitemapIndexEntry = (
+  forwardedHost: string,
+  rootPath: string,
+  entry: string,
+  lastUpdated: string,
+  bindingAddress?: string
+) => {
+  const querystring = bindingAddress
+    ? `?__bindingAddress=${bindingAddress}`
+    : ''
+  return `<sitemap>
+      <loc>https://${forwardedHost}${rootPath}/sitemap/${entry}.xml${querystring}</loc>
+      <lastmod>${lastUpdated}</lastmod>
+    </sitemap>`
+}
 
-export async function sitemap(ctx: Context) {
-  const {
-    vtex: { production, logger },
-    clients: { canonicals },
-  } = ctx
-  const sitemapClient = sitemapClientFromCtx(ctx)
-  const forwardedHost = ctx.get('x-forwarded-host')
-  let rootPath = ctx.get('x-vtex-root-path')
-  // Defend against malformed root path. It should always start with `/`.
-  if (rootPath && !rootPath.startsWith('/')) {
-    rootPath = `/${rootPath}`
-  }
-  const [forwardedPath] = ctx.get('x-forwarded-path').split('?')
+const sitemapBindingEntry = (
+  forwardedHost: string,
+  rootPath: string,
+  lastUpdated: string,
+  bindingAddress?: string
+) => {
+  const querystring = bindingAddress
+    ? `?__bindingAddress=${bindingAddress}`
+    : ''
+  return `<sitemap>
+      <loc>https://${forwardedHost}${rootPath}/sitemap.xml${querystring}</loc>
+      <lastmod>${lastUpdated}</lastmod>
+    </sitemap>`
+}
 
-  const originalXML = await sitemapClient.fromLegacy(forwardedPath)
-  const normalizedXML = sitemapClient.replaceHost(
-    originalXML,
-    forwardedHost,
-    rootPath
-  )
-
-  const $ = cheerio.load(normalizedXML, {
-    decodeEntities: false,
-    xmlMode: true,
-  })
-
-  if (forwardedPath === '/sitemap.xml') {
-    await sitemapClient.appendSitemapItems($('sitemapindex'), [
-      `https://${forwardedHost}${rootPath}/sitemap/sitemap-custom.xml`,
-      `https://${forwardedHost}${rootPath}/sitemap/sitemap-user-routes.xml`,
-    ])
-  }
-
-  const routeList: Route[] = []
-  const canonical = isCanonical(ctx)
-  $('loc').each((_: any, loc: any) => {
-    const canonicalUrl = $(loc).text()
-    if (canonical) {
-      routeList.push(new Route(ctx, canonicalUrl))
-    } else {
-      const shouldRemove = BLACK_LIST_TERMS.some(
-        term => canonicalUrl.indexOf(term) !== -1
-      )
-      if (shouldRemove) {
-        $(loc.parentNode).remove()
-      }
+const sitemapIndex = async (
+  forwardedHost: string,
+  rootPath: string,
+  vbase: VBase,
+  bucket: string,
+  bindingAddress?: string
+) => {
+  const $ = cheerio.load(
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    {
+      xmlMode: true,
     }
+  )
+
+  const indexData = await vbase.getJSON<SitemapIndex>(
+    bucket,
+    SITEMAP_INDEX,
+    true
+  )
+
+  if (!indexData) {
+    throw new SitemapNotFound('Sitemap not found')
+  }
+  const { index, lastUpdated } = indexData as SitemapIndex
+  index.forEach(entry =>
+    $('sitemapindex').append(
+      sitemapIndexEntry(
+        forwardedHost,
+        rootPath,
+        entry,
+        lastUpdated,
+        bindingAddress
+      )
+    )
+  )
+  return $
+}
+
+const sitemapBindingIndex = async (
+  forwardedHost: string,
+  rootPath: string,
+  bindings: Binding[]
+) => {
+  const $ = cheerio.load(
+    '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    {
+      xmlMode: true,
+    }
+  )
+
+  const date = currentDate()
+  bindings.forEach(binding => {
+    $('sitemapindex').append(
+      sitemapBindingEntry(
+        forwardedHost,
+        rootPath,
+        date,
+        rootPath ? '' : binding.canonicalBaseAddress
+      )
+    )
   })
+  return $
+}
 
-  forEach(
-    (route: Route) =>
-      canonicals.save(route).catch((err: any) => logger.error(err)),
-    routeList
-  )
+export async function sitemap(ctx: Context, next: () => Promise<void>) {
+  const {
+    state: {
+      forwardedHost,
+      bucket,
+      rootPath,
+      matchingBindings,
+      bindingAddress,
+    },
+    clients: { events, vbase },
+  } = ctx
 
-  ctx.set('Content-Type', 'text/xml')
+  const hasBindingIdentifier = rootPath || bindingAddress
+  let $: any
+  try {
+    if (hasBindingIdentifier) {
+      $ = await sitemapIndex(
+        forwardedHost,
+        rootPath,
+        vbase,
+        bucket,
+        bindingAddress
+      )
+    } else {
+      const hasMultipleMatchingBindings = matchingBindings.length > 1
+      $ = hasMultipleMatchingBindings
+        ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
+        : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
+    }
+  } catch (err) {
+    if (err instanceof SitemapNotFound) {
+      ctx.status = 404
+      ctx.body = 'Generating sitemap...'
+      ctx.vtex.logger.error(err.message)
+      events.sendEvent('', GENERATE_SITEMAP_EVENT)
+      return
+    }
+  }
+
   ctx.body = $.xml()
-  ctx.status = 200
-  ctx.set(
-    'cache-control',
-    production ? `public, max-age=${TEN_MINUTES_S}` : 'no-cache'
-  )
+  next()
 }

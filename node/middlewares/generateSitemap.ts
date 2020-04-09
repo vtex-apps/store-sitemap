@@ -1,12 +1,13 @@
 /* eslint-disable no-await-in-loop */
+import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from '../clients/rewriter'
+import { hashString, TENANT_CACHE_TTL_S } from '../utils'
 
-export const SITEMAP_BUCKET = '_SITEMAP_'
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
-const LIST_LIMIT = 500
+const LIST_LIMIT = 300
 
 export interface SitemapIndex {
   index: string[]
@@ -20,12 +21,14 @@ export interface SitemapEntry {
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
-const generate = async (ctx: Context | EventContext) => {
+const generate = async (ctx: Context | EventContext, binding: Binding) => {
   const { vbase, rewriter } = ctx.clients
+  const bucket = `${hashString(binding.id)}`
+
   let response
   let from = 0
   let next: Maybe<string>
-  await vbase.saveJSON<SitemapIndex>(SITEMAP_BUCKET, SITEMAP_INDEX, {
+  await vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
     index: [] as string[],
     lastUpdated: '',
   })
@@ -45,19 +48,16 @@ const generate = async (ctx: Context | EventContext) => {
 
     const to = from + length
     const entry = `sitemap-${from}-${to}`
-    const indexData = await vbase.getJSON<SitemapIndex>(
-      SITEMAP_BUCKET,
-      SITEMAP_INDEX
-    )
+    const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX)
     const { index } = indexData as SitemapIndex
     index.push(entry)
     const lastUpdated = currentDate()
     await Promise.all([
-      vbase.saveJSON<SitemapIndex>(SITEMAP_BUCKET, SITEMAP_INDEX, {
+      vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
         index,
         lastUpdated,
       }),
-      vbase.saveJSON<SitemapEntry>(SITEMAP_BUCKET, entry, {
+      vbase.saveJSON<SitemapEntry>(bucket, entry, {
         lastUpdated,
         routes: list,
       }),
@@ -66,6 +66,19 @@ const generate = async (ctx: Context | EventContext) => {
   } while (next)
 }
 
+export async function generateSitemapFromREST(ctx: Context) {
+  generateSitemap(ctx)
+  ctx.status = 200
+}
+
 export async function generateSitemap(ctx: Context | EventContext) {
-  generate(ctx)
+  const { tenant } = ctx.clients
+  const { bindings } = await tenant.info({
+    forceMaxAge: TENANT_CACHE_TTL_S,
+  })
+
+  bindings.forEach(
+    binding =>
+      binding.targetProduct === 'vtex-storefront' && generate(ctx, binding)
+  )
 }

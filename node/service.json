@@ -6,44 +6,12 @@
   "maxReplicas": 10,
   "workers": 4,
   "routes": {
-    "sitemapXML": {
+    "sitemap": {
       "path": "/sitemap.xml",
       "public": true
     },
-    "departments": {
-      "path": "/sitemap-departments.xml",
-      "public": true
-    },
-    "brands": {
-      "path": "/sitemap-brands.xml",
-      "public": true
-    },
-    "custom": {
-      "path": "/sitemap/sitemap-custom.xml",
-      "public": true
-    },
-    "user": {
-      "path": "/sitemap/sitemap-user-routes.xml",
-      "public": true
-    },
-    "products": {
-      "path": "/sitemap-products-:page:.xml",
-      "public": true
-    },
-    "categories": {
-      "path": "/sitemap-categories.xml",
-      "public": true
-    },
-    "category": {
-      "path": "/sitemap-category-:specifier:.xml",
-      "public": true
-    },
-    "sitemap": {
+    "sitemapEntry": {
       "path": "/sitemap/:path",
-      "public": true
-    },
-    "newSitemap": {
-      "path": "/_v/public/newsitemap/:path",
       "public": true
     },
     "generateSitemap": {
@@ -53,11 +21,6 @@
     "robots": {
       "path": "/robots.txt",
       "public": true
-    },
-    "canonical": {
-      "path": "/canonical",
-      "public": false,
-      "smartcache": true
     }
   },
   "events": {
