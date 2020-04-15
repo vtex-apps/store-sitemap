@@ -1,18 +1,5 @@
 import { AppGraphQLClient, InstanceOptions, IOContext } from '@vtex/api'
-
-export interface Internal {
-  from: string
-  type: string
-  id: string
-  endDate?: string
-  imagePath?: string
-  imageTitle?: string
-}
-
-export interface ListInternalsResponse {
-  routes?: Internal[]
-  next?: string
-}
+import { Internal, ListInternalsResponse } from 'vtex.rewriter'
 
 export class Rewriter extends AppGraphQLClient {
   constructor(ctx: IOContext, opts?: InstanceOptions) {
@@ -34,6 +21,7 @@ export class Rewriter extends AppGraphQLClient {
         internal {
           listInternals(limit: $limit, next: $next) {
             routes {
+              binding
               from
               type
               endDate

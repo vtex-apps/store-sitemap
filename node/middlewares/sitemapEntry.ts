@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
+import { Internal } from 'vtex.rewriter'
 
-import { Internal } from '../clients/rewriter'
 import { SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateSitemap'
 
