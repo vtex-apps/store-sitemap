@@ -2,7 +2,7 @@
 import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
-import { Internal } from '../clients/rewriter'
+import { Internal } from 'vtex.rewriter'
 import { hashString, TENANT_CACHE_TTL_S } from '../utils'
 
 export const SITEMAP_INDEX = 'sitemap_index'
@@ -41,7 +41,7 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
     }
     const list = response.routes.filter(
       internal =>
-        !startsWith('notFound', internal.type) && internal.id !== 'search'
+        !startsWith('notFound', internal.type) && internal.id !== 'search' && internal.binding === binding.id
     )
 
     next = response.next

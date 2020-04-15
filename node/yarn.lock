@@ -146,10 +146,10 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@vtex/api@6.24.3":
-  version "6.24.3"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.24.3.tgz#8b60e8ddf9440528cbec6233d99a818b5afb6bb8"
-  integrity sha512-0DID7jBZfP6awgVieoKW29NcBbqwW4WBupD3WRMUzBjSLN87ucX4srY2XiQD68/ACUtP/9dByt8ijJNTEv03ZA==
+"@vtex/api@6.24.4":
+  version "6.24.4"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.24.4.tgz#e39c5c87c01fe287ce0aaac9acc7c7acd224f7a1"
+  integrity sha512-w/wSmNQjvG0CQBGic/KPGD4l+yGIam2LMORlubt68bb6qA5j/21Fijfy8N9HFEwo+rmQAYnutMJGVzSQUlBh9A==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -1907,7 +1907,7 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-stats-lite@vtex/node-stats-lite#dist:
+"stats-lite@github:vtex/node-stats-lite#dist":
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
@@ -2187,9 +2187,9 @@ vary@^1.1.2:
   version "0.0.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.7.2/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
-"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.31.0/public/@types/vtex.rewriter":
-  version "1.31.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.31.0/public/@types/vtex.rewriter#e6c7cf762a2fac658b54942f47d39d50e262e0cd"
+"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.37.0/public/@types/vtex.rewriter":
+  version "1.37.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.37.0/public/@types/vtex.rewriter#792c4084b600039764c117afaa98c9814b170d85"
 
 wide-align@^1.1.0:
   version "1.1.3"
