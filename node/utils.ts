@@ -47,5 +47,5 @@ export const hashString = (str: string) => {
     // tslint:disable-next-line:no-bitwise
     hash &= hash
   }
-  return hash
+  return hash.toString()
 }
