@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import { Binding } from '@vtex/api'
 import { startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
@@ -21,17 +20,13 @@ export interface SitemapEntry {
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
-const generate = async (ctx: Context | EventContext, binding: Binding) => {
+const generate = async (ctx: Context | EventContext) => {
   const { vbase, rewriter } = ctx.clients
-  const bucket = `${hashString(binding.id)}`
 
   let response
-  let from = 0
   let next: Maybe<string>
-  await vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
-    index: [] as string[],
-    lastUpdated: '',
-  })
+  let count = 0
+
   do {
     response = await rewriter.listInternals(LIST_LIMIT, next)
     const length: number = response.routes?.length ?? 0
@@ -39,30 +34,45 @@ const generate = async (ctx: Context | EventContext, binding: Binding) => {
       next = response.next
       continue
     }
-    const list = response.routes.filter(
-      internal =>
-        !startsWith('notFound', internal.type) && internal.id !== 'search' && internal.binding === binding.id
+    const routesByBinding = response.routes.reduce(
+      (acc, internal) => {
+        if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
+          const { binding } = internal
+          const bindingRoutes = acc[binding] || []
+          acc[binding] = bindingRoutes.concat(internal)
+        }
+        return acc
+      },
+      {} as Record<string, Internal[]>
     )
 
-    next = response.next
+    await Promise.all(
+      Object.keys(routesByBinding).map(async bindingId => {
+        const bucket = hashString(bindingId)
+        const routes = routesByBinding[bindingId]
 
-    const to = from + length
-    const entry = `sitemap-${from}-${to}`
-    const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX)
-    const { index } = indexData as SitemapIndex
-    index.push(entry)
-    const lastUpdated = currentDate()
-    await Promise.all([
-      vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
-        index,
-        lastUpdated,
-      }),
-      vbase.saveJSON<SitemapEntry>(bucket, entry, {
-        lastUpdated,
-        routes: list,
-      }),
-    ])
-    from += length
+
+        const entry = `sitemap-${count}`
+        const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX, true)
+        const { index } = indexData as SitemapIndex
+        index.push(entry)
+        const lastUpdated = currentDate()
+        await Promise.all([
+          vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
+            index,
+            lastUpdated,
+          }),
+          vbase.saveJSON<SitemapEntry>(bucket, entry, {
+            lastUpdated,
+            routes,
+          }),
+        ])
+      })
+    )
+
+
+    count++
+    next = response.next
   } while (next)
 }
 
@@ -72,13 +82,16 @@ export async function generateSitemapFromREST(ctx: Context) {
 }
 
 export async function generateSitemap(ctx: Context | EventContext) {
-  const { tenant } = ctx.clients
+  const { tenant, vbase } = ctx.clients
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
 
-  bindings.forEach(
-    binding =>
-      binding.targetProduct === 'vtex-storefront' && generate(ctx, binding)
-  )
+  await Promise.all(bindings.map(
+    binding => vbase.saveJSON<SitemapIndex>(hashString(binding.id), SITEMAP_INDEX, {
+      index: [] as string[],
+      lastUpdated: '',
+    })
+  ))
+  generate(ctx)
 }
