@@ -48,7 +48,7 @@ const URLEntry = (
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
-      binding: stateBinding,
+      binding,
       bindingAddress,
       forwardedHost,
       forwardedPath,
@@ -57,8 +57,11 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     },
     clients: { vbase },
   } = ctx
+
+  if (!binding) {
+    throw new Error(`Binding from context not found`)
+  }
   
-  const binding = stateBinding as Binding
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
