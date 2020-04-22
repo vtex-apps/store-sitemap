@@ -1,4 +1,3 @@
-import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 import { Internal } from 'vtex.rewriter'
@@ -61,7 +60,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   if (!binding) {
     throw new Error(`Binding from context not found`)
   }
-  
+
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
