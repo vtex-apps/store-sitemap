@@ -10,6 +10,7 @@ import {
 } from '@vtex/api'
 
 import { Clients } from './clients'
+import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
 import {
   generateSitemap,
@@ -59,7 +60,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateSitemap: generateSitemapFromREST,
     robots: method({
       DEFAULT: methodNotAllowed,
-      GET: [cache, robots],
+      GET: [cache, binding, robots],
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
