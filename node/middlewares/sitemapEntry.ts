@@ -1,3 +1,4 @@
+import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 import { Internal } from 'vtex.rewriter'
@@ -47,7 +48,7 @@ const URLEntry = (
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
-      binding,
+      binding: stateBinding,
       bindingAddress,
       forwardedHost,
       forwardedPath,
@@ -56,6 +57,8 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     },
     clients: { vbase },
   } = ctx
+  
+  const binding = stateBinding as Binding
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
   if (!sitemapParams) {
