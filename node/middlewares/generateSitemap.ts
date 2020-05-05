@@ -28,15 +28,9 @@ const generate = async (ctx: Context | EventContext) => {
 
   let response
   let next: Maybe<string>
-
   let count = 0
-  let brands = 0
-  let productRoutes = 0
-  let userRoutes = 0
-  let categories = 0
-  let departments = 0
-  let subcategories = 0
-  let rest = 0
+
+  const report: Record<string, number> = {}
 
   do {
     response = await rewriter.listInternals(LIST_LIMIT, next)
@@ -48,29 +42,7 @@ const generate = async (ctx: Context | EventContext) => {
     const routesByBinding = response.routes.reduce(
       (acc, internal) => {
         if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
-          switch (internal.type) {
-            case 'product':
-              productRoutes++
-              break
-            case 'department':
-              departments++
-              break
-            case 'category':
-              categories++
-              break
-            case 'subcategory':
-              subcategories++
-              break
-            case 'userRoute':
-              userRoutes++
-              break
-            case 'brand':
-              brands++
-              break
-            default:
-              rest++
-              break
-          }
+          report[internal.type] = (report[internal.type] || 0) + 1
           const { binding } = internal
           const bindingRoutes = acc[binding] || []
           acc[binding] = bindingRoutes.concat(internal)
@@ -110,14 +82,8 @@ const generate = async (ctx: Context | EventContext) => {
     await sleep(300)
   } while (next)
   ctx.vtex.logger.info({
-    brands,
-    categories,
-    departments,
     message: 'Sitemap complete',
-    productRoutes,
-    rest,
-    subcategories,
-    userRoutes,
+    report,
   })
 }
 
