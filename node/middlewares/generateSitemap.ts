@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { startsWith } from 'ramda'
+import { path, startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
 import { hashString, TENANT_CACHE_TTL_S } from '../utils'
@@ -44,38 +44,43 @@ const generate = async (ctx: Context | EventContext) => {
         if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
           report[internal.type] = (report[internal.type] || 0) + 1
           const { binding } = internal
-          const bindingRoutes = acc[binding] || []
-          acc[binding] = bindingRoutes.concat(internal)
+          const routes: Internal[] = path([binding, internal.type], acc) || []
+          acc[binding] = {
+            ...acc[binding] || {},
+            [internal.type]: routes.concat(internal),
+          }
         }
         return acc
       },
-      {} as Record<string, Internal[]>
+      {} as Record<string, Record<string,Internal[]>>
     )
 
     await Promise.all(
       Object.keys(routesByBinding).map(async bindingId => {
         const bucket = hashString(bindingId)
-        const routes = routesByBinding[bindingId]
-
-
-        const entry = `sitemap-${count}`
-        const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX, true)
-        const { index } = indexData as SitemapIndex
-        index.push(entry)
-        const lastUpdated = currentDate()
-        await Promise.all([
-          vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
-            index,
-            lastUpdated,
-          }),
-          vbase.saveJSON<SitemapEntry>(bucket, entry, {
-            lastUpdated,
-            routes,
-          }),
-        ])
+        const groupedRoutes = routesByBinding[bindingId]
+        await Promise.all(
+          Object.keys(groupedRoutes).map(async entityType => {
+            const routes = routesByBinding[bindingId][entityType]
+            const entry = `${entityType}-${count}`
+            const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX, true)
+            const { index } = indexData as SitemapIndex
+            index.push(entry)
+            const lastUpdated = currentDate()
+            await Promise.all([
+              vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
+                index,
+                lastUpdated,
+              }),
+              vbase.saveJSON<SitemapEntry>(bucket, entry, {
+                lastUpdated,
+                routes,
+              }),
+            ])
+          })
+        )
       })
     )
-
 
     count++
     next = response.next
