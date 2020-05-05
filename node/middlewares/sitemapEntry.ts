@@ -17,14 +17,16 @@ const URLEntry = (
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.from}${querystring}`
-  const localization = supportedLocations
-    .map(
-      locale =>
-        `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}${
+  const localization = supportedLocations.length > 1
+    ? supportedLocations
+      .map(
+        locale =>
+          `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}${
           querystring ? '&' : '?'
-        }cultureInfo=${locale}"/>`
-    )
-    .join('\n')
+          }cultureInfo=${locale}"/>`
+      )
+      .join('\n')
+    : ''
   let entry = `
       <loc>${loc}</loc>
       ${localization}
