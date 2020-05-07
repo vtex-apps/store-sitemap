@@ -1,14 +1,15 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { getMatchingBindings, hashString } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getMatchingBindings, hashString } from '../utils'
 import { GENERATE_SITEMAP_EVENT } from './generateSitemap'
 
-const ONE_DAY_S = 24 * 60 * 60
+// const ONE_DAY_S = 24 * 60 * 60
+const TWO_HOURS = 2 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
     vtex: { production },
-    clients: { events, tenant },
+    clients: { vbase, events, tenant },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
@@ -26,7 +27,12 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const query = parse(queryString)
 
-  const bucket = `${hashString(binding.id)}`
+  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE)
+    .catch(err => {
+      events.sendEvent('', GENERATE_SITEMAP_EVENT)
+      throw err
+    })
+  const bucket = `${productionPrefix}_${hashString(binding.id)}`
 
   ctx.state = {
     ...ctx.state,
@@ -45,7 +51,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   ctx.status = 200
   ctx.set(
     'cache-control',
-    production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
+    production ? `public, max-age=${TWO_HOURS}` : 'no-cache'
   )
   if (production) {
     events.sendEvent('', GENERATE_SITEMAP_EVENT)

@@ -1,6 +1,9 @@
 import { Binding, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 
+export const CONFIG_BUCKET = 'configuration'
+export const CONFIG_FILE = 'config.json'
+
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 const STORE_PRODUCT = 'vtex-storefront'
