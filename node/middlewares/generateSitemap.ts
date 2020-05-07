@@ -2,7 +2,7 @@
 import { path, startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
-import { hashString, TENANT_CACHE_TTL_S } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../utils'
 
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
@@ -18,13 +18,19 @@ export interface SitemapEntry {
   lastUpdated: string
 }
 
+const DEFAULT_CONFIG: Config = {
+  generationPrefix: 'B',
+  productionPrefix: 'A',
+}
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 const generate = async (ctx: Context | EventContext) => {
-  const { vbase, rewriter } = ctx.clients
+  const { state: { config }, clients: { vbase, rewriter } } = ctx
+
+  const {generationPrefix, productionPrefix } = config!
 
   let response
   let next: Maybe<string>
@@ -57,7 +63,7 @@ const generate = async (ctx: Context | EventContext) => {
 
     await Promise.all(
       Object.keys(routesByBinding).map(async bindingId => {
-        const bucket = hashString(bindingId)
+        const bucket = getBucket(generationPrefix, hashString(bindingId))
         const groupedRoutes = routesByBinding[bindingId]
         await Promise.all(
           Object.keys(groupedRoutes).map(async entityType => {
@@ -86,6 +92,10 @@ const generate = async (ctx: Context | EventContext) => {
     next = response.next
     await sleep(300)
   } while (next)
+  await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
+    generationPrefix: productionPrefix,
+    productionPrefix: generationPrefix,
+  })
   ctx.vtex.logger.info({
     message: 'Sitemap complete',
     report,
@@ -103,8 +113,10 @@ export async function generateSitemap(ctx: Context | EventContext) {
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
 
+  const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  ctx.state.config = config
   await Promise.all(bindings.map(
-    binding => vbase.saveJSON<SitemapIndex>(hashString(binding.id), SITEMAP_INDEX, {
+    binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), SITEMAP_INDEX, {
       index: [] as string[],
       lastUpdated: '',
     })

@@ -17,6 +17,7 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
+    config?: Config
   }
 
   type Context = ServiceContext<Clients, State>
@@ -29,5 +30,10 @@ declare global {
 
   interface CatalogPageTypeResponse {
     pageType: string
+  }
+
+  interface Config {
+    productionPrefix: string
+    generationPrefix: string
   }
 }
