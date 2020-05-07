@@ -52,3 +52,5 @@ export const hashString = (str: string) => {
   }
   return hash.toString()
 }
+
+export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`

@@ -1,7 +1,7 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { CONFIG_BUCKET, CONFIG_FILE, getMatchingBindings, hashString } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString } from '../utils'
 import { GENERATE_SITEMAP_EVENT } from './generateSitemap'
 
 // const ONE_DAY_S = 24 * 60 * 60
@@ -32,7 +32,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
       events.sendEvent('', GENERATE_SITEMAP_EVENT)
       throw err
     })
-  const bucket = `${productionPrefix}_${hashString(binding.id)}`
+  const bucket = getBucket(productionPrefix, hashString(binding.id))
 
   ctx.state = {
     ...ctx.state,

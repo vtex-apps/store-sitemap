@@ -2,7 +2,7 @@
 import { path, startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
-import { CONFIG_BUCKET, CONFIG_FILE, hashString, TENANT_CACHE_TTL_S } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../utils'
 
 export const SITEMAP_INDEX = 'sitemap_index'
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
@@ -63,7 +63,7 @@ const generate = async (ctx: Context | EventContext) => {
 
     await Promise.all(
       Object.keys(routesByBinding).map(async bindingId => {
-        const bucket = `${generationPrefix}_${hashString(bindingId)}`
+        const bucket = getBucket(generationPrefix, hashString(bindingId))
         const groupedRoutes = routesByBinding[bindingId]
         await Promise.all(
           Object.keys(groupedRoutes).map(async entityType => {
@@ -116,7 +116,7 @@ export async function generateSitemap(ctx: Context | EventContext) {
   const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   ctx.state.config = config
   await Promise.all(bindings.map(
-    binding => vbase.saveJSON<SitemapIndex>(`${config.generationPrefix}_${hashString(binding.id)}`, SITEMAP_INDEX, {
+    binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), SITEMAP_INDEX, {
       index: [] as string[],
       lastUpdated: '',
     })
