@@ -23,7 +23,7 @@ import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 
 const THREE_SECONDS_MS = 3 * 1000
-const SIX_SECOND_MS = 6 * 1000
+const EIGHT_SECOND_MS = 8 * 1000
 
 const tenantCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
@@ -39,13 +39,16 @@ metrics.trackCache('tenant', tenantCacheStorage)
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
+    default: {
+      retries: 1,
+      timeout: THREE_SECONDS_MS,
+    },
     rewriter: {
       memoryCache: rewriterCacheStorage,
-      timeout: SIX_SECOND_MS,
+      timeout: EIGHT_SECOND_MS,
     },
     tenant: {
       memoryCache: tenantCacheStorage,
-      timeout: THREE_SECONDS_MS,
     },
   },
 }
