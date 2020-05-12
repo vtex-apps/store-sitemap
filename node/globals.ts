@@ -8,7 +8,7 @@ import {
 import { Clients } from './clients'
 
 declare global {
-  interface State extends RecorderState {
+  interface State extends RecorderState, SitemapGenerationEvent {
     platform?: string
     binding: Binding | null
     bucket: string
@@ -35,5 +35,11 @@ declare global {
   interface Config {
     productionPrefix: string
     generationPrefix: string
+  }
+
+  interface SitemapGenerationEvent {
+    next: Maybe<string>
+    report: Record<string, number>
+    count: number
   }
 }
