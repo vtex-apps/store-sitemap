@@ -121,7 +121,6 @@ const generate = async (ctx: EventContext) => {
   )
 
   if (responseNext) {
-    // Ne middleware
     const payload: SitemapGenerationEvent = {
       count: count + 1,
       next: responseNext,
