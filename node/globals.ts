@@ -17,7 +17,6 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
-    config?: Config
   }
 
   type Context = ServiceContext<Clients, State>

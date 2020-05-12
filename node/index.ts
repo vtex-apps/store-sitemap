@@ -33,8 +33,13 @@ const rewriterCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
+const vbaseCacheStorage = new LRUCache<string, Cached>({
+  max: 3000,
+})
+
 metrics.trackCache('rewrite', rewriterCacheStorage)
 metrics.trackCache('tenant', tenantCacheStorage)
+metrics.trackCache('vbase', vbaseCacheStorage)
 
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
@@ -49,6 +54,9 @@ const clients: ClientsConfig<Clients> = {
     },
     tenant: {
       memoryCache: tenantCacheStorage,
+    },
+    vbase: {
+      memoryCache: vbaseCacheStorage,
     },
   },
 }

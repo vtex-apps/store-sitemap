@@ -41,7 +41,6 @@ const initializeSitemap = async (ctx: EventContext) => {
   })
 
   const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
-  ctx.state.config = config
   await Promise.all(bindings.map(
     binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), SITEMAP_INDEX, {
       index: [] as string[],
@@ -51,11 +50,11 @@ const initializeSitemap = async (ctx: EventContext) => {
 }
 
 const generate = async (ctx: EventContext) => {
-  const { state: { config }, clients: { events,vbase, rewriter }, body, vtex: { logger } } = ctx
-  if (!body.count) {
+  if (!ctx.body.count) {
     await initializeSitemap(ctx)
   }
-  const {generationPrefix, productionPrefix } = config!
+  const { clients: { events,vbase, rewriter }, body, vtex: { logger } } = ctx
+  const {generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
     count,
     next,
@@ -122,6 +121,7 @@ const generate = async (ctx: EventContext) => {
   )
 
   if (responseNext) {
+    // Ne middleware
     const payload: SitemapGenerationEvent = {
       count: count + 1,
       next: responseNext,
