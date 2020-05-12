@@ -78,8 +78,8 @@ const generate = async (ctx: EventContext) => {
 
   const routesByBinding = routes.reduce(
     (acc, internal) => {
+      report[internal.type] = (report[internal.type] || 0) + 1
       if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
-        report[internal.type] = (report[internal.type] || 0) + 1
         const { binding } = internal
         const bindingRoutes: Internal[] = path([binding, internal.type], acc) || []
         acc[binding] = {
