@@ -21,6 +21,10 @@
     "robots": {
       "path": "/robots.txt",
       "public": true
+    },
+    "meta": {
+      "path": "/meta",
+      "public": false
     }
   },
   "events": {

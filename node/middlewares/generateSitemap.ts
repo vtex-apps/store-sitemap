@@ -53,7 +53,7 @@ const generate = async (ctx: EventContext) => {
   if (!ctx.body.count) {
     await initializeSitemap(ctx)
   }
-  const { clients: { events,vbase, rewriter }, body, vtex: { logger } } = ctx
+  const { clients: { events, vbase, rewriter, meta }, body, vtex: { logger } } = ctx
   const {generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
     count,
@@ -72,7 +72,7 @@ const generate = async (ctx: EventContext) => {
   })
 
   const response = await rewriter.listInternals(LIST_LIMIT, next)
-  // Call meta?
+  await meta.makeMetaRequest()
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
@@ -96,7 +96,7 @@ const generate = async (ctx: EventContext) => {
     Object.keys(routesByBinding).map(async bindingId => {
       const bucket = getBucket(generationPrefix, hashString(bindingId))
       const groupedRoutes = routesByBinding[bindingId]
-      // Call meta?
+      await meta.makeMetaRequest()
       await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]

@@ -16,6 +16,7 @@ import {
   generateSitemap,
   generateSitemapFromREST,
 } from './middlewares/generateSitemap'
+import { meta } from './middlewares/meta'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
@@ -76,5 +77,6 @@ export default new Service<Clients, State, ParamsContext>({
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
+    meta,
   },
 })
