@@ -31,6 +31,10 @@
     "generateSitemap": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate"]
+    },
+    "generateUserRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:user-routes"]
     }
   }
 }

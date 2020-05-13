@@ -3,7 +3,7 @@ import RouteParser from 'route-parser'
 import { Internal } from 'vtex.rewriter'
 
 import { SITEMAP_URL } from '../utils'
-import { SitemapEntry } from './generateSitemap'
+import { SitemapEntry } from './generateMiddlewares/utils'
 
 const URLEntry = (
   forwardedHost: string,

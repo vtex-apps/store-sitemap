@@ -15,7 +15,8 @@ import { cache } from './middlewares/cache'
 import {
   generateSitemap,
   generateSitemapFromREST,
-} from './middlewares/generateSitemap'
+} from './middlewares/generateMiddlewares/generateSitemap'
+import { generateUserRoutes } from './middlewares/generateMiddlewares/generateUserRoutes'
 import { meta } from './middlewares/meta'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
@@ -68,15 +69,16 @@ export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
     generateSitemap,
+    generateUserRoutes,
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
+    meta,
     robots: method({
       DEFAULT: methodNotAllowed,
       GET: [cache, binding, robots],
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
-    meta,
   },
 })

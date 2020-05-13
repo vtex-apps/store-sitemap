@@ -2,7 +2,7 @@ import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString } from '../utils'
-import { GENERATE_SITEMAP_EVENT } from './generateSitemap'
+import { GENERATE_SITEMAP_EVENT } from './generateMiddlewares/utils'
 
 // const ONE_DAY_S = 24 * 60 * 60
 const TWO_HOURS = 2 * 60 * 60

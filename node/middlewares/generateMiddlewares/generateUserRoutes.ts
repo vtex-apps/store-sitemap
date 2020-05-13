@@ -1,38 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import { path, startsWith } from 'ramda'
+import { path } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../utils'
-
-export const SITEMAP_INDEX = 'sitemap_index'
-export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { currentDate, DEFAULT_CONFIG, DEFAULT_EVENT, GENERATE_USER_ROUTES_EVENT, SitemapEntry, SitemapIndex, sleep, USER_ROUTES_INDEX } from './utils'
 
 const LIST_LIMIT = 300
-
-export interface SitemapIndex {
-  index: string[]
-  lastUpdated: string
-}
-
-export interface SitemapEntry {
-  routes: Internal[]
-  lastUpdated: string
-}
-
-const DEFAULT_CONFIG: Config = {
-  generationPrefix: 'B',
-  productionPrefix: 'A',
-}
-
-const DEFAULT_EVENT: SitemapGenerationEvent = {
-  count: 0,
-  next: null,
-  report: {},
-}
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-const currentDate = (): string => new Date().toISOString().split('T')[0]
 
 const initializeSitemap = async (ctx: EventContext) => {
   const { tenant, vbase } = ctx.clients
@@ -42,14 +15,14 @@ const initializeSitemap = async (ctx: EventContext) => {
 
   const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   await Promise.all(bindings.map(
-    binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), SITEMAP_INDEX, {
+    binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), USER_ROUTES_INDEX, {
       index: [] as string[],
       lastUpdated: '',
     })
   ))
 }
 
-const generate = async (ctx: EventContext) => {
+export async function generateUserRoutes(ctx: EventContext) {
   if (!ctx.body.count) {
     await initializeSitemap(ctx)
   }
@@ -63,7 +36,7 @@ const generate = async (ctx: EventContext) => {
   ? DEFAULT_EVENT
   : body
   logger.debug({
-    message: 'Event received',
+    message: '[User Routes] Event received',
     payload: {
       count,
       next,
@@ -78,8 +51,8 @@ const generate = async (ctx: EventContext) => {
 
   const routesByBinding = routes.reduce(
     (acc, internal) => {
-      report[internal.type] = (report[internal.type] || 0) + 1
-      if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
+      if (internal.type === 'userRoute') {
+        report[internal.type] = (report[internal.type] || 0) + 1
         const { binding } = internal
         const bindingRoutes: Internal[] = path([binding, internal.type], acc) || []
         acc[binding] = {
@@ -101,12 +74,12 @@ const generate = async (ctx: EventContext) => {
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]
           const entry = `${entityType}-${count}`
-          const indexData = await vbase.getJSON<SitemapIndex>(bucket, SITEMAP_INDEX, true)
+          const indexData = await vbase.getJSON<SitemapIndex>(bucket, USER_ROUTES_INDEX, true)
           const { index } = indexData as SitemapIndex
           index.push(entry)
           const lastUpdated = currentDate()
           await Promise.all([
-            vbase.saveJSON<SitemapIndex>(bucket, SITEMAP_INDEX, {
+            vbase.saveJSON<SitemapIndex>(bucket, USER_ROUTES_INDEX, {
               index,
               lastUpdated,
             }),
@@ -127,8 +100,8 @@ const generate = async (ctx: EventContext) => {
       report,
     }
     await sleep(300)
-    events.sendEvent('', GENERATE_SITEMAP_EVENT, payload)
-    logger.debug({ message: 'Event sent', payload, })
+    events.sendEvent('', GENERATE_USER_ROUTES_EVENT, payload)
+    logger.debug({ message: '[User Routes] Event sent', payload, })
   } else {
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
@@ -139,14 +112,4 @@ const generate = async (ctx: EventContext) => {
       report,
     })
   }
-}
-
-export async function generateSitemapFromREST(ctx: Context) {
-  const { events } = ctx.clients
-  events.sendEvent('', GENERATE_SITEMAP_EVENT)
-  ctx.status = 200
-}
-
-export async function generateSitemap(ctx: EventContext) {
-  generate(ctx)
 }
