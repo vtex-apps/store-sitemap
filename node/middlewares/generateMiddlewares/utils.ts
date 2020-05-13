@@ -9,12 +9,6 @@ export const DEFAULT_CONFIG: Config = {
   productionPrefix: 'A',
 }
 
-export const DEFAULT_EVENT: SitemapGenerationEvent = {
-  count: 0,
-  next: null,
-  report: {},
-}
-
 export interface SitemapIndex {
   index: string[]
   lastUpdated: string

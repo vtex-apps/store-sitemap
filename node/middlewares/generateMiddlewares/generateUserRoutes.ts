@@ -1,13 +1,18 @@
-/* eslint-disable no-await-in-loop */
 import { path } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
-import { currentDate, DEFAULT_CONFIG, DEFAULT_EVENT, GENERATE_USER_ROUTES_EVENT, SitemapEntry, SitemapIndex, sleep, USER_ROUTES_INDEX } from './utils'
+import { currentDate, DEFAULT_CONFIG, GENERATE_USER_ROUTES_EVENT, SitemapEntry, SitemapIndex, sleep, USER_ROUTES_INDEX } from './utils'
 
 const LIST_LIMIT = 300
 
-const initializeSitemap = async (ctx: EventContext) => {
+export const DEFAULT_EVENT: UserRoutesGenerationEvent = {
+  count: 0,
+  next: null,
+  report: 0,
+}
+
+const initializeUserRoutesSitemap = async (ctx: EventContext) => {
   const { tenant, vbase } = ctx.clients
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
@@ -24,7 +29,7 @@ const initializeSitemap = async (ctx: EventContext) => {
 
 export async function generateUserRoutes(ctx: EventContext) {
   if (!ctx.body.count) {
-    await initializeSitemap(ctx)
+    await initializeUserRoutesSitemap(ctx)
   }
   const { clients: { events, vbase, rewriter, meta }, body, vtex: { logger } } = ctx
   const {generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
@@ -32,7 +37,7 @@ export async function generateUserRoutes(ctx: EventContext) {
     count,
     next,
     report,
-  }: SitemapGenerationEvent = !body.count
+  }: UserRoutesGenerationEvent = !body.count
   ? DEFAULT_EVENT
   : body
   logger.debug({
@@ -49,10 +54,11 @@ export async function generateUserRoutes(ctx: EventContext) {
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
+  let userRoutesCount = 0
   const routesByBinding = routes.reduce(
     (acc, internal) => {
       if (internal.type === 'userRoute') {
-        report[internal.type] = (report[internal.type] || 0) + 1
+        userRoutesCount++
         const { binding } = internal
         const bindingRoutes: Internal[] = path([binding, internal.type], acc) || []
         acc[binding] = {
@@ -94,10 +100,10 @@ export async function generateUserRoutes(ctx: EventContext) {
   )
 
   if (responseNext) {
-    const payload: SitemapGenerationEvent = {
+    const payload: UserRoutesGenerationEvent= {
       count: count + 1,
       next: responseNext,
-      report,
+      report: report + userRoutesCount,
     }
     await sleep(300)
     events.sendEvent('', GENERATE_USER_ROUTES_EVENT, payload)
@@ -108,7 +114,7 @@ export async function generateUserRoutes(ctx: EventContext) {
       productionPrefix: generationPrefix,
     })
     ctx.vtex.logger.info({
-      message: 'Sitemap complete',
+      message: '[User Routes]Sitemap complete',
       report,
     })
   }
