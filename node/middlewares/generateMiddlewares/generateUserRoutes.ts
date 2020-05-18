@@ -1,52 +1,42 @@
 import { path } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
-import { currentDate, DEFAULT_CONFIG, GENERATE_USER_ROUTES_EVENT, SitemapEntry, SitemapIndex, sleep, USER_ROUTES_INDEX } from './utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString } from '../../utils'
+import {
+  currentDate,
+  DEFAULT_CONFIG,
+  GENERATE_USER_ROUTES_EVENT,
+  initializeSitemap,
+  SitemapEntry,
+  SitemapIndex,
+  sleep,
+  USER_ROUTES_INDEX
+} from './utils'
 
 const LIST_LIMIT = 300
 
-export const DEFAULT_EVENT: UserRoutesGenerationEvent = {
-  count: 0,
-  next: null,
-  report: 0,
-}
 
-const initializeUserRoutesSitemap = async (ctx: EventContext) => {
-  const { tenant, vbase } = ctx.clients
-  const { bindings } = await tenant.info({
-    forceMaxAge: TENANT_CACHE_TTL_S,
-  })
-
-  const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
-  await Promise.all(bindings.map(
-    binding => vbase.saveJSON<SitemapIndex>(getBucket(config.generationPrefix, hashString(binding.id)), USER_ROUTES_INDEX, {
-      index: [] as string[],
-      lastUpdated: '',
-    })
-  ))
-}
 
 export async function generateUserRoutes(ctx: EventContext) {
   if (!ctx.body.count) {
-    await initializeUserRoutesSitemap(ctx)
+    await initializeSitemap(ctx, USER_ROUTES_INDEX)
   }
   const { clients: { events, vbase, rewriter, meta }, body, vtex: { logger } } = ctx
-  const {generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const {generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
     count,
     next,
     report,
-  }: UserRoutesGenerationEvent = !body.count
-  ? DEFAULT_EVENT
-  : body
+  }: UserRoutesGenerationEvent = body!
+
   logger.debug({
-    message: '[User Routes] Event received',
+    message: 'Event received',
     payload: {
       count,
       next,
       report,
     },
+    type: 'user-routes',
   })
 
   const response = await rewriter.listInternals(LIST_LIMIT, next)
@@ -60,15 +50,20 @@ export async function generateUserRoutes(ctx: EventContext) {
       if (internal.type === 'userRoute') {
         userRoutesCount++
         const { binding } = internal
-        const bindingRoutes: Internal[] = path([binding, internal.type], acc) || []
+        const bindingRoutes: Route[] = path([binding, internal.type], acc) || []
+        const route: Route = {
+          imagePath: internal.imagePath || undefined,
+          imageTitle: internal.imageTitle || undefined,
+          path: internal.from,
+        }
         acc[binding] = {
           ...acc[binding] || {},
-          [internal.type]: bindingRoutes.concat(internal),
+          [internal.type]: bindingRoutes.concat(route),
         }
       }
       return acc
     },
-    {} as Record<string, Record<string, Internal[]>>
+    {} as Record<string, Record<string, Route[]>>
   )
 
   await Promise.all(
@@ -107,15 +102,12 @@ export async function generateUserRoutes(ctx: EventContext) {
     }
     await sleep(300)
     events.sendEvent('', GENERATE_USER_ROUTES_EVENT, payload)
-    logger.debug({ message: '[User Routes] Event sent', payload, })
+    logger.debug({ message: 'Event sent', type: 'user-routes', payload, })
   } else {
-    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
-      generationPrefix: productionPrefix,
-      productionPrefix: generationPrefix,
-    })
     ctx.vtex.logger.info({
-      message: '[User Routes]Sitemap complete',
+      message: 'User routes complete',
       report,
+      type: 'user-routes',
     })
   }
 }

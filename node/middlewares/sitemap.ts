@@ -2,7 +2,7 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
 import { currentDate, SitemapNotFound } from '../utils'
-import { GENERATE_SITEMAP_EVENT, SitemapIndex, USER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import { GENERATE_SITEMAP_EVENT, PRODUCT_ROUTES_INDEX, SitemapIndex, USER_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -49,11 +49,22 @@ const sitemapIndex = async (
     }
   )
 
-  const indexData = await vbase.getJSON<SitemapIndex>(
-    bucket,
-    USER_ROUTES_INDEX,
-    true
-  )
+  const [productsIndexData, userIndexData] = await Promise.all([
+      vbase.getJSON<SitemapIndex>(
+        bucket,
+        USER_ROUTES_INDEX,
+        true
+      ),
+      vbase.getJSON<SitemapIndex>(
+        bucket,
+        PRODUCT_ROUTES_INDEX,
+        true
+      ),
+  ])
+  const indexData = {
+    index: productsIndexData.index.concat(userIndexData.index),
+    lastUpdated: productsIndexData.lastUpdated,
+  }
 
   if (!indexData) {
     throw new SitemapNotFound('Sitemap not found')
@@ -109,6 +120,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       bindingAddress,
     },
     clients: { events, vbase },
+    vtex: { adminUserAuthToken },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
@@ -133,7 +145,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       ctx.status = 404
       ctx.body = 'Generating sitemap...'
       ctx.vtex.logger.error(err.message)
-      events.sendEvent('', GENERATE_SITEMAP_EVENT)
+      events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken })
       return
     }
   }

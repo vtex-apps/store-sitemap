@@ -1,6 +1,5 @@
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
-import { Internal } from 'vtex.rewriter'
 
 import { SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
@@ -8,7 +7,7 @@ import { SitemapEntry } from './generateMiddlewares/utils'
 const URLEntry = (
   forwardedHost: string,
   rootPath: string,
-  route: Internal,
+  route: Route,
   lastUpdated: string,
   supportedLocations: string[],
   bindingAddress?: string
@@ -16,7 +15,7 @@ const URLEntry = (
   const querystring = bindingAddress
     ? `?__bindingAddress=${bindingAddress}`
     : ''
-  const loc = `https://${forwardedHost}${rootPath}${route.from}${querystring}`
+  const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
   const localization = supportedLocations.length > 1
     ? supportedLocations
       .map(
@@ -91,7 +90,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     return
   }
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-  routes.forEach((route: Internal) => {
+  routes.forEach((route: Route) => {
     $('urlset').append(
       URLEntry(
         forwardedHost,

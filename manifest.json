@@ -13,14 +13,22 @@
   "dependencies": {
     "gocommerce.sitemap-app": "1.x",
     "vtex.catalog-api-proxy": "0.x",
-    "vtex.rewriter": "1.x"
+    "vtex.rewriter": "1.x",
+    "vtex.catalog-graphql": "1.x"
   },
   "policies": [
     {
       "name": "outbound-access",
       "attrs": {
         "host": "portal.vtexcommercestable.com.br",
-        "path": "/*.xml"
+        "path": "/api/tenant/tenants"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/catalog_system/*"
       }
     },
     {
@@ -29,6 +37,9 @@
         "host": "janus-edge.vtex.com.br",
         "path": "/robots.txt"
       }
+    },
+    {
+      "name": "vtex.catalog-graphql:resolve-graphql"
     },
     {
       "name": "colossus-fire-event"

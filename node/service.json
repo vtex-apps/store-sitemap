@@ -35,6 +35,10 @@
     "generateUserRoutes": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:user-routes"]
+    },
+    "generateProductRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:product-routes"]
     }
   }
 }

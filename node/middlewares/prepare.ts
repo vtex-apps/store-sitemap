@@ -8,9 +8,14 @@ import { GENERATE_SITEMAP_EVENT } from './generateMiddlewares/utils'
 const TWO_HOURS = 2 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
-    vtex: { production },
+    vtex: { adminUserAuthToken, production, logger },
     clients: { vbase, events, tenant },
   } = ctx
+  if (!adminUserAuthToken) {
+      ctx.status = 401
+      logger.error(`Missing adminUserAuth token`)
+      return
+  }
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
   // Defend against malformed root path. It should always start with `/`.
@@ -29,7 +34,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE)
     .catch(err => {
-      events.sendEvent('', GENERATE_SITEMAP_EVENT)
+      events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken } )
       throw err
     })
   const bucket = getBucket(productionPrefix, hashString(binding.id))
@@ -54,6 +59,6 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     production ? `public, max-age=${TWO_HOURS}` : 'no-cache'
   )
   if (production) {
-    events.sendEvent('', GENERATE_SITEMAP_EVENT)
+    events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken } )
   }
 }

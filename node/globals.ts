@@ -31,6 +31,12 @@ declare global {
     pageType: string
   }
 
+  interface Route {
+    path: string,
+    imagePath?: string
+    imageTitle?: string
+  }
+
   interface Config {
     productionPrefix: string
     generationPrefix: string
@@ -40,5 +46,12 @@ declare global {
     next: Maybe<string>
     report: number
     count: number
+  }
+
+  interface ProductRoutesGenerationEvent {
+    authToken: string
+    from: number
+    processedProducts: number
+    invalidProducts: number
   }
 }

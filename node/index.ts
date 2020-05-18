@@ -12,6 +12,7 @@ import {
 import { Clients } from './clients'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
+import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
 import {
   generateSitemap,
   generateSitemapFromREST,
@@ -23,6 +24,7 @@ import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
+import { tenant } from './middlewares/tenant'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -47,6 +49,7 @@ const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
     default: {
+      concurrency: 5,
       retries: 1,
       timeout: THREE_SECONDS_MS,
     },
@@ -68,6 +71,7 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
+    generateProductRoutes: [tenant, generateProductRoutes],
     generateSitemap,
     generateUserRoutes,
   },
