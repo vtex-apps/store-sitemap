@@ -998,9 +998,9 @@ glob@^7.1.3:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-"gocommerce.sitemap-app@http://gocommerce.vtexassets.com/_v/public/typings/v1/gocommerce.sitemap-app@1.2.0/public/_types/react":
+"gocommerce.sitemap-app@http://gocommerce.vtexassets.com/_v/public/typings/v1/gocommerce.sitemap-app@1.2.1/public/_types/react":
   version "0.0.0"
-  resolved "http://gocommerce.vtexassets.com/_v/public/typings/v1/gocommerce.sitemap-app@1.2.0/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+  resolved "http://gocommerce.vtexassets.com/_v/public/typings/v1/gocommerce.sitemap-app@1.2.1/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
 graceful-fs@^4.1.0, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   version "4.1.15"
@@ -1915,7 +1915,7 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
 
-"stats-lite@github:vtex/node-stats-lite#dist":
+stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:
@@ -2191,13 +2191,17 @@ vary@^1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha1-IpnwLG3tMNSllhsLn3RSShj2NPw=
 
-"vtex.catalog-api-proxy@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.7.2/public/_types/react":
+"vtex.catalog-api-proxy@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.9.0/public/_types/react":
   version "0.0.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.7.2/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.9.0/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
-"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.37.0/public/@types/vtex.rewriter":
-  version "1.37.0"
-  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.37.0/public/@types/vtex.rewriter#792c4084b600039764c117afaa98c9814b170d85"
+"vtex.catalog-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.79.0/public/@types/vtex.catalog-graphql":
+  version "1.79.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.79.0/public/@types/vtex.catalog-graphql#c3e4ddf94c3a5c0cbb4751e7eeeae934d82a7caf"
+
+"vtex.store-sitemap@https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589805998/public/_types/react":
+  version "0.0.0"
+  resolved "https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589805998/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
 wide-align@^1.1.0:
   version "1.1.3"

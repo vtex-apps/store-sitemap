@@ -1,3 +1,4 @@
+import { Product } from 'vtex.catalog-graphql'
 import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   DEFAULT_CONFIG,
@@ -37,7 +38,7 @@ export async function generateProductRoutes(ctx: EventContext) {
   })
 
   const {
-    authToken, // CHECK IF IT IS SAFE
+    authToken, // TODO: CHECK IF IT IS SAFE
     from,
     processedProducts,
     invalidProducts,
@@ -69,7 +70,7 @@ export async function generateProductRoutes(ctx: EventContext) {
 
     const bindings = filterBindingsBySalesChannel(
         tenantInfo,
-        product.salesChannel
+        product.salesChannel as Product['salesChannel']
       )
     return bindings.map(binding => {
         // TODO TRANSLSATE

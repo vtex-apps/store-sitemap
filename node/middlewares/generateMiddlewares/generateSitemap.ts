@@ -23,7 +23,7 @@ export async function generateSitemap(ctx: EventContext) {
     ctx.vtex.logger.error('Missing authorization token')
     return
   }
-  // events.sendEvent('', GENERATE_USER_ROUTES_EVENT, DEFAULT_USER_ROUTES_PAYLOAD)
+  events.sendEvent('', GENERATE_USER_ROUTES_EVENT, DEFAULT_USER_ROUTES_PAYLOAD)
   events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
     authToken,
     from: 0,

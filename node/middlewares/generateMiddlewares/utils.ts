@@ -1,5 +1,5 @@
 import { Tenant } from '@vtex/api'
-import { Product } from 'vtex.catalog-graphql'
+import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 
@@ -50,7 +50,7 @@ export const filterBindingsBySalesChannel = (
   tenantInfo: Tenant,
   salesChannels: Product['salesChannel']
 ): Tenant['bindings'] => {
-  const salesChannelsSet = salesChannels?.reduce((acc: Set<string>, sc: Product['salesChannel']) => {
+  const salesChannelsSet = salesChannels?.reduce((acc: Set<string>, sc: Maybe<SalesChannel>) => {
     if (sc?.id) {
       acc.add(sc.id)
     }
