@@ -1,10 +1,13 @@
+import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
 import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
+  createTranslator,
   DEFAULT_CONFIG,
   filterBindingsBySalesChannel,
   GENERATE_PRODUCT_ROUTES_EVENT,
   initializeSitemap,
+  Message,
   PRODUCT_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex,
@@ -25,6 +28,7 @@ export async function generateProductRoutes(ctx: EventContext) {
       events,
       vbase,
       meta,
+      messages: messagesClient,
       tenant,
     },
     body,
@@ -72,35 +76,42 @@ export async function generateProductRoutes(ctx: EventContext) {
         tenantInfo,
         product.salesChannel as Product['salesChannel']
       )
-    return bindings.map(binding => {
-        // TODO TRANSLSATE
-        const translated = product.linkId
-        const translatedSlug = slugify(translated).toLowerCase()
-        const path = `/${translatedSlug}/p`
 
-        return [binding.id, path] as [string, string]
-      })
+    return bindings.map(binding => [binding, product] as [Binding, Product])
   }))
 
   let currentInvalidProducts = 0
   let currentProcessedProducts = 0
-  const routesByBinding = productsInfo.reduce((acc, productInfo) => {
+  const messagesByBinding = productsInfo.reduce((acc, productInfo) => {
     if (!productInfo) {
       currentInvalidProducts++
       return acc
     }
     currentProcessedProducts++
-    productInfo.forEach(([binding, path]) => {
-      acc[binding] = acc[binding] ? acc[binding].concat({path}) : [{path}]
+    productInfo.forEach(([binding, product]) => {
+      const message: Message = {content: product.linkId!, context: product.id }
+      if (acc[binding.id]) {
+        acc[binding.id].messages =  acc[binding.id].messages.concat(message)
+      } else {
+        acc[binding.id] = { bindingLocale: binding.defaultLocale, messages: [message] }
+      }
     })
     return acc
-  }, {} as Record<string, Route[]>)
+  }, {} as Record<string, { bindingLocale: string, messages: Message[] }>)
 
+  const translate = createTranslator(messagesClient)
+  const tenantLocale = tenantInfo.defaultLocale
 
   await Promise.all(
-    Object.keys(routesByBinding).map(async bindingId => {
+    Object.keys(messagesByBinding).map(async bindingId => {
       const bucket = getBucket(generationPrefix, hashString(bindingId))
-      const routes = routesByBinding[bindingId]
+      const { messages, bindingLocale } = messagesByBinding[bindingId]
+      const translatedSlugs = await translate(
+        tenantLocale,
+        bindingLocale,
+        messages
+      )
+      const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
       await meta.makeMetaRequest()
       const entry = `product-${from}`
       const indexData = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)

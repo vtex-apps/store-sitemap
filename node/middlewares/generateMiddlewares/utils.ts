@@ -1,6 +1,7 @@
 import { Tenant } from '@vtex/api'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
+import { Messages } from '../../clients/messages'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const USER_ROUTES_INDEX = 'userRoutesIndex.json'
@@ -23,6 +24,11 @@ export interface SitemapIndex {
 export interface SitemapEntry {
   routes: Route[]
   lastUpdated: string
+}
+
+export interface Message {
+  content: string
+  context: string
 }
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -77,3 +83,24 @@ export const slugify = (str: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[*+~.()'"!:@&\[\]`,/ %$#?{}|><=_^]/g, '-')
+
+export const createTranslator = (service: Messages) => async (
+  from: string,
+  to: string,
+  messages: Message[]
+): Promise<string[]> => {
+  if (from.toLowerCase() === to.toLowerCase()) {
+    return messages.map(({ content }) => content)
+  }
+  const translations = await service.translateNoCache({
+    indexedByFrom: [
+      {
+        from,
+        messages,
+      },
+    ],
+    to,
+  })
+  return translations
+}
+

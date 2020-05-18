@@ -1,7 +1,7 @@
 import { IOClients } from '@vtex/api'
 
-
 import { Catalog } from './catalog'
+import { Messages } from './messages'
 import { Meta } from './meta'
 import { Rewriter } from './rewriter'
 import { Robots } from './robots'
@@ -26,5 +26,9 @@ export class Clients extends IOClients {
 
   get catalog() {
     return this.getOrSet('catalog', Catalog)
+  }
+
+  get messages() {
+    return this.getOrSet('messages', Messages)
   }
 }

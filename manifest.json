@@ -11,6 +11,7 @@
     "docs": "0.x"
   },
   "dependencies": {
+    "vtex.messages": "1.x",
     "gocommerce.sitemap-app": "1.x",
     "vtex.catalog-api-proxy": "0.x",
     "vtex.rewriter": "1.x",
@@ -70,6 +71,9 @@
     },
     {
       "name": "vtex.rewriter:resolve-graphql"
+    },
+    {
+      "name": "vtex.messages:graphql-save-translation-messages"
     }
   ],
   "credentialType": "absolute",

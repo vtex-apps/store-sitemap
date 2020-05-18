@@ -25,7 +25,9 @@
     "typescript": "3.8.3",
     "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.9.0/public/_types/react",
     "vtex.catalog-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.79.0/public/@types/vtex.catalog-graphql",
-    "vtex.store-sitemap": "https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589805998/public/_types/react"
+    "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.60.1/public/@types/vtex.messages",
+    "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.41.9/public/@types/vtex.rewriter",
+    "vtex.store-sitemap": "https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589809771/public/_types/react"
   },
   "resolutions": {
     "**/lodash": "^4.17.11"

@@ -2199,9 +2199,17 @@ vary@^1.1.2:
   version "1.79.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.79.0/public/@types/vtex.catalog-graphql#c3e4ddf94c3a5c0cbb4751e7eeeae934d82a7caf"
 
-"vtex.store-sitemap@https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589805998/public/_types/react":
+"vtex.messages@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.60.1/public/@types/vtex.messages":
+  version "1.60.1"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.60.1/public/@types/vtex.messages#8005189da8e3d60ad37c682052e99db5e235d142"
+
+"vtex.rewriter@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.41.9/public/@types/vtex.rewriter":
+  version "1.41.9"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.41.9/public/@types/vtex.rewriter#fb110fa460da3a81c01e9876920193e9fdcfd3ce"
+
+"vtex.store-sitemap@https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589809771/public/_types/react":
   version "0.0.0"
-  resolved "https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589805998/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
+  resolved "https://fox--storecomponents.myvtex.com/_v/private/typings/linked/v1/vtex.store-sitemap@2.2.3+build1589809771/public/_types/react#fa7a0347e046eab3dd768998fc9252b2c0dd5aef"
 
 wide-align@^1.1.0:
   version "1.1.3"
