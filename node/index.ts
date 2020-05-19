@@ -13,11 +13,11 @@ import { Clients } from './clients'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
+import { generateRewriterRoutes } from './middlewares/generateMiddlewares/generateRewriterRoutes'
 import {
   generateSitemap,
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
-import { generateUserRoutes } from './middlewares/generateMiddlewares/generateUserRoutes'
 import { meta } from './middlewares/meta'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
@@ -72,8 +72,8 @@ export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
     generateProductRoutes: [tenant, generateProductRoutes],
+    generateRewriterRoutes,
     generateSitemap,
-    generateUserRoutes,
   },
   routes: {
     generateSitemap: generateSitemapFromREST,

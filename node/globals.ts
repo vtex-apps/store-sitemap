@@ -8,7 +8,7 @@ import {
 import { Clients } from './clients'
 
 declare global {
-  interface State extends RecorderState, UserRoutesGenerationEvent {
+  interface State extends RecorderState, RewriterRoutesGenerationEvent{
     platform?: string
     binding: Binding | null
     bucket: string
@@ -42,9 +42,9 @@ declare global {
     generationPrefix: string
   }
 
-  interface UserRoutesGenerationEvent {
+  interface RewriterRoutesGenerationEvent {
     next: Maybe<string>
-    report: number
+    report: Record<string, number>
     count: number
   }
 

@@ -32,9 +32,9 @@
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate"]
     },
-    "generateUserRoutes": {
+    "generateRewriterRoutes": {
       "sender": "vtex.store-sitemap",
-      "keys": ["sitemap.generate:user-routes"]
+      "keys": ["sitemap.generate:rewriter-routes"]
     },
     "generateProductRoutes": {
       "sender": "vtex.store-sitemap",

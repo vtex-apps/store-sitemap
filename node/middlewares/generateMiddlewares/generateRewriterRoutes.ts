@@ -1,11 +1,11 @@
-import { path } from 'ramda'
+import { path, startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString } from '../../utils'
 import {
   currentDate,
   DEFAULT_CONFIG,
-  GENERATE_USER_ROUTES_EVENT,
+  GENERATE_REWRITER_ROUTES_EVENT,
   initializeSitemap,
   SitemapEntry,
   SitemapIndex,
@@ -17,7 +17,7 @@ const LIST_LIMIT = 300
 
 
 
-export async function generateUserRoutes(ctx: EventContext) {
+export async function generateRewriterRoutes(ctx: EventContext) {
   if (!ctx.body.count) {
     await initializeSitemap(ctx, USER_ROUTES_INDEX)
   }
@@ -27,7 +27,7 @@ export async function generateUserRoutes(ctx: EventContext) {
     count,
     next,
     report,
-  }: UserRoutesGenerationEvent = body!
+  }: RewriterRoutesGenerationEvent = body!
 
   logger.debug({
     message: 'Event received',
@@ -44,11 +44,10 @@ export async function generateUserRoutes(ctx: EventContext) {
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
-  let userRoutesCount = 0
   const routesByBinding = routes.reduce(
     (acc, internal) => {
-      if (internal.type === 'userRoute') {
-        userRoutesCount++
+      report[internal.type] = (report[internal.type] || 0) + 1
+      if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
         const { binding } = internal
         const bindingRoutes: Route[] = path([binding, internal.type], acc) || []
         const route: Route = {
@@ -95,13 +94,13 @@ export async function generateUserRoutes(ctx: EventContext) {
   )
 
   if (responseNext) {
-    const payload: UserRoutesGenerationEvent= {
+    const payload: RewriterRoutesGenerationEvent= {
       count: count + 1,
       next: responseNext,
-      report: report + userRoutesCount,
+      report,
     }
     await sleep(300)
-    events.sendEvent('', GENERATE_USER_ROUTES_EVENT, payload)
+    events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, payload)
     logger.debug({ message: 'Event sent', type: 'user-routes', payload, })
   } else {
     ctx.vtex.logger.info({

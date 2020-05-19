@@ -8,7 +8,7 @@ export const USER_ROUTES_INDEX = 'userRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
-export const GENERATE_USER_ROUTES_EVENT = 'sitemap.generate:user-routes'
+export const GENERATE_REWRITER_ROUTES_EVENT = 'sitemap.generate:rewriter-routes'
 export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
 
 export const DEFAULT_CONFIG: Config = {
