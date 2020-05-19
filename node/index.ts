@@ -18,7 +18,7 @@ import {
   generateSitemap,
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
-import { meta } from './middlewares/meta'
+import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
@@ -71,13 +71,12 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateProductRoutes: [tenant, generateProductRoutes],
-    generateRewriterRoutes,
+    generateProductRoutes: [tenant, generateProductRoutes, sendNextEvent],
+    generateRewriterRoutes: [generateRewriterRoutes, sendNextEvent],
     generateSitemap,
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
-    meta,
     robots: method({
       DEFAULT: methodNotAllowed,
       GET: [cache, binding, robots],

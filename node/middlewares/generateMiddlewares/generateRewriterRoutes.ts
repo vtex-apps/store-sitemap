@@ -9,7 +9,6 @@ import {
   initializeSitemap,
   SitemapEntry,
   SitemapIndex,
-  sleep,
   USER_ROUTES_INDEX
 } from './utils'
 
@@ -17,11 +16,11 @@ const LIST_LIMIT = 300
 
 
 
-export async function generateRewriterRoutes(ctx: EventContext) {
+export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: () => Promise<void>) {
   if (!ctx.body.count) {
     await initializeSitemap(ctx, USER_ROUTES_INDEX)
   }
-  const { clients: { events, vbase, rewriter, meta }, body, vtex: { logger } } = ctx
+  const { clients: { vbase, rewriter }, body, vtex: { logger } } = ctx
   const {generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
     count,
@@ -40,7 +39,6 @@ export async function generateRewriterRoutes(ctx: EventContext) {
   })
 
   const response = await rewriter.listInternals(LIST_LIMIT, next)
-  await meta.makeMetaRequest()
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
@@ -69,7 +67,6 @@ export async function generateRewriterRoutes(ctx: EventContext) {
     Object.keys(routesByBinding).map(async bindingId => {
       const bucket = getBucket(generationPrefix, hashString(bindingId))
       const groupedRoutes = routesByBinding[bindingId]
-      await meta.makeMetaRequest()
       await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]
@@ -99,9 +96,11 @@ export async function generateRewriterRoutes(ctx: EventContext) {
       next: responseNext,
       report,
     }
-    await sleep(300)
-    events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, payload)
-    logger.debug({ message: 'Event sent', type: 'user-routes', payload, })
+    ctx.state.nextEvent = {
+      event: GENERATE_REWRITER_ROUTES_EVENT,
+      payload,
+    }
+    nextMiddleware()
   } else {
     ctx.vtex.logger.info({
       message: 'User routes complete',

@@ -8,7 +8,7 @@ import {
 import { Clients } from './clients'
 
 declare global {
-  interface State extends RecorderState, RewriterRoutesGenerationEvent{
+  interface State extends RecorderState {
     platform?: string
     binding: Binding | null
     bucket: string
@@ -17,6 +17,10 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
+    nextEvent:  {
+      event: string,
+      payload: RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent
+    }
   }
 
   type Context = ServiceContext<Clients, State>

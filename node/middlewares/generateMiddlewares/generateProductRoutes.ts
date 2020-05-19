@@ -16,7 +16,7 @@ import {
 
 const PAGE_LIMIT = 10
 
-export async function generateProductRoutes(ctx: EventContext) {
+export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
   if (!ctx.body.from) {
     await initializeSitemap(ctx, PRODUCT_ROUTES_INDEX)
   }
@@ -25,9 +25,7 @@ export async function generateProductRoutes(ctx: EventContext) {
     clients: {
       catalog,
       catalogGraphQL,
-      events,
       vbase,
-      meta,
       messages: messagesClient,
       tenant,
     },
@@ -112,7 +110,6 @@ export async function generateProductRoutes(ctx: EventContext) {
         messages
       )
       const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
-      await meta.makeMetaRequest()
       const entry = `product-${from}`
       const indexData = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
       const { index } = indexData as SitemapIndex
@@ -153,6 +150,9 @@ export async function generateProductRoutes(ctx: EventContext) {
     })
     return
   }
-  events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, payload)
-  logger.debug({ message: 'Event sent', type: 'product-routes', payload })
+  ctx.state.nextEvent = {
+    event: GENERATE_PRODUCT_ROUTES_EVENT,
+    payload,
+  }
+  next()
 }
