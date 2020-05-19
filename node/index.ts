@@ -20,6 +20,8 @@ import { sitemap } from './middlewares/sitemap'
 import { prepareState } from './middlewares/state'
 import { userSitemap } from './middlewares/userSitemap'
 
+process.env.DETERMINISTIC_VARY = 'true'
+
 const ONE_SECOND_MS = 1 * 1000
 const THREE_SECONDS_MS = 3 * 1000
 const FIFTY_SECONDS_MS = 50 * 1000
