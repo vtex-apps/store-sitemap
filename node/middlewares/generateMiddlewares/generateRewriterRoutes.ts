@@ -105,7 +105,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     ctx.vtex.logger.info({
       message: 'User routes complete',
       report,
-      type: 'user-routes',
+      type: GENERATE_REWRITER_ROUTES_EVENT,
     })
   }
 }
