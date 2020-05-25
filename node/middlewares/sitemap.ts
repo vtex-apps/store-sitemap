@@ -64,7 +64,6 @@ const sitemapIndex = async (
   if (!productsIndexData || !userIndexData) {
     throw new SitemapNotFound('Sitemap not found')
   }
-  console.log('****PRODUCT INDEX', productsIndexData.index)
   const indexData = {
     index: productsIndexData.index.concat(userIndexData.index),
     lastUpdated: productsIndexData.lastUpdated,
