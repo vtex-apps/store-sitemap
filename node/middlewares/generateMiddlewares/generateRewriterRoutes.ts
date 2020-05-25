@@ -45,7 +45,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const routesByBinding = routes.reduce(
     (acc, internal) => {
       report[internal.type] = (report[internal.type] || 0) + 1
-      if (!startsWith('notFound', internal.type) && internal.id !== 'search') {
+      if (!startsWith('notFound', internal.type) && internal.type !== 'product') {
         const { binding } = internal
         const bindingRoutes: Route[] = path([binding, internal.type], acc) || []
         const route: Route = {

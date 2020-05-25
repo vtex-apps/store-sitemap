@@ -61,14 +61,14 @@ const sitemapIndex = async (
         true
       ),
   ])
+  if (!productsIndexData || !userIndexData) {
+    throw new SitemapNotFound('Sitemap not found')
+  }
   const indexData = {
     index: productsIndexData.index.concat(userIndexData.index),
     lastUpdated: productsIndexData.lastUpdated,
   }
 
-  if (!indexData) {
-    throw new SitemapNotFound('Sitemap not found')
-  }
   const { index, lastUpdated } = indexData as SitemapIndex
   index.forEach(entry =>
     $('sitemapindex').append(
@@ -148,6 +148,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken })
       return
     }
+    throw err
   }
 
   ctx.body = $.xml()
