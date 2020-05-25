@@ -53,6 +53,7 @@ declare global {
   }
 
   interface ProductRoutesGenerationEvent {
+    entityCountByBinding: Record<string, number>
     authToken: string
     from: number
     processedProducts: number

@@ -49,7 +49,7 @@ const sitemapIndex = async (
     }
   )
 
-  const [productsIndexData, userIndexData] = await Promise.all([
+  const [userIndexData, productsIndexData] = await Promise.all([
       vbase.getJSON<SitemapIndex>(
         bucket,
         USER_ROUTES_INDEX,
@@ -64,12 +64,13 @@ const sitemapIndex = async (
   if (!productsIndexData || !userIndexData) {
     throw new SitemapNotFound('Sitemap not found')
   }
+  console.log('****PRODUCT INDEX', productsIndexData.index)
   const indexData = {
     index: productsIndexData.index.concat(userIndexData.index),
     lastUpdated: productsIndexData.lastUpdated,
   }
 
-  const { index, lastUpdated } = indexData as SitemapIndex
+  const { index, lastUpdated } = indexData
   index.forEach(entry =>
     $('sitemapindex').append(
       sitemapIndexEntry(

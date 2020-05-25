@@ -26,6 +26,7 @@ export async function generateSitemap(ctx: EventContext) {
   events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
   events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
     authToken,
+    entityCountByBinding: {} as Record<string, number>,
     from: 0,
     invalidProducts: 0,
     processedProducts: 0,
