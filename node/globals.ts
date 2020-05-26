@@ -46,14 +46,17 @@ declare global {
     generationPrefix: string
   }
 
-  interface RewriterRoutesGenerationEvent {
-    next: Maybe<string>
-    report: Record<string, number>
-    count: number
+  interface GenerationEvent {
+    entityCountByBinding: Record<string, Record<string, number>>
   }
 
-  interface ProductRoutesGenerationEvent {
-    entityCountByBinding: Record<string, number>
+  interface RewriterRoutesGenerationEvent extends GenerationEvent {
+    next: Maybe<string>
+    report: Record<string, number>
+    firstEvent?: boolean
+  }
+
+  interface ProductRoutesGenerationEvent extends GenerationEvent {
     authToken: string
     from: number
     processedProducts: number

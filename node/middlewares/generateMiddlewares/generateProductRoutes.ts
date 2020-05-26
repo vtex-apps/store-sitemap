@@ -1,7 +1,8 @@
-import { Binding, VBase } from '@vtex/api'
+import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
 import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
+  createDataSaver,
   createTranslator,
   DEFAULT_CONFIG,
   filterBindingsBySalesChannel,
@@ -9,49 +10,12 @@ import {
   initializeSitemap,
   Message,
   PRODUCT_ROUTES_INDEX,
-  SitemapEntry,
   SitemapIndex,
   slugify
 } from './utils'
 
 const PAGE_LIMIT = 10
-
-const FILE_LIMIT = 30000
-
-const getEntry = (entity: string, count: number) => `${entity}-${count}`
-
-const createDataSaver = (vbase: VBase, bucket: string, indexFile: string) =>
-  async (entity: string, count: number, routes: Route[], lastUpdated: string) => {
-    const currentEntry = getEntry(entity, count)
-    const { routes: savedRoutes } = await vbase.getJSON<SitemapEntry>(bucket, currentEntry, true) || { routes: [] }
-    const shouldUpdateIndex = savedRoutes.length === 0 || savedRoutes.length + routes.length > FILE_LIMIT
-
-    if (shouldUpdateIndex) {
-      const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
-      const newCount = count + 1
-      const newEntry = getEntry(entity, newCount)
-      const newIndex = index.concat(newEntry)
-
-      await Promise.all([
-        vbase.saveJSON<SitemapEntry>(bucket, newEntry, {
-          lastUpdated,
-          routes,
-        }),
-        vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
-          index: newIndex,
-          lastUpdated,
-        }),
-      ])
-      return newCount
-    } else {
-      const updatedRoutes = [...savedRoutes, ...routes]
-      await vbase.saveJSON<SitemapEntry>(bucket, currentEntry, {
-        lastUpdated,
-        routes: updatedRoutes,
-      })
-      return count
-    }
-  }
+const PRODUCT_ENTITY = 'product'
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
   if (!ctx.body.from) {
@@ -141,9 +105,9 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   await Promise.all(
     Object.keys(messagesByBinding).map(async bindingId => {
-      const count = entityCountByBinding[bindingId] || 0
+      const currentCount = entityCountByBinding[bindingId][PRODUCT_ENTITY] || 0
       const bucket = getBucket(generationPrefix, hashString(bindingId))
-      const saveData = createDataSaver(vbase, bucket, PRODUCT_ROUTES_INDEX)
+      const saveData = createDataSaver(vbase, bucket)
       const { messages, bindingLocale } = messagesByBinding[bindingId]
       const translatedSlugs = await translate(
         tenantLocale,
@@ -152,7 +116,16 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       )
       const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
       const lastUpdated = currentDate()
-      entityCountByBinding[bindingId] = await saveData('product', count, routes, lastUpdated)
+      const saveDataReponse = await saveData(PRODUCT_ENTITY, currentCount, routes, lastUpdated)
+      if (saveDataReponse) {
+        const { count, entry } = saveDataReponse
+        entityCountByBinding[bindingId][PRODUCT_ENTITY] = count
+        const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
+        await vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
+          index: index.concat(entry),
+          lastUpdated: currentDate(),
+        })
+      }
     })
   )
 
@@ -183,5 +156,5 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     event: GENERATE_PRODUCT_ROUTES_EVENT,
     payload,
   }
-  next()
+  await next()
 }
