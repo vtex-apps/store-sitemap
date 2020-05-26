@@ -12,7 +12,8 @@ export async function generateSitemapFromREST(ctx: Context) {
 }
 
 const DEFAULT_REWRITER_ROUTES_PAYLOAD: RewriterRoutesGenerationEvent = {
-  count: 0,
+  entityCountByBinding: {} as Record<string, Record<string, number>>,
+  firstEvent: true,
   next: null,
   report: {},
 }
@@ -26,7 +27,7 @@ export async function generateSitemap(ctx: EventContext) {
   events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
   events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
     authToken,
-    entityCountByBinding: {} as Record<string, number>,
+    entityCountByBinding: {} as Record<string, Record<string, number>>,
     from: 0,
     invalidProducts: 0,
     processedProducts: 0,

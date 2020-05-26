@@ -3,13 +3,13 @@ import { path, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString } from '../../utils'
 import {
+  createDataSaver,
   currentDate,
   DEFAULT_CONFIG,
   GENERATE_REWRITER_ROUTES_EVENT,
   initializeSitemap,
-  SitemapEntry,
-  SitemapIndex,
-  USER_ROUTES_INDEX
+  REWRITER_ROUTES_INDEX,
+  SitemapIndex
 } from './utils'
 
 const LIST_LIMIT = 300
@@ -17,13 +17,13 @@ const LIST_LIMIT = 300
 
 
 export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: () => Promise<void>) {
-  if (!ctx.body.count) {
-    await initializeSitemap(ctx, USER_ROUTES_INDEX)
+  if (ctx.body.firstEvent) {
+    await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
   const { clients: { vbase, rewriter }, body, vtex: { logger } } = ctx
   const {generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
-    count,
+    entityCountByBinding,
     next,
     report,
   }: RewriterRoutesGenerationEvent = body!
@@ -31,11 +31,11 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   logger.debug({
     message: 'Event received',
     payload: {
-      count,
+      entityCountByBinding,
       next,
       report,
     },
-    type: 'user-routes',
+    type: GENERATE_REWRITER_ROUTES_EVENT,
   })
 
   const response = await rewriter.listInternals(LIST_LIMIT, next)
@@ -66,33 +66,35 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   await Promise.all(
     Object.keys(routesByBinding).map(async bindingId => {
       const bucket = getBucket(generationPrefix, hashString(bindingId))
+      const saveData = createDataSaver(vbase, bucket)
       const groupedRoutes = routesByBinding[bindingId]
-      await Promise.all(
+      const entries = await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]
-          const entry = `${entityType}-${count}`
-          const indexData = await vbase.getJSON<SitemapIndex>(bucket, USER_ROUTES_INDEX, true)
-          const { index } = indexData as SitemapIndex
-          index.push(entry)
+          const currentCount = entityCountByBinding[bindingId][entityType] || 0
           const lastUpdated = currentDate()
-          await Promise.all([
-            vbase.saveJSON<SitemapIndex>(bucket, USER_ROUTES_INDEX, {
-              index,
-              lastUpdated,
-            }),
-            vbase.saveJSON<SitemapEntry>(bucket, entry, {
-              lastUpdated,
-              routes: entityRoutes,
-            }),
-          ])
+          const saveDataResponse = await saveData(entityType, currentCount, entityRoutes, lastUpdated)
+          if (saveDataResponse) {
+            const { count, entry } = saveDataResponse
+            entityCountByBinding[bindingId][entityType] = count
+            return entry
+          }
+          return
         })
       )
+      const filteredEntries = entries.filter(entry => entry !== undefined) as string[]
+      const { index } = await vbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX)
+
+      await vbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
+        index: [...index, ...filteredEntries],
+        lastUpdated: currentDate(),
+      })
     })
   )
 
   if (responseNext) {
     const payload: RewriterRoutesGenerationEvent= {
-      count: count + 1,
+      entityCountByBinding,
       next: responseNext,
       report,
     }
