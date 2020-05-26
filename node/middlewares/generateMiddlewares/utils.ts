@@ -4,7 +4,7 @@ import { Product, SalesChannel } from 'vtex.catalog-graphql'
 import { Messages } from '../../clients/messages'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 
-export const REWRITER_ROUTES_INDEX = 'userRoutesIndex.json'
+export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
