@@ -7,9 +7,9 @@ import {
   DEFAULT_CONFIG,
   GENERATE_REWRITER_ROUTES_EVENT,
   initializeSitemap,
+  REWRITER_ROUTES_INDEX,
   SitemapEntry,
-  SitemapIndex,
-  REWRITER_ROUTES_INDEX
+  SitemapIndex
 } from './utils'
 
 const LIST_LIMIT = 300
