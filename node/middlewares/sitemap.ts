@@ -2,7 +2,7 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
 import { currentDate, SitemapNotFound } from '../utils'
-import { GENERATE_SITEMAP_EVENT, PRODUCT_ROUTES_INDEX, SitemapIndex, USER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import { GENERATE_SITEMAP_EVENT, PRODUCT_ROUTES_INDEX, SitemapIndex, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -52,7 +52,7 @@ const sitemapIndex = async (
   const [productsIndexData, userIndexData] = await Promise.all([
       vbase.getJSON<SitemapIndex>(
         bucket,
-        USER_ROUTES_INDEX,
+        REWRITER_ROUTES_INDEX,
         true
       ),
       vbase.getJSON<SitemapIndex>(
