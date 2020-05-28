@@ -1,7 +1,6 @@
 import { VBase } from '@vtex/api'
-import { flatten } from 'ramda'
 
-import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import { DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex } from './utils'
 
 const FILE_LIMIT = 10000
@@ -13,9 +12,15 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
     const { routes } = await vbase.getJSON<SitemapEntry>(rawBucket, file)
     currentRoutes = [...currentRoutes, ...routes]
     if (currentRoutes.length > FILE_LIMIT) {
-      // Split
-      // Save file
-      // Add to ersponse array
+      const rest = currentRoutes.splice(FILE_LIMIT)
+      const entry = `${entity}-${count}`
+      newFiles.push(entry)
+      await vbase.saveJSON<SitemapEntry>(bucket, entry, {
+        lastUpdated: currentDate(),
+        routes: currentRoutes,
+      })
+      currentRoutes = rest
+      count++
     }
   }
   if (currentRoutes.length > 0) {
@@ -36,16 +41,16 @@ export async function groupEntries(ctx: EventContext) {
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
   const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
-  const storeBindings = bindings.filter(binding => binding.targetProduct === 'vtex.storefront')
+  const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
 
   await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
-    const { index } = await vbase.getJSON<SitemapIndex>(bucket, indexFile)
+    const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
 
     const filesByEntity = index.reduce((acc, file) => {
       // Centralize file name creation
-      const [entity, _] = file.split('-')
+      const entity = file.split('-')[0]
       if (!acc[entity]) {
         acc[entity] = []
       }
@@ -65,14 +70,13 @@ export async function groupEntries(ctx: EventContext) {
       ))
 
     const newIndex: string[] = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
+    console.log('NEW INDEZX', newIndex)
     await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
       index: newIndex,
       lastUpdated: currentDate(),
     })
     await vbase.deleteFile(rawBucket, indexFile)
   }))
-
-
 
   if (indexFile === PRODUCT_ROUTES_INDEX) {
     logger.info(`Sitemap complete`)

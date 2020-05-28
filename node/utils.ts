@@ -6,7 +6,7 @@ export const CONFIG_FILE = 'config.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
-const STORE_PRODUCT = 'vtex-storefront'
+export const STORE_PRODUCT = 'vtex-storefront'
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT

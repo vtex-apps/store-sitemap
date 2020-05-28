@@ -1,20 +1,21 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
-import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   createTranslator,
-  DEFAULT_CONFIG,
   filterBindingsBySalesChannel,
   GENERATE_PRODUCT_ROUTES_EVENT,
+  GROUP_ENTRIES_EVENT,
   initializeSitemap,
   Message,
   PRODUCT_ROUTES_INDEX,
+  RAW_DATA_PREFIX,
   SitemapEntry,
   SitemapIndex,
   slugify
 } from './utils'
 
-const PAGE_LIMIT = 10
+const PAGE_LIMIT = 50
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
   if (!ctx.body.from) {
@@ -34,7 +35,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       logger,
     },
   } = ctx
-  const {generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+
   const tenantInfo = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
@@ -102,7 +103,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   await Promise.all(
     Object.keys(messagesByBinding).map(async bindingId => {
-      const bucket = getBucket(generationPrefix, hashString(bindingId))
+      const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
       const { messages, bindingLocale } = messagesByBinding[bindingId]
       const translatedSlugs = await translate(
         tenantLocale,
@@ -111,8 +112,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       )
       const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
       const entry = `product-${from}`
-      const indexData = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
-      const { index } = indexData as SitemapIndex
+      const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
       index.push(entry)
       const lastUpdated = currentDate()
       await Promise.all([
@@ -134,6 +134,10 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     invalidProducts: invalidProducts + currentInvalidProducts,
     processedProducts: processedProducts + currentProcessedProducts,
   }
+  ctx.state.nextEvent = {
+    event: GENERATE_PRODUCT_ROUTES_EVENT,
+    payload,
+  }
   if (payload.processedProducts >= total || payload.from >= total) {
     logger.info({
       invalidProducts: payload.invalidProducts,
@@ -142,17 +146,13 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       total,
       type: 'product-routes',
     })
+    ctx.state.nextEvent = {
+      event: GROUP_ENTRIES_EVENT,
+      payload: {
+        indexFile: PRODUCT_ROUTES_INDEX,
+      },
+    }
+  }
 
-    logger.info(`Sitemap complete`)
-    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
-      generationPrefix: productionPrefix,
-      productionPrefix: generationPrefix,
-    })
-    return
-  }
-  ctx.state.nextEvent = {
-    event: GENERATE_PRODUCT_ROUTES_EVENT,
-    payload,
-  }
   await next()
 }
