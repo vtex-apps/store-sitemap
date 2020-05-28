@@ -19,7 +19,6 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
-  return
   const { clients: { vbase, rewriter }, body, vtex: { logger } } = ctx
   const {
     count,
