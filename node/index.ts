@@ -75,10 +75,10 @@ export default new Service<Clients, State, ParamsContext>({
     generateProductRoutes: [tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generateRewriterRoutes, sendNextEvent],
     generateSitemap,
+    groupEntries,
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
-    groupEntries,
     robots: method({
       DEFAULT: methodNotAllowed,
       GET: [cache, binding, robots],
