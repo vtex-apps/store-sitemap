@@ -2,7 +2,7 @@ import { Tenant } from '@vtex/api'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const RAW_DATA_PREFIX = 'C'
 
@@ -44,10 +44,8 @@ export const initializeSitemap = async (ctx: EventContext, indexFile: string) =>
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
 
-  const config = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
-  const prefix = indexFile === PRODUCT_ROUTES_INDEX ? RAW_DATA_PREFIX : config.generationPrefix
   await Promise.all(bindings.map(
-    binding => vbase.saveJSON<SitemapIndex>(getBucket(prefix, hashString(binding.id)), indexFile, {
+    binding => vbase.saveJSON<SitemapIndex>(getBucket(RAW_DATA_PREFIX, hashString(binding.id)), indexFile, {
       index: [] as string[],
       lastUpdated: '',
     })

@@ -49,7 +49,7 @@ export async function groupEntries(ctx: EventContext) {
     const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
 
     const filesByEntity = index.reduce((acc, file) => {
-      // Centralize file name creation
+      // TODO Centralize file name creation
       const entity = file.split('-')[0]
       if (!acc[entity]) {
         acc[entity] = []
@@ -70,7 +70,6 @@ export async function groupEntries(ctx: EventContext) {
       ))
 
     const newIndex: string[] = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
-    console.log('NEW INDEZX', newIndex)
     await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
       index: newIndex,
       lastUpdated: currentDate(),
@@ -78,6 +77,7 @@ export async function groupEntries(ctx: EventContext) {
     await vbase.deleteFile(rawBucket, indexFile)
   }))
 
+  // TODO Add parameter to payload
   if (indexFile === PRODUCT_ROUTES_INDEX) {
     logger.info(`Sitemap complete`)
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {

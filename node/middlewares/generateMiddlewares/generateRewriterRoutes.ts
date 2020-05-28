@@ -1,12 +1,13 @@
 import { path, startsWith } from 'ramda'
 
 import { Internal } from 'vtex.rewriter'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString } from '../../utils'
+import { getBucket, hashString } from '../../utils'
 import {
   currentDate,
-  DEFAULT_CONFIG,
   GENERATE_REWRITER_ROUTES_EVENT,
+  GROUP_ENTRIES_EVENT,
   initializeSitemap,
+  RAW_DATA_PREFIX,
   REWRITER_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex
@@ -19,7 +20,6 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
   const { clients: { vbase, rewriter }, body, vtex: { logger } } = ctx
-  const {generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const {
     count,
     next,
@@ -63,7 +63,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
 
   await Promise.all(
     Object.keys(routesByBinding).map(async bindingId => {
-      const bucket = getBucket(generationPrefix, hashString(bindingId))
+      const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
       const groupedRoutes = routesByBinding[bindingId]
       const newEntries = await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
@@ -95,12 +95,18 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       event: GENERATE_REWRITER_ROUTES_EVENT,
       payload,
     }
-    await nextMiddleware()
   } else {
     ctx.vtex.logger.info({
       message: 'User routes complete',
       report,
       type: GENERATE_REWRITER_ROUTES_EVENT,
     })
+    ctx.state.nextEvent = {
+      event: GROUP_ENTRIES_EVENT,
+      payload: {
+        indexFile: REWRITER_ROUTES_INDEX,
+      },
+    }
   }
+  await nextMiddleware()
 }
