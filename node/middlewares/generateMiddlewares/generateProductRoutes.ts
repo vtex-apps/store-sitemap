@@ -154,5 +154,5 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     event: GENERATE_PRODUCT_ROUTES_EVENT,
     payload,
   }
-  next()
+  await next()
 }

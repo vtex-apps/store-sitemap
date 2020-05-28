@@ -14,8 +14,6 @@ import {
 
 const LIST_LIMIT = 300
 
-
-
 export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: () => Promise<void>) {
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
@@ -67,31 +65,28 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     Object.keys(routesByBinding).map(async bindingId => {
       const bucket = getBucket(generationPrefix, hashString(bindingId))
       const groupedRoutes = routesByBinding[bindingId]
-      await Promise.all(
+      const newEntries = await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]
           const entry = `${entityType}-${count}`
-          const indexData = await vbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
-          const { index } = indexData as SitemapIndex
-          index.push(entry)
           const lastUpdated = currentDate()
-          await Promise.all([
-            vbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
-              index,
-              lastUpdated,
-            }),
-            vbase.saveJSON<SitemapEntry>(bucket, entry, {
+          await vbase.saveJSON<SitemapEntry>(bucket, entry, {
               lastUpdated,
               routes: entityRoutes,
-            }),
-          ])
+          })
+          return entry
         })
       )
+      const { index } = await vbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
+      await vbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
+        index: [...index, ...newEntries],
+        lastUpdated: currentDate(),
+      })
     })
   )
 
   if (responseNext) {
-    const payload: RewriterRoutesGenerationEvent= {
+    const payload: RewriterRoutesGenerationEvent = {
       count: count + 1,
       next: responseNext,
       report,
@@ -100,7 +95,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       event: GENERATE_REWRITER_ROUTES_EVENT,
       payload,
     }
-    nextMiddleware()
+    await nextMiddleware()
   } else {
     ctx.vtex.logger.info({
       message: 'User routes complete',
