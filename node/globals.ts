@@ -19,7 +19,7 @@ declare global {
     bindingAddress?: string
     nextEvent:  {
       event: string,
-      payload: RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent
+      payload: Events
     }
   }
 
@@ -44,6 +44,12 @@ declare global {
   interface Config {
     productionPrefix: string
     generationPrefix: string
+  }
+
+  type Events = RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent | GroupEntriesEvent
+
+  interface GroupEntriesEvent {
+    indexFile: string
   }
 
   interface RewriterRoutesGenerationEvent {

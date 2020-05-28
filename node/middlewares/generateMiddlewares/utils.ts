@@ -4,12 +4,15 @@ import { Product, SalesChannel } from 'vtex.catalog-graphql'
 import { Messages } from '../../clients/messages'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 
+export const RAW_DATA_PREFIX = 'C'
+
 export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
 export const GENERATE_REWRITER_ROUTES_EVENT = 'sitemap.generate:rewriter-routes'
 export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
+export const GROUP_ENTRIES_EVENT = 'sitemap.generate:group-entries'
 
 export const DEFAULT_CONFIG: Config = {
   generationPrefix: 'B',
@@ -34,7 +37,6 @@ export interface Message {
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const currentDate = (): string => new Date().toISOString()
-
 
 export const initializeSitemap = async (ctx: EventContext, indexFile: string) => {
   const { tenant, vbase } = ctx.clients

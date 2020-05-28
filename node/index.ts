@@ -18,6 +18,7 @@ import {
   generateSitemap,
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
+import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
@@ -77,6 +78,7 @@ export default new Service<Clients, State, ParamsContext>({
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
+    groupEntries,
     robots: method({
       DEFAULT: methodNotAllowed,
       GET: [cache, binding, robots],
