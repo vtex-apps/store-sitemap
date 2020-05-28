@@ -75,10 +75,8 @@ export async function groupEntries(ctx: EventContext) {
       index: newIndex,
       lastUpdated: currentDate(),
     })
-    await vbase.deleteFile(rawBucket, indexFile)
   }))
 
-  // TODO Add parameter to payload
   if (indexFile === PRODUCT_ROUTES_INDEX) {
     logger.info(`Sitemap complete`)
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
