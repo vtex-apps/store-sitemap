@@ -1,4 +1,5 @@
 import { VBase } from '@vtex/api'
+import { flatten } from 'ramda'
 
 import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex } from './utils'
@@ -62,8 +63,10 @@ export async function groupEntries(ctx: EventContext) {
           vbase
         )
       ))
+
+    const newIndex: string[] = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
     await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
-      index: entries,
+      index: newIndex,
       lastUpdated: currentDate(),
     })
     await vbase.deleteFile(rawBucket, indexFile)
