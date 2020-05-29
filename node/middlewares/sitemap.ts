@@ -1,8 +1,8 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
-import { currentDate, SitemapNotFound } from '../utils'
-import { GENERATE_SITEMAP_EVENT, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX, SitemapIndex } from './generateMiddlewares/utils'
+import { SitemapNotFound } from '../utils'
+import { currentDate, GENERATE_SITEMAP_EVENT, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX, SitemapIndex } from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
