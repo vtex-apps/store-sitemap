@@ -1,7 +1,7 @@
 import { VBase } from '@vtex/api'
 
-import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
-import { createFileName, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex, splitFileName } from './utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { createFileName, currentDate, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex } from './utils'
 
 const FILE_LIMIT = 5000
 
