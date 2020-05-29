@@ -15,7 +15,8 @@
     "gocommerce.sitemap-app": "1.x",
     "vtex.catalog-api-proxy": "0.x",
     "vtex.rewriter": "1.x",
-    "vtex.catalog-graphql": "1.x"
+    "vtex.catalog-graphql": "1.x",
+    "vtex.routes-bootstrap": "0.x"
   },
   "policies": [
     {
