@@ -1,7 +1,7 @@
 import { VBase } from '@vtex/api'
 
 import { CONFIG_BUCKET, CONFIG_FILE, currentDate, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
-import { DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex } from './utils'
+import { createFileName, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex, splitFileName } from './utils'
 
 const FILE_LIMIT = 5000
 
@@ -14,7 +14,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
     currentRoutes = [...currentRoutes, ...routes]
     if (currentRoutes.length > FILE_LIMIT) {
       const rest = currentRoutes.splice(FILE_LIMIT)
-      const entry = `${entity}-${count}`
+      const entry = createFileName(entity, count)
       newFiles.push(entry)
       await vbase.saveJSON<SitemapEntry>(bucket, entry, {
         lastUpdated: currentDate(),
@@ -25,7 +25,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
     }
   }
   if (currentRoutes.length > 0) {
-    const entry = `${entity}-${count}`
+    const entry = createFileName(entity, count)
     newFiles.push(entry)
     await vbase.saveJSON<SitemapEntry>(bucket, entry, {
       lastUpdated: currentDate(),
@@ -50,7 +50,7 @@ export async function groupEntries(ctx: EventContext) {
     const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
 
     const filesByEntity = index.reduce((acc, file) => {
-      const entity = file.split('-')[0]
+      const entity = splitFileName(file)[0]
       if (!acc[entity]) {
         acc[entity] = []
       }

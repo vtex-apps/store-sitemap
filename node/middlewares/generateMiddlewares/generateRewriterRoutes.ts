@@ -3,6 +3,7 @@ import { path, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
 import { getBucket, hashString } from '../../utils'
 import {
+  createFileName,
   currentDate,
   GENERATE_REWRITER_ROUTES_EVENT,
   GROUP_ENTRIES_EVENT,
@@ -58,7 +59,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       const newEntries = await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
           const entityRoutes = routesByBinding[bindingId][entityType]
-          const entry = `${entityType}-${count}`
+          const entry = createFileName(entityType, count)
           const lastUpdated = currentDate()
           await vbase.saveJSON<SitemapEntry>(bucket, entry, {
               lastUpdated,

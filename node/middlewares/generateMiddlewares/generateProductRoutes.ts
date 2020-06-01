@@ -2,6 +2,7 @@ import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
 import { currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
+  createFileName,
   createTranslator,
   filterBindingsBySalesChannel,
   GENERATE_PRODUCT_ROUTES_EVENT,
@@ -100,7 +101,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
         messages
       )
       const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
-      const entry = `product-${from}`
+      const entry = createFileName('product',from)
       const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
       index.push(entry)
       const lastUpdated = currentDate()

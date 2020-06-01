@@ -34,6 +34,10 @@ export interface Message {
   context: string
 }
 
+export const createFileName = (entity: string, count: number) => `${entity}-${count}`
+
+export const splitFileName = (file: string) => file.split('-')
+
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 export const currentDate = (): string => new Date().toISOString()
