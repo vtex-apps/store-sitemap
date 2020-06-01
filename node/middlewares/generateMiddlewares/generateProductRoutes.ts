@@ -1,9 +1,10 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
-import { currentDate, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   createFileName,
   createTranslator,
+  currentDate,
   filterBindingsBySalesChannel,
   GENERATE_PRODUCT_ROUTES_EVENT,
   GROUP_ENTRIES_EVENT,
@@ -19,7 +20,7 @@ import {
 const PAGE_LIMIT = 50
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
-  if (!ctx.body.from) {
+  if (ctx.body.from === 0) {
     await initializeSitemap(ctx, PRODUCT_ROUTES_INDEX)
   }
 

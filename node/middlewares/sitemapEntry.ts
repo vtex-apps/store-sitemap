@@ -30,8 +30,6 @@ const URLEntry = (
       <loc>${loc}</loc>
       ${localization}
       <lastmod>${lastUpdated}</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>0.4</priority>
     `
   if (route.imagePath && route.imageTitle) {
     // add image metainfo
