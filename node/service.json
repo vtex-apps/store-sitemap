@@ -27,6 +27,18 @@
     "generateSitemap": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate"]
+    },
+    "generateRewriterRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:rewriter-routes"]
+    },
+    "generateProductRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:product-routes"]
+    },
+    "groupEntries": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:group-entries"]
     }
   }
 }

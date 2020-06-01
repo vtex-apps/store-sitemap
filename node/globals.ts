@@ -17,7 +17,10 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
-    config?: Config
+    nextEvent:  {
+      event: string,
+      payload: Events
+    }
   }
 
   type Context = ServiceContext<Clients, State>
@@ -32,8 +35,33 @@ declare global {
     pageType: string
   }
 
+  interface Route {
+    path: string,
+    imagePath?: string
+    imageTitle?: string
+  }
+
   interface Config {
     productionPrefix: string
     generationPrefix: string
+  }
+
+  type Events = RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent | GroupEntriesEvent
+
+  interface GroupEntriesEvent {
+    indexFile: string
+  }
+
+  interface RewriterRoutesGenerationEvent {
+    next: Maybe<string>
+    report: Record<string, number>
+    count: number
+  }
+
+  interface ProductRoutesGenerationEvent {
+    authToken: string
+    from: number
+    processedProducts: number
+    invalidProducts: number
   }
 }
