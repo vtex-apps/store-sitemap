@@ -19,22 +19,12 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
-  const { clients: { vbase, rewriter }, body, vtex: { logger } } = ctx
+  const { clients: { vbase, rewriter }, body } = ctx
   const {
     count,
     next,
     report,
   }: RewriterRoutesGenerationEvent = body!
-
-  logger.debug({
-    message: 'Event received',
-    payload: {
-      count,
-      next,
-      report,
-    },
-    type: 'user-routes',
-  })
 
   const response = await rewriter.listInternals(LIST_LIMIT, next)
   const routes: Internal[] = response.routes || []
@@ -97,7 +87,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     }
   } else {
     ctx.vtex.logger.info({
-      message: 'User routes complete',
+      message: 'Rewriter routes complete',
       report,
       type: GENERATE_REWRITER_ROUTES_EVENT,
     })

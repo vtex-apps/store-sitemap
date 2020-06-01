@@ -41,7 +41,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   })
 
   const {
-    authToken, // TODO: CHECK IF IT IS SAFE
+    authToken,
     from,
     processedProducts,
     invalidProducts,
@@ -49,17 +49,6 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const to = from + PAGE_LIMIT - 1
   const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
-
-  logger.debug({
-    message: 'Event received',
-    payload: {
-      from,
-      invalidProducts,
-      processedProducts,
-      total,
-    },
-    type: 'product-routes',
-  })
 
   const productsInfo = await Promise.all(Object.keys(data).map(async productId => {
     const hasSKUs = data[productId].length > 0

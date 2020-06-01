@@ -50,7 +50,6 @@ export async function groupEntries(ctx: EventContext) {
     const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
 
     const filesByEntity = index.reduce((acc, file) => {
-      // TODO Centralize file name creation
       const entity = file.split('-')[0]
       if (!acc[entity]) {
         acc[entity] = []
