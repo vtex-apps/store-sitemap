@@ -1,4 +1,4 @@
-import { Apps } from "@vtex/api"
+import { Apps } from '@vtex/api'
 
 const TEN_MINUTES_S = 10 * 60
 
