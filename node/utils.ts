@@ -4,11 +4,13 @@ import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = 'configuration'
 export const CONFIG_FILE = 'config.json'
-export const TOKEN_FILE = 'token.json'
+export const GENERATION_CONFIG_FILE = 'generation.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'
+
+const oneHourFromNowMS = () => `${new Date(Date.now() + 1 * 60 * 60 * 1000)}`
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT
@@ -64,14 +66,25 @@ export const startSitemapGeneration = async (ctx: Context) => {
       return
   }
   const force = ctx.query.__force !== undefined
-  // TODO add generationId
-  // Add ttl
-  const token = await vbase.getJSON<string>(CONFIG_BUCKET, TOKEN_FILE, true)
-  if (token && !force) {
+  const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+  if (config && validDate(config.endDate) && !force) {
     ctx.status = 202
     ctx.body = 'Sitemap generation already in place'
     return
   }
-  await vbase.saveJSON<string>(CONFIG_BUCKET, TOKEN_FILE, adminUserAuthToken)
-  events.sendEvent('', GENERATE_SITEMAP_EVENT)
+  const generationId = (Math.random() * 10000).toString()
+  await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
+    authToken: adminUserAuthToken,
+    endDate: oneHourFromNowMS(),
+    generationId,
+  })
+  events.sendEvent('', GENERATE_SITEMAP_EVENT, { generationId })
+}
+
+export const validDate = (endDate: string) => {
+  const date = new Date(endDate)
+  if (date && date.toString() !== 'Invalid Date' && date <= new Date()) {
+    return false
+  }
+  return true
 }

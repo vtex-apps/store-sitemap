@@ -1,6 +1,6 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
-import { CONFIG_BUCKET, getBucket, hashString, TENANT_CACHE_TTL_S, TOKEN_FILE } from '../../utils'
+import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   createFileName,
   createTranslator,
@@ -44,11 +44,12 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const {
     from,
+    generationId,
     processedProducts,
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-  const authToken = await vbase.getJSON<string>(CONFIG_BUCKET, TOKEN_FILE)
+  const { authToken } = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE)
 
   const to = from + PAGE_LIMIT - 1
   const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
@@ -122,6 +123,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const payload: ProductRoutesGenerationEvent = {
     from: from + PAGE_LIMIT,
+    generationId,
     invalidProducts: invalidProducts + currentInvalidProducts,
     processedProducts: processedProducts + currentProcessedProducts,
   }
@@ -140,6 +142,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     ctx.state.nextEvent = {
       event: GROUP_ENTRIES_EVENT,
       payload: {
+        generationId,
         indexFile: PRODUCT_ROUTES_INDEX,
       },
     }

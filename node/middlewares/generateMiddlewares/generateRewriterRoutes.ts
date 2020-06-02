@@ -23,6 +23,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const { clients: { vbase, rewriter }, body } = ctx
   const {
     count,
+    generationId,
     next,
     report,
   }: RewriterRoutesGenerationEvent = body!
@@ -79,6 +80,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (responseNext) {
     const payload: RewriterRoutesGenerationEvent = {
       count: count + 1,
+      generationId,
       next: responseNext,
       report,
     }
@@ -95,6 +97,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     ctx.state.nextEvent = {
       event: GROUP_ENTRIES_EVENT,
       payload: {
+        generationId,
         indexFile: REWRITER_ROUTES_INDEX,
       },
     }

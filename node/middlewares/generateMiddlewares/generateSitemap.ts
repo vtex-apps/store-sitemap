@@ -6,17 +6,21 @@ export async function generateSitemapFromREST(ctx: Context) {
   await startSitemapGeneration(ctx)
 }
 
-const DEFAULT_REWRITER_ROUTES_PAYLOAD: RewriterRoutesGenerationEvent = {
+const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
   count: 0,
   next: null,
   report: {},
 }
 
 export async function generateSitemap(ctx: EventContext) {
-  const { clients: { events } } = ctx
-  events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
+  const { clients: { events }, body: { generationId } } = ctx
+  events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
+    ...DEFAULT_REWRITER_ROUTES_PAYLOAD,
+    generationId,
+  } as RewriterRoutesGenerationEvent)
   events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
     from: 0,
+    generationId,
     invalidProducts: 0,
     processedProducts: 0,
   } as ProductRoutesGenerationEvent)

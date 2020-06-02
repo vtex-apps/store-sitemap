@@ -1,6 +1,6 @@
 import { VBase } from '@vtex/api'
 
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S, TOKEN_FILE } from '../../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import { createFileName, currentDate, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex, splitFileName } from './utils'
 
 const FILE_LIMIT = 5000
@@ -82,7 +82,7 @@ export async function groupEntries(ctx: EventContext) {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,
     })
-    await vbase.deleteFile(CONFIG_BUCKET, TOKEN_FILE)
+    await vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE)
     return
   }
 }
