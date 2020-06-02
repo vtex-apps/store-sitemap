@@ -1,4 +1,3 @@
-import { Catalog } from './clients/catalog';
 import './globals'
 
 import {
