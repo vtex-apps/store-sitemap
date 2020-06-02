@@ -1,3 +1,4 @@
+import { Catalog } from './clients/catalog';
 import './globals'
 
 import {
@@ -50,10 +51,16 @@ metrics.trackCache('vbase', vbaseCacheStorage)
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
+    catalog: {
+      timeout: EIGHT_SECOND_MS,
+    },
     default: {
       concurrency: 5,
       retries: 1,
       timeout: THREE_SECONDS_MS,
+    },
+    messages: {
+      timeout: EIGHT_SECOND_MS,
     },
     rewriter: {
       memoryCache: rewriterCacheStorage,
