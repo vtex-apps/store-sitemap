@@ -1,16 +1,19 @@
-import { VBase } from '@vtex/api'
+import { Logger, VBase } from '@vtex/api'
 
 import { CONFIG_BUCKET, CONFIG_FILE, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import { createFileName, currentDate, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex, splitFileName } from './utils'
 
 const FILE_LIMIT = 5000
 
-const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, vbase: VBase) => {
+const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, ctx: EventContext) => {
+  const { clients: { vbase }, vtex: { logger } } = ctx
   let count = 0
+  let routesCount = 0
   let currentRoutes: Route[] = []
   const newFiles: string[] = []
   for (const file of files) {
     const { routes } = await vbase.getJSON<SitemapEntry>(rawBucket, file)
+    routesCount += routes.length
     currentRoutes = [...currentRoutes, ...routes]
     if (currentRoutes.length > FILE_LIMIT) {
       const rest = currentRoutes.splice(FILE_LIMIT)
@@ -32,6 +35,11 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
       routes: currentRoutes,
     })
   }
+  logger.info({
+    count: routesCount,
+    entity,
+    messages: 'Routes grouped',
+  })
   return newFiles
 }
 
@@ -65,7 +73,7 @@ export async function groupEntries(ctx: EventContext) {
           filesByEntity[entity],
           bucket,
           rawBucket,
-          vbase
+          ctx
         )
       ))
 
