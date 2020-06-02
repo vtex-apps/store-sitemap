@@ -119,7 +119,7 @@ export class BindingResolver {
 
   private resolve(ctx: Context, bindings: Binding[]): Binding | null {
     const {
-      vtex: { account, binding },
+      vtex: { account, binding, logger },
       query: { __bindingAddress, __bindingId },
     } = ctx
     const bindingId = binding?.id ?? __bindingId
@@ -132,7 +132,20 @@ export class BindingResolver {
     }
 
     const hostAndPath = this.mountHostAndPath(ctx)
-    return this.findMatchingBinding(account, hostAndPath, bindings)
+    const matching = this.findMatchingBinding(account, hostAndPath, bindings)
+    if (matching) {
+      return matching
+    }
+
+    logger.warn({
+      headers: ctx.request.headers,
+      message: 'No binding found, falling back to the first store binding',
+    })
+    return this.getStoreBinding(bindings)
+  }
+
+  private getStoreBinding(bindings: Binding[]) {
+    return bindings.find(b => b.targetProduct === 'vtex-storefront') ?? null
   }
 
   private getBindingById(bindingId: string, bindings: Binding[]): Binding {
