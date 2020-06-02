@@ -35,15 +35,10 @@ const tenantCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
-const rewriterCacheStorage = new LRUCache<string, Cached>({
-  max: 3000,
-})
-
 const vbaseCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
-metrics.trackCache('rewrite', rewriterCacheStorage)
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('vbase', vbaseCacheStorage)
 
@@ -62,7 +57,6 @@ const clients: ClientsConfig<Clients> = {
       timeout: EIGHT_SECOND_MS,
     },
     rewriter: {
-      memoryCache: rewriterCacheStorage,
       timeout: EIGHT_SECOND_MS,
     },
     tenant: {
