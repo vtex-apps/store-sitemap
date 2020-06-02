@@ -1,6 +1,6 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
-import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, getBucket, hashString, TENANT_CACHE_TTL_S, TOKEN_FILE } from '../../utils'
 import {
   createFileName,
   createTranslator,
@@ -43,11 +43,12 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   })
 
   const {
-    authToken,
     from,
     processedProducts,
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
+
+  const authToken = await vbase.getJSON<string>(CONFIG_BUCKET, TOKEN_FILE)
 
   const to = from + PAGE_LIMIT - 1
   const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
@@ -120,7 +121,6 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   )
 
   const payload: ProductRoutesGenerationEvent = {
-    authToken,
     from: from + PAGE_LIMIT,
     invalidProducts: invalidProducts + currentInvalidProducts,
     processedProducts: processedProducts + currentProcessedProducts,

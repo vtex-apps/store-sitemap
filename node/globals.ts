@@ -59,7 +59,6 @@ declare global {
   }
 
   interface ProductRoutesGenerationEvent {
-    authToken: string
     from: number
     processedProducts: number
     invalidProducts: number

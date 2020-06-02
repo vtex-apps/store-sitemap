@@ -1,8 +1,10 @@
 import { Binding, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
+import { GENERATE_SITEMAP_EVENT, sleep } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = 'configuration'
 export const CONFIG_FILE = 'config.json'
+export const TOKEN_FILE = 'token.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
@@ -52,3 +54,23 @@ export const hashString = (str: string) => {
 }
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
+
+export const startSitemapGeneration = async (ctx: Context) => {
+  const { clients: { vbase, events }, vtex: { logger, adminUserAuthToken } } = ctx
+  if (!adminUserAuthToken) {
+      ctx.status = 401
+      ctx.body = 'Missing adminUserAuth token'
+      logger.error(`Missing adminUserAuth token`)
+      return
+  }
+  // TODO add querystrring force
+  // Add ttl
+  const token = await vbase.getJSON<string>(CONFIG_BUCKET, TOKEN_FILE, true)
+  if (token) {
+    ctx.status = 202
+    ctx.body = 'Sitemap generation already in place'
+    return
+  }
+  await vbase.saveJSON<string>(CONFIG_BUCKET, TOKEN_FILE, adminUserAuthToken)
+  events.sendEvent('', GENERATE_SITEMAP_EVENT)
+}
