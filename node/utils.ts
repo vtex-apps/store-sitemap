@@ -62,7 +62,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
   if (!adminUserAuthToken) {
       ctx.status = 401
       ctx.body = 'Missing adminUserAuth token'
-      logger.error(`Missing adminUserAuth token`)
+      logger.error(ctx.body)
       return
   }
   const force = ctx.query.__force !== undefined

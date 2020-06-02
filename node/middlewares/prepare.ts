@@ -4,6 +4,7 @@ import { BindingResolver } from '../resources/bindings'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString, startSitemapGeneration } from '../utils'
 import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
+// TODO: Make cache last one day
 // const ONE_DAY_S = 24 * 60 * 60
 const TWO_HOURS = 2 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {

@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Adds token security, by saving it in VBase
-- Creates a generation Id, to identify a generation and not process events from other ones
+- Token security, by saving it in VBase
+- Generation Id, to identify a generation and not process events from other ones
 
 ### Fixed
 - Increases clients timeouts
