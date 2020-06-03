@@ -8,13 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Fallbacks to first store binding in case of missing binding
+- Increases clients timeouts
 
 ### Added
 - Token security, by saving it in VBase
 - Generation Id, to identify a generation and not process events from other ones
-
-### Fixed
-- Increases clients timeouts
 
 ## [2.3.1] - 2020-06-01
 
