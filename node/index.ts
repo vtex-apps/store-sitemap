@@ -19,6 +19,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
 import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
+import { prepare as generationPrepare } from './middlewares/generateMiddlewares/prepare'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
@@ -34,28 +35,28 @@ const tenantCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
-const rewriterCacheStorage = new LRUCache<string, Cached>({
-  max: 3000,
-})
-
 const vbaseCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
 
-metrics.trackCache('rewrite', rewriterCacheStorage)
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('vbase', vbaseCacheStorage)
 
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
+    catalog: {
+      timeout: EIGHT_SECOND_MS,
+    },
     default: {
       concurrency: 5,
       retries: 1,
       timeout: THREE_SECONDS_MS,
     },
+    messages: {
+      timeout: EIGHT_SECOND_MS,
+    },
     rewriter: {
-      memoryCache: rewriterCacheStorage,
       timeout: EIGHT_SECOND_MS,
     },
     tenant: {
@@ -72,10 +73,10 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateProductRoutes: [tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [generateRewriterRoutes, sendNextEvent],
-    generateSitemap,
-    groupEntries,
+    generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
+    generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
+    generateSitemap: [generationPrepare, generateSitemap],
+    groupEntries: [generationPrepare, groupEntries],
   },
   routes: {
     generateSitemap: generateSitemapFromREST,

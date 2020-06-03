@@ -46,20 +46,29 @@ declare global {
     generationPrefix: string
   }
 
+  interface GenerationConfig {
+    generationId: string
+    authToken: string
+    endDate: string
+  }
+
   type Events = RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent | GroupEntriesEvent
 
-  interface GroupEntriesEvent {
+  interface DefaultEvent {
+    generationId: string
+  }
+
+  interface GroupEntriesEvent extends DefaultEvent {
     indexFile: string
   }
 
-  interface RewriterRoutesGenerationEvent {
+  interface RewriterRoutesGenerationEvent extends DefaultEvent  {
     next: Maybe<string>
     report: Record<string, number>
     count: number
   }
 
-  interface ProductRoutesGenerationEvent {
-    authToken: string
+  interface ProductRoutesGenerationEvent extends DefaultEvent   {
     from: number
     processedProducts: number
     invalidProducts: number

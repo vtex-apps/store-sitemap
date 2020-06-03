@@ -1,4 +1,4 @@
-import { Apps } from "@vtex/api"
+import { Apps } from '@vtex/api'
 
 const TEN_MINUTES_S = 10 * 60
 
@@ -19,7 +19,7 @@ export async function robots(ctx: Context) {
     vtex: { account, production, platform }, state: { binding },
   } = ctx
 
-  let data: string | undefined = undefined
+  let data: string | undefined
 
   const { clients } = ctx
   const robotsDataSource =

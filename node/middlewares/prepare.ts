@@ -1,15 +1,16 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString } from '../utils'
-import { GENERATE_SITEMAP_EVENT } from './generateMiddlewares/utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString, startSitemapGeneration } from '../utils'
+import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
+// TODO: Make cache last one day
 // const ONE_DAY_S = 24 * 60 * 60
 const TWO_HOURS = 2 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
     vtex: { adminUserAuthToken, production, logger },
-    clients: { vbase, events, tenant },
+    clients: { vbase, tenant },
   } = ctx
   if (!adminUserAuthToken) {
       ctx.status = 401
@@ -32,11 +33,8 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const query = parse(queryString)
 
-  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE)
-    .catch(err => {
-      events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken } )
-      throw err
-    })
+  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE) || DEFAULT_CONFIG
+
   const bucket = getBucket(productionPrefix, hashString(binding.id))
 
   ctx.state = {
@@ -59,6 +57,8 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     production ? `public, max-age=${TWO_HOURS}` : 'no-cache'
   )
   if (production) {
-    events.sendEvent('', GENERATE_SITEMAP_EVENT, { authToken: adminUserAuthToken } )
+    startSitemapGeneration(ctx)
   }
+
+  return
 }

@@ -1,12 +1,16 @@
 import { Binding, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
+import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = 'configuration'
 export const CONFIG_FILE = 'config.json'
+export const GENERATION_CONFIG_FILE = 'generation.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'
+
+const oneHourFromNowMS = () => `${new Date(Date.now() + 1 * 60 * 60 * 1000)}`
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT
@@ -52,3 +56,35 @@ export const hashString = (str: string) => {
 }
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
+
+export const startSitemapGeneration = async (ctx: Context) => {
+  const { clients: { vbase, events }, vtex: { logger, adminUserAuthToken } } = ctx
+  if (!adminUserAuthToken) {
+      ctx.status = 401
+      ctx.body = 'Missing adminUserAuth token'
+      logger.error(ctx.body)
+      return
+  }
+  const force = ctx.query.__force !== undefined
+  const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+  if (config && validDate(config.endDate) && !force) {
+    ctx.status = 202
+    ctx.body = 'Sitemap generation already in place'
+    return
+  }
+  const generationId = (Math.random() * 10000).toString()
+  await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
+    authToken: adminUserAuthToken,
+    endDate: oneHourFromNowMS(),
+    generationId,
+  })
+  events.sendEvent('', GENERATE_SITEMAP_EVENT, { generationId })
+}
+
+export const validDate = (endDate: string) => {
+  const date = new Date(endDate)
+  if (date && date.toString() !== 'Invalid Date' && date <= new Date()) {
+    return false
+  }
+  return true
+}
