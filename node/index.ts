@@ -53,6 +53,10 @@ const clients: ClientsConfig<Clients> = {
       retries: 1,
       timeout: THREE_SECONDS_MS,
     },
+    graphqlServer: {
+      retries: 1,
+      timeout: EIGHT_SECOND_MS,
+    },
     messages: {
       timeout: EIGHT_SECOND_MS,
     },

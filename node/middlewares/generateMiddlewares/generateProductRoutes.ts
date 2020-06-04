@@ -1,6 +1,7 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { GraphQLServer } from './../../clients/graphqlServer'
 import {
   createFileName,
   createTranslator,
@@ -18,12 +19,31 @@ import {
 } from './utils'
 
 const PAGE_LIMIT = 50
+const PRODUCT_QUERY =  `query Product($identifier: ProductUniqueIdentifier) {
+  product(identifier: $identifier) @context(provider: "vtex.search-graphql") {
+		productId
+  }
+}`
+
+const isProductActive = async (productId: string, graphqlServer: GraphQLServer) => {
+  const searchResponse = await graphqlServer.query(PRODUCT_QUERY, { identifier: { field: 'id', value: productId } }, {
+    persistedQuery: {
+      provider: 'vtex.search-graphql@0.x',
+      sender: 'vtex.store-sitemap@2.x',
+    },
+  }).catch(error => {
+    if (error.graphQLErrors.length === 1 && error.graphQLErrors[0].message.startsWith('No product was found')) {
+      return null
+    }
+    throw error
+  })
+  return searchResponse !== null
+}
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
   if (ctx.body.from === 0) {
     await initializeSitemap(ctx, PRODUCT_ROUTES_INDEX)
   }
-
   const {
     clients: {
       catalog,
@@ -31,6 +51,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       vbase,
       messages: messagesClient,
       tenant,
+      graphqlServer,
     },
     body,
     vtex: {
@@ -59,8 +80,13 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     if (!hasSKUs) {
       return
     }
-    const { product } = await catalogGraphQL.product(productId) || { product: null }
-    if (!product || !product.isActive ) {
+    const [catalogResponse, isActive] = await Promise.all([
+      catalogGraphQL.product(productId),
+      isProductActive(productId, graphqlServer),
+    ])
+    const product = catalogResponse?.product
+
+    if (!product || isActive ) {
       return
     }
 

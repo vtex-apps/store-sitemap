@@ -16,7 +16,8 @@
     "vtex.catalog-api-proxy": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.catalog-graphql": "1.x",
-    "vtex.routes-bootstrap": "0.x"
+    "vtex.routes-bootstrap": "0.x",
+    "vtex.graphql-server": "1.x"
   },
   "policies": [
     {
@@ -75,6 +76,9 @@
     },
     {
       "name": "vtex.messages:graphql-save-translation-messages"
+    },
+    {
+      "name": "vtex.graphql-server:resolve-graphql"
     }
   ],
   "credentialType": "absolute",
