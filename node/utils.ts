@@ -73,6 +73,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
     return
   }
   const generationId = (Math.random() * 10000).toString()
+  logger.info({ message: 'New generation starting', generationId })
   await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
     authToken: adminUserAuthToken,
     endDate: oneHourFromNowMS(),
