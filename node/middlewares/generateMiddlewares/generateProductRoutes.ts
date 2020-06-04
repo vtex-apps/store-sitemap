@@ -25,7 +25,7 @@ const PRODUCT_QUERY =  `query Product($identifier: ProductUniqueIdentifier) {
   }
 }`
 
-const isProductActive = async (productId: string, graphqlServer: GraphQLServer) => {
+const isProductSearchResponseEmpty = async (productId: string, graphqlServer: GraphQLServer) => {
   const searchResponse = await graphqlServer.query(PRODUCT_QUERY, { identifier: { field: 'id', value: productId } }, {
     persistedQuery: {
       provider: 'vtex.search-graphql@0.x',
@@ -80,13 +80,13 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     if (!hasSKUs) {
       return
     }
-    const [catalogResponse, isActive] = await Promise.all([
+    const [catalogResponse, hasSearchResponse] = await Promise.all([
       catalogGraphQL.product(productId),
-      isProductActive(productId, graphqlServer),
+      isProductSearchResponseEmpty(productId, graphqlServer),
     ])
     const product = catalogResponse?.product
 
-    if (!product || !isActive ) {
+    if (!product || !product.isActive || !hasSearchResponse) {
       return
     }
 
