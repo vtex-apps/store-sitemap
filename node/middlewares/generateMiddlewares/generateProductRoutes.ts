@@ -86,7 +86,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     ])
     const product = catalogResponse?.product
 
-    if (!product || isActive ) {
+    if (!product || !isActive ) {
       return
     }
 
