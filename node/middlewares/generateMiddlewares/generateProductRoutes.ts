@@ -1,7 +1,7 @@
 import { Binding } from '@vtex/api'
 import { Product } from 'vtex.catalog-graphql'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
-import { GraphQLServer } from './../../clients/graphqlServer'
+import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
   createFileName,
   createTranslator,
@@ -32,7 +32,7 @@ const isProductSearchResponseEmpty = async (productId: string, graphqlServer: Gr
       sender: 'vtex.store-sitemap@2.x',
     },
   }).catch(error => {
-    if (error.graphQLErrors.length === 1 && error.graphQLErrors[0].message.startsWith('No product was found')) {
+    if (error instanceof ProductNotFound) {
       return null
     }
     throw error
@@ -85,6 +85,15 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       isProductSearchResponseEmpty(productId, graphqlServer),
     ])
     const product = catalogResponse?.product
+    if (!hasSearchResponse) {
+      logger.debug({ message: 'Invalid search', product: product?.name, id: productId })
+      if (product?.isActive) {
+        logger.debug({ message: 'Invalid search but valid product', product: product?.name, id: productId })
+      }
+    }
+    if (!product?.isActive && hasSearchResponse) {
+        logger.debug({ message: 'Valid search but invalid product', product: product?.name, id: productId })
+    }
 
     if (!product || !product.isActive || !hasSearchResponse) {
       return
