@@ -33,7 +33,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const query = parse(queryString)
 
-  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE) || DEFAULT_CONFIG
+  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
 
   const bucket = getBucket(productionPrefix, hashString(binding.id))
 
