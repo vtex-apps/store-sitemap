@@ -1,6 +1,7 @@
 import { IOClients } from '@vtex/api'
 
 import { Catalog } from './catalog'
+import { GraphQLServer } from './graphqlServer'
 import { Messages } from './messages'
 import { Rewriter } from './rewriter'
 import { Robots } from './robots'
@@ -25,5 +26,9 @@ export class Clients extends IOClients {
 
   get messages() {
     return this.getOrSet('messages', Messages)
+  }
+
+  public get graphqlServer(): GraphQLServer {
+    return this.getOrSet('graphqlServer', GraphQLServer)
   }
 }

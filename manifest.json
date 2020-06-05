@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "2.5.0",
+  "version": "2.5.1-beta.1",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
@@ -16,7 +16,8 @@
     "vtex.catalog-api-proxy": "0.x",
     "vtex.rewriter": "1.x",
     "vtex.catalog-graphql": "1.x",
-    "vtex.routes-bootstrap": "0.x"
+    "vtex.routes-bootstrap": "0.x",
+    "vtex.graphql-server": "1.x"
   },
   "policies": [
     {
@@ -75,6 +76,9 @@
     },
     {
       "name": "vtex.messages:graphql-save-translation-messages"
+    },
+    {
+      "name": "vtex.graphql-server:resolve-graphql"
     }
   ],
   "credentialType": "absolute",
