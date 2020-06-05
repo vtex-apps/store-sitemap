@@ -85,16 +85,6 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
       isProductSearchResponseEmpty(productId, graphqlServer),
     ])
     const product = catalogResponse?.product
-    if (!hasSearchResponse) {
-      logger.debug({ message: 'Invalid search', product: product?.name, id: productId })
-      if (product?.isActive) {
-        logger.debug({ message: 'Invalid search but valid product', product: product?.name, id: productId })
-      }
-    }
-    if (!product?.isActive && hasSearchResponse) {
-        logger.debug({ message: 'Valid search but invalid product', product: product?.name, id: productId })
-    }
-
     if (!product || !product.isActive || !hasSearchResponse) {
       return
     }
