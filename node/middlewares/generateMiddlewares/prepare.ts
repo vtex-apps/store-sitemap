@@ -7,7 +7,8 @@ export async function prepare(ctx: EventContext, next: () => Promise<void>) {
     logger.error({ message: 'Missing generation id', payload: body })
     return
   }
-  const { generationId: currentGenerationId } = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE)
+  const { generationId: currentGenerationId } = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+    || { generationId: null }
   if (generationId !== currentGenerationId) {
     logger.debug({ message: 'Invalid generation id', payload: body })
     return

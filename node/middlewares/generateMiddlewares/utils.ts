@@ -1,8 +1,8 @@
-import { Tenant } from '@vtex/api'
+import { Tenant, VBase } from '@vtex/api'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const RAW_DATA_PREFIX = 'C'
 
@@ -109,3 +109,24 @@ export const createTranslator = (service: Messages) => async (
   return translations
 }
 
+
+export const isSitemapComplete = async (vbase: VBase) => {
+  const [
+    isProductsRoutesComplete,
+    isRewriterRoutesComplete,
+  ] = await Promise.all([
+    vbase.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX),
+    vbase.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX),
+  ])
+  return isProductsRoutesComplete && isRewriterRoutesComplete
+}
+
+export const completeRoutes = async (file: string, vbase: VBase) =>
+  vbase.saveJSON(CONFIG_BUCKET, file, 'OK')
+
+export const cleanConfigBucket = async (vbase: VBase) =>
+  Promise.all([
+    vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE),
+    vbase.deleteFile(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX),
+    vbase.deleteFile(CONFIG_BUCKET, REWRITER_ROUTES_INDEX),
+  ])
