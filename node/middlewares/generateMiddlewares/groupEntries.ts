@@ -1,5 +1,16 @@
-import { CONFIG_BUCKET, CONFIG_FILE, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
-import { createFileName, currentDate, DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, SitemapEntry, SitemapIndex, splitFileName } from './utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import {
+  cleanConfigBucket,
+  completeRoutes,
+  createFileName,
+  currentDate,
+  DEFAULT_CONFIG,
+  isSitemapComplete,
+  RAW_DATA_PREFIX,
+  SitemapEntry,
+  SitemapIndex,
+  splitFileName
+} from './utils'
 
 const FILE_LIMIT = 5000
 
@@ -81,14 +92,16 @@ export async function groupEntries(ctx: EventContext) {
       lastUpdated: currentDate(),
     })
   }))
+  await completeRoutes(indexFile, vbase)
 
-  if (indexFile === PRODUCT_ROUTES_INDEX) {
+  const isComplete = await isSitemapComplete(vbase)
+  if (isComplete) {
     logger.info(`Sitemap complete`)
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,
     })
-    await vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE)
+    await cleanConfigBucket(vbase)
     return
   }
 }
