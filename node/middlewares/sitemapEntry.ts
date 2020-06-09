@@ -22,14 +22,14 @@ const URLEntry = (
   },
   } = ctx
   const querystring = bindingAddress
-    ? `${bindingAddress}`
+    ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
   const localization = route.alternates && route.alternates.length > 1
     ? route.alternates.map(
-        ({ bindingId, path }) => {
-          const alternateBinding = getBinding(bindingId, matchingBindings)
-          if (bindingId === binding.id || !alternateBinding) {
+      ({ bindingId, path }) => {
+        const alternateBinding = getBinding(bindingId, matchingBindings)
+        if (bindingId === binding.id || !alternateBinding) {
             return ''
           }
           const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
