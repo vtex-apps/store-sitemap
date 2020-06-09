@@ -1,5 +1,7 @@
 import { Binding } from '@vtex/api'
+import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
+
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
@@ -119,16 +121,34 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   const translate = createTranslator(messagesClient)
   const tenantLocale = tenantInfo.defaultLocale
 
-  await Promise.all(
+  const pathsDictionary: Record<string, string> = {}
+  const routesList = await Promise.all(
     Object.keys(messagesByBinding).map(async bindingId => {
-      const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
       const { messages, bindingLocale } = messagesByBinding[bindingId]
       const translatedSlugs = await translate(
         tenantLocale,
         bindingLocale,
         messages
       )
-      const routes = translatedSlugs.map(slug => ({path: `/${slugify(slug).toLowerCase()}/p`}))
+      const ids = messages.map(message => message.context)
+      const pathById = zipObj(ids, translatedSlugs)
+      const routes: Route[] = Object.keys(pathById).map(id => {
+        const slug = pathById[id]
+        const path = `/${slugify(slug).toLowerCase()}/p`
+        const key = `${bindingId}_${id}`
+        pathsDictionary[key] = path
+        return { path, id }
+      })
+      return routes
+    })
+  )
+
+  const bindingsIds = Object.keys(messagesByBinding)
+  const routesByBinding = zipObj(bindingsIds, routesList)
+  await Promise.all(
+    Object.keys(routesByBinding).map(async bindingId => {
+      const routes = routesByBinding[bindingId].map(completeRoutes(pathsDictionary, bindingsIds))
+      const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
       const entry = createFileName('product',from)
       const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
       index.push(entry)
@@ -143,7 +163,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
           routes,
         }),
       ])
-    })
+    } )
   )
 
   const payload: ProductRoutesGenerationEvent = {
@@ -174,4 +194,13 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   }
 
   await next()
+}
+
+
+const completeRoutes = (pathsDictionary: Record<string, string>, bindingIds: string[]) => (route: Route): Route => {
+  const alternates: AlternateRoute[] = bindingIds.map(id => ({ bindingId: id, path: pathsDictionary[`${id}_${route.id}`]}))
+  return {
+    ...route,
+    alternates,
+  }
 }
