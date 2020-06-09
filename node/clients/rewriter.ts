@@ -37,6 +37,9 @@ export class Rewriter extends AppGraphQLClient {
           variables: { limit, next },
         },
         {
+          headers: {
+            'cache-control': 'no-cache',
+          },
           metric: 'rewriter-get-internals',
         }
       )
