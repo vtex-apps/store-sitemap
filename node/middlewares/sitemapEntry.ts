@@ -5,8 +5,8 @@ import RouteParser from 'route-parser'
 import { SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
 
-const getCanonicalBaseAddress = (bindingId: string, bindings: Binding[]) =>
-  bindings.find(binding => binding.id === bindingId)?.canonicalBaseAddress
+const getBinding = (bindingId: string, bindings: Binding[]) =>
+  bindings.find(binding => binding.id === bindingId)
 
 const URLEntry = (
   ctx: Context,
@@ -25,13 +25,14 @@ const URLEntry = (
     ? `${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
-  const localization = route.alternates?.length > 1
+  const localization = route.alternates && route.alternates.length > 1
     ? route.alternates.map(
-        ({ bindingId, locale, path }) => {
-          const canonicalBaseAddress = getCanonicalBaseAddress(bindingId, matchingBindings)
-          if (bindingId === binding.id || !canonicalBaseAddress) {
+        ({ bindingId, path }) => {
+          const alternateBinding = getBinding(bindingId, matchingBindings)
+          if (bindingId === binding.id || !alternateBinding) {
             return ''
           }
+          const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
           const href = querystring
             ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
             : `https://${canonicalBaseAddress}${path}`

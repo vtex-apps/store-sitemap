@@ -38,7 +38,7 @@ declare global {
   interface Route {
     id: string
     path: string,
-    alternates: AlternateRoute[]
+    alternates?: AlternateRoute[]
     imagePath?: string
     imageTitle?: string
   }
@@ -46,7 +46,6 @@ declare global {
   interface AlternateRoute {
     bindingId: string
     path: string
-    locale: string
   }
 
   interface Config {
