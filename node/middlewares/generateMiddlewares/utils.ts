@@ -4,7 +4,7 @@ import { Product, SalesChannel } from 'vtex.catalog-graphql'
 import { Messages } from '../../clients/messages'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 
-export const RAW_DATA_PREFIX = 'C'
+export const RAW_DATA_PREFIX = 'CC'
 
 export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
@@ -15,8 +15,8 @@ export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
 export const GROUP_ENTRIES_EVENT = 'sitemap.generate:group-entries'
 
 export const DEFAULT_CONFIG: Config = {
-  generationPrefix: 'B',
-  productionPrefix: 'A',
+  generationPrefix: 'BB',
+  productionPrefix: 'AA',
 }
 
 export interface SitemapIndex {
@@ -88,6 +88,8 @@ export const slugify = (str: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[*+~.()'"!:@&\[\]`,/ %$#?{}|><=_^]/g, '-')
+
+export type Translator = (from: string, to: string, messages: Message[]) => Promise<string[]>
 
 export const createTranslator = (service: Messages) => async (
   from: string,
