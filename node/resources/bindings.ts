@@ -22,7 +22,7 @@ const ensureEndingSlash = (address: string) => {
 export class BindingResolver {
   constructor(private options: BindingDiscoveryOptions = defaultOptions) {}
 
-  public async discover(ctx: Context): Promise<Binding | null> {
+  public async discover(ctx: Context): Promise<Binding> {
     const {
       clients: { tenant: tenantClient },
       vtex: { account },
@@ -36,11 +36,8 @@ export class BindingResolver {
           q: account,
         },
       })
-      .catch(_ => null)
 
-    const matchingBinding = tenantInfo
-      ? this.resolve(ctx, tenantInfo.bindings)
-      : null
+    const matchingBinding = this.resolve(ctx, tenantInfo.bindings)
 
     return matchingBinding
   }
@@ -117,7 +114,7 @@ export class BindingResolver {
     return resultPath
   }
 
-  private resolve(ctx: Context, bindings: Binding[]): Binding | null {
+  private resolve(ctx: Context, bindings: Binding[]): Binding {
     const {
       vtex: { account, binding, logger },
       query: { __bindingAddress, __bindingId },
@@ -145,7 +142,11 @@ export class BindingResolver {
   }
 
   private getStoreBinding(bindings: Binding[]) {
-    return bindings.find(b => b.targetProduct === 'vtex-storefront') ?? null
+    const storeBinding = bindings.find(b => b.targetProduct === 'vtex-storefront')
+    if (!storeBinding) {
+      throw new Error('No binding found')
+    }
+    return storeBinding
   }
 
   private getBindingById(bindingId: string, bindings: Binding[]): Binding {
