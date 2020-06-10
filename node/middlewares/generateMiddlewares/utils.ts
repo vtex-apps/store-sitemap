@@ -115,8 +115,8 @@ export const isSitemapComplete = async (vbase: VBase) => {
     isProductsRoutesComplete,
     isRewriterRoutesComplete,
   ] = await Promise.all([
-    vbase.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX),
-    vbase.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX),
+    vbase.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true),
+    vbase.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true),
   ])
   return isProductsRoutesComplete && isRewriterRoutesComplete
 }

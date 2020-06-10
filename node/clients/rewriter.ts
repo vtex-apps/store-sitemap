@@ -1,5 +1,5 @@
 import { AppGraphQLClient, InstanceOptions, IOContext } from '@vtex/api'
-import { Internal, ListInternalsResponse } from 'vtex.rewriter'
+import { EntityLocator, Internal, ListInternalsResponse, RoutesByBinding } from 'vtex.rewriter'
 
 export class Rewriter extends AppGraphQLClient {
   constructor(ctx: IOContext, opts?: InstanceOptions) {
@@ -37,10 +37,40 @@ export class Rewriter extends AppGraphQLClient {
           variables: { limit, next },
         },
         {
+          headers: {
+            'cache-control': 'no-cache',
+          },
           metric: 'rewriter-get-internals',
         }
       )
       .then(res => res.data?.internal?.listInternals) as Promise<
       ListInternalsResponse
     >
+
+    public routesById = (
+      locator: EntityLocator
+    ): Promise<RoutesByBinding[]> =>
+      this.graphql
+        .query<
+          { internal: { routes: RoutesByBinding[] } },
+          { locator: EntityLocator }
+        >(
+          {
+            query: `
+        query Routes($locator: EntityLocator!) {
+          internal {
+            routes(locator: $locator) {
+              route
+              binding
+            }
+          }
+        }
+        `,
+            variables: { locator },
+          },
+          {
+            metric: 'rewriter-get-internals',
+          }
+        )
+      .then(res => res.data?.internal?.routes) as Promise<RoutesByBinding[]>
 }

@@ -10,7 +10,7 @@ import { Clients } from './clients'
 declare global {
   interface State extends RecorderState {
     platform?: string
-    binding: Binding | null
+    binding: Binding
     bucket: string
     forwardedHost: string
     forwardedPath: string
@@ -36,9 +36,16 @@ declare global {
   }
 
   interface Route {
+    id: string
     path: string,
+    alternates?: AlternateRoute[]
     imagePath?: string
     imageTitle?: string
+  }
+
+  interface AlternateRoute {
+    bindingId: string
+    path: string
   }
 
   interface Config {

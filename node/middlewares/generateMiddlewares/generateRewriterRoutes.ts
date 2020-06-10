@@ -1,5 +1,6 @@
-import { path, startsWith } from 'ramda'
+import { Rewriter } from './../../clients/rewriter'
 
+import { path as Rpath, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
 import { getBucket, hashString } from '../../utils'
 import {
@@ -37,8 +38,9 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       report[internal.type] = (report[internal.type] || 0) + 1
       if (!startsWith('notFound', internal.type) && internal.type !== 'product') {
         const { binding } = internal
-        const bindingRoutes: Route[] = path([binding, internal.type], acc) || []
+        const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
         const route: Route = {
+          id: internal.id,
           imagePath: internal.imagePath || undefined,
           imageTitle: internal.imageTitle || undefined,
           path: internal.from,
@@ -59,7 +61,9 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       const groupedRoutes = routesByBinding[bindingId]
       const newEntries = await Promise.all(
         Object.keys(groupedRoutes).map(async entityType => {
-          const entityRoutes = routesByBinding[bindingId][entityType]
+          const entityRoutes = await Promise.all(
+            routesByBinding[bindingId][entityType].map(completeRoute(rewriter, entityType))
+          )
           const entry = createFileName(entityType, count)
           const lastUpdated = currentDate()
           await vbase.saveJSON<SitemapEntry>(bucket, entry, {
@@ -103,4 +107,16 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     }
   }
   await nextMiddleware()
+}
+
+const completeRoute = (rewriter: Rewriter, type: string) => async (route: Route) => {
+  const routesById = await rewriter.routesById({
+    id: route.id,
+    type,
+  })
+  const alternates = routesById.map(({ route: path, binding: bindingId}) => ({ path, bindingId}))
+  return {
+    ...route,
+    alternates,
+  }
 }

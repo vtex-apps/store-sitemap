@@ -1,29 +1,44 @@
+import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
 import { SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
 
+const getBinding = (bindingId: string, bindings: Binding[]) =>
+  bindings.find(binding => binding.id === bindingId)
+
 const URLEntry = (
-  forwardedHost: string,
-  rootPath: string,
+  ctx: Context,
   route: Route,
-  lastUpdated: string,
-  supportedLocations: string[],
-  bindingAddress?: string
+  lastUpdated: string
 ): string => {
+  const { state: {
+    binding,
+    bindingAddress,
+    forwardedHost,
+    rootPath,
+    matchingBindings,
+  },
+  } = ctx
   const querystring = bindingAddress
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
-  const localization = supportedLocations.length > 1
-    ? supportedLocations
-      .map(
-        locale =>
-          `<xhtml:link rel="alternate" hreflang="${locale}" href="${loc}${
-          querystring ? '&' : '?'
-          }cultureInfo=${locale}"/>`
-      )
+  const localization = route.alternates && route.alternates.length > 1
+    ? route.alternates.map(
+      ({ bindingId, path }) => {
+        const alternateBinding = getBinding(bindingId, matchingBindings)
+        if (bindingId === binding.id || !alternateBinding) {
+            return ''
+          }
+          const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
+          const href = querystring
+            ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
+            : `https://${canonicalBaseAddress}${path}`
+          return `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
+        }
+       )
       .join('\n')
     : ''
   let entry = `
@@ -47,11 +62,8 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
       binding,
-      bindingAddress,
-      forwardedHost,
       forwardedPath,
       bucket,
-      rootPath,
     },
     clients: { vbase },
   } = ctx
@@ -90,14 +102,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
   routes.forEach((route: Route) => {
     $('urlset').append(
-      URLEntry(
-        forwardedHost,
-        rootPath,
-        route,
-        lastUpdated,
-        binding.supportedLocales,
-        bindingAddress
-      )
+      URLEntry(ctx, route, lastUpdated)
     )
   })
 
