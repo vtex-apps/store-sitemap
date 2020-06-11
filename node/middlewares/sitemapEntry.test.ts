@@ -1,4 +1,4 @@
-import { IOContext, Logger, VBase, Binding } from '@vtex/api'
+import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
