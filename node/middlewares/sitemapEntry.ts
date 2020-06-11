@@ -8,7 +8,7 @@ import { SitemapEntry } from './generateMiddlewares/utils'
 const getBinding = (bindingId: string, bindings: Binding[]) =>
   bindings.find(binding => binding.id === bindingId)
 
-const URLEntry = (
+export const URLEntry = (
   ctx: Context,
   route: Route,
   lastUpdated: string
@@ -61,16 +61,11 @@ const URLEntry = (
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
-      binding,
       forwardedPath,
       bucket,
     },
     clients: { vbase },
   } = ctx
-
-  if (!binding) {
-    throw new Error(`Binding from context not found`)
-  }
 
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
