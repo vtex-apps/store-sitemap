@@ -1,8 +1,8 @@
-import { Binding, IOContext, Logger, VBase } from '@vtex/api'
+import { IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { Clients } from '../../clients'
-import { prepare } from './prepare'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE } from '../../utils'
+import { prepare } from './prepare'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
@@ -60,21 +60,13 @@ describe('Test generation prepare', () => {
       ...contextMock.object,
       state: {
         ...state.object,
-        binding: {
-          id: '1',
-        } as Binding,
-        bucket: 'bucket',
-        forwardedHost: 'www.host.com',
-          forwardedPath: '/sitemap/file1.xml',
-          rootPath: '',
-        },
-        vtex: {
-          ...ioContext.object,
-          adminUserAuthToken: 'TOKEN',
-          logger: loggerMock.object,
-        },
-      }
-    })
+      },
+      vtex: {
+        ...ioContext.object,
+        logger: loggerMock.object,
+      },
+    }
+  })
 
    it('Shouldnt continue if genereationId isnt found', async () => {
      const thisContext = {
