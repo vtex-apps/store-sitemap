@@ -2,9 +2,22 @@ import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase} from '@v
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT } from './../../utils'
+import {
+  CONFIG_BUCKET,
+  GENERATION_CONFIG_FILE,
+  getBucket,
+  hashString,
+  STORE_PRODUCT
+} from './../../utils'
 import { groupEntries } from './groupEntries'
-import { DEFAULT_CONFIG, PRODUCT_ROUTES_INDEX, RAW_DATA_PREFIX, REWRITER_ROUTES_INDEX, SitemapIndex, SitemapEntry } from './utils'
+import {
+  DEFAULT_CONFIG,
+  PRODUCT_ROUTES_INDEX,
+  RAW_DATA_PREFIX,
+  REWRITER_ROUTES_INDEX,
+  SitemapEntry,
+  SitemapIndex
+} from './utils'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
