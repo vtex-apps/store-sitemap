@@ -1,6 +1,6 @@
 import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 
-interface GetProductsAndSkuIdsReponse {
+export interface GetProductsAndSkuIdsReponse {
   data: Record<string, number[]>
   range: {
     total: number
