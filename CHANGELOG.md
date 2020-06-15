@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [2.5.3] - 2020-06-10
 ### Fixed
+- Refactors generation middlewares
+- Changes buckets if app is linked
 - Builds alternates links with other bindings' routes
 
 ## [2.5.2] - 2020-06-08

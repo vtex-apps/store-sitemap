@@ -1,7 +1,8 @@
-import { Binding } from '@vtex/api'
+import { Binding, Tenant, VBase } from '@vtex/api'
 import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
+import { Clients } from '../../clients'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
@@ -17,7 +18,8 @@ import {
   RAW_DATA_PREFIX,
   SitemapEntry,
   SitemapIndex,
-  slugify
+  slugify,
+  Translator
 } from './utils'
 
 const PAGE_LIMIT = 50
@@ -26,6 +28,9 @@ const PRODUCT_QUERY =  `query Product($identifier: ProductUniqueIdentifier) {
 		productId
   }
 }`
+
+type ProductInfo = Array<[Binding, Product]>
+type MessagesByBinding = Record<string, { bindingLocale: string, messages: Message[] }>
 
 const isProductSearchResponseEmpty = async (productId: string, graphqlServer: GraphQLServer) => {
   const searchResponse = await graphqlServer.query(PRODUCT_QUERY, { identifier: { field: 'id', value: productId } }, {
@@ -42,6 +47,110 @@ const isProductSearchResponseEmpty = async (productId: string, graphqlServer: Gr
   return searchResponse !== null
 }
 
+const getProductInfo = (data: Record<string, number[]>, tenantInfo: Tenant, clients: Clients) => async (productId: string): Promise<ProductInfo | undefined> => {
+    const { catalogGraphQL, graphqlServer } = clients
+    const hasSKUs = data[productId].length > 0
+    if (!hasSKUs) {
+      return
+    }
+    const [catalogResponse, hasSearchResponse] = await Promise.all([
+      catalogGraphQL.product(productId),
+      isProductSearchResponseEmpty(productId, graphqlServer),
+    ])
+    const product = catalogResponse?.product
+    if (!product || !product.isActive || !hasSearchResponse) {
+      return
+    }
+
+    const bindings = filterBindingsBySalesChannel(
+        tenantInfo,
+        product.salesChannel as Product['salesChannel']
+      )
+
+    return bindings.map(binding => [binding, product] as [Binding, Product])
+}
+
+const getMessagesFromProductsInfo = (productsInfo: Array<ProductInfo | undefined>) =>
+  productsInfo.reduce((acc, productInfo) => {
+    const { messagesByBinding } = acc
+    if (!productInfo) {
+      acc.currentInvalidProducts++
+      return acc
+    }
+    acc.currentProcessedProducts++
+    productInfo.forEach(([binding, product]) => {
+      const message: Message = { content: product.linkId!, context: product.id }
+      if (messagesByBinding[binding.id]) {
+        messagesByBinding[binding.id].messages = messagesByBinding[binding.id].messages.concat(message)
+      } else {
+        messagesByBinding[binding.id] = { bindingLocale: binding.defaultLocale, messages: [message] }
+      }
+    })
+    return acc
+  }, {
+    currentInvalidProducts: 0,
+    currentProcessedProducts: 0,
+    messagesByBinding: {} as MessagesByBinding,
+  })
+
+const createRoutes = (
+  messagesByBinding: MessagesByBinding,
+  tenantLocale: string,
+  pathsDictionary: Record<string, string>,
+  translate: Translator
+) =>
+    async (bindingId: string)=> {
+      const { messages, bindingLocale } = messagesByBinding[bindingId]
+      const translatedSlugs = await translate(
+        tenantLocale,
+        bindingLocale,
+        messages
+      )
+      const ids = messages.map(message => message.context)
+      const pathById = zipObj(ids, translatedSlugs)
+      const routes: Route[] = Object.keys(pathById).map(id => {
+        const slug = pathById[id]
+        const path = `/${slugify(slug).toLowerCase()}/p`
+        const key = `${bindingId}_${id}`
+        pathsDictionary[key] = path
+        return { path, id }
+      })
+      return routes
+    }
+
+const completeRoutes = (pathsDictionary: Record<string, string>, bindingIds: string[]) => (route: Route): Route => {
+  const alternates: AlternateRoute[] = bindingIds.map(id => ({ bindingId: id, path: pathsDictionary[`${id}_${route.id}`]}))
+  return {
+    ...route,
+    alternates,
+  }
+}
+
+const saveRoutes = (
+  routesByBinding: Record<string, Route[]>,
+  pathsDictionary: Record<string, string>,
+  bindingsIds: string[],
+  entry: string,
+  vbase: VBase
+) =>
+  async (bindingId: string) => {
+    const routes = routesByBinding[bindingId].map(completeRoutes(pathsDictionary, bindingsIds))
+    const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
+    const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
+    index.push(entry)
+    const lastUpdated = currentDate()
+    await Promise.all([
+      vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
+        index,
+        lastUpdated,
+    }),
+    vbase.saveJSON<SitemapEntry>(bucket, entry, {
+      lastUpdated,
+      routes,
+    }),
+  ])
+}
+
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
   if (ctx.body.from === 0) {
     await initializeSitemap(ctx, PRODUCT_ROUTES_INDEX)
@@ -49,11 +158,9 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   const {
     clients: {
       catalog,
-      catalogGraphQL,
       vbase,
       messages: messagesClient,
       tenant,
-      graphqlServer,
     },
     body,
     vtex: {
@@ -77,93 +184,27 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   const to = from + PAGE_LIMIT - 1
   const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
 
-  const productsInfo = await Promise.all(Object.keys(data).map(async productId => {
-    const hasSKUs = data[productId].length > 0
-    if (!hasSKUs) {
-      return
-    }
-    const [catalogResponse, hasSearchResponse] = await Promise.all([
-      catalogGraphQL.product(productId),
-      isProductSearchResponseEmpty(productId, graphqlServer),
-    ])
-    const product = catalogResponse?.product
-    if (!product || !product.isActive || !hasSearchResponse) {
-      return
-    }
+  const productsInfo = await Promise.all(Object.keys(data).map(getProductInfo(data, tenantInfo, ctx.clients)))
 
-    const bindings = filterBindingsBySalesChannel(
-        tenantInfo,
-        product.salesChannel as Product['salesChannel']
-      )
-
-    return bindings.map(binding => [binding, product] as [Binding, Product])
-  }))
-
-  let currentInvalidProducts = 0
-  let currentProcessedProducts = 0
-  const messagesByBinding = productsInfo.reduce((acc, productInfo) => {
-    if (!productInfo) {
-      currentInvalidProducts++
-      return acc
-    }
-    currentProcessedProducts++
-    productInfo.forEach(([binding, product]) => {
-      const message: Message = {content: product.linkId!, context: product.id }
-      if (acc[binding.id]) {
-        acc[binding.id].messages =  acc[binding.id].messages.concat(message)
-      } else {
-        acc[binding.id] = { bindingLocale: binding.defaultLocale, messages: [message] }
-      }
-    })
-    return acc
-  }, {} as Record<string, { bindingLocale: string, messages: Message[] }>)
+  const {
+    currentInvalidProducts,
+    currentProcessedProducts,
+    messagesByBinding,
+  } = getMessagesFromProductsInfo(productsInfo)
 
   const translate = createTranslator(messagesClient)
   const tenantLocale = tenantInfo.defaultLocale
 
   const pathsDictionary: Record<string, string> = {}
   const routesList = await Promise.all(
-    Object.keys(messagesByBinding).map(async bindingId => {
-      const { messages, bindingLocale } = messagesByBinding[bindingId]
-      const translatedSlugs = await translate(
-        tenantLocale,
-        bindingLocale,
-        messages
-      )
-      const ids = messages.map(message => message.context)
-      const pathById = zipObj(ids, translatedSlugs)
-      const routes: Route[] = Object.keys(pathById).map(id => {
-        const slug = pathById[id]
-        const path = `/${slugify(slug).toLowerCase()}/p`
-        const key = `${bindingId}_${id}`
-        pathsDictionary[key] = path
-        return { path, id }
-      })
-      return routes
-    })
+    Object.keys(messagesByBinding).map(createRoutes(messagesByBinding, tenantLocale, pathsDictionary, translate))
   )
 
   const bindingsIds = Object.keys(messagesByBinding)
-  const routesByBinding = zipObj(bindingsIds, routesList)
+  const routesByBinding: Record<string, Route[]> = zipObj(bindingsIds, routesList)
+  const entry = createFileName('product', from)
   await Promise.all(
-    Object.keys(routesByBinding).map(async bindingId => {
-      const routes = routesByBinding[bindingId].map(completeRoutes(pathsDictionary, bindingsIds))
-      const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
-      const entry = createFileName('product',from)
-      const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
-      index.push(entry)
-      const lastUpdated = currentDate()
-      await Promise.all([
-        vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
-          index,
-          lastUpdated,
-        }),
-        vbase.saveJSON<SitemapEntry>(bucket, entry, {
-          lastUpdated,
-          routes,
-        }),
-      ])
-    } )
+    Object.keys(routesByBinding).map(saveRoutes(routesByBinding, pathsDictionary, bindingsIds, entry, vbase))
   )
 
   const payload: ProductRoutesGenerationEvent = {
@@ -194,13 +235,4 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   }
 
   await next()
-}
-
-
-const completeRoutes = (pathsDictionary: Record<string, string>, bindingIds: string[]) => (route: Route): Route => {
-  const alternates: AlternateRoute[] = bindingIds.map(id => ({ bindingId: id, path: pathsDictionary[`${id}_${route.id}`]}))
-  return {
-    ...route,
-    alternates,
-  }
 }

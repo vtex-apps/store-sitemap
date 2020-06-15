@@ -1,8 +1,9 @@
-import { Binding, TenantClient } from '@vtex/api'
+
+import { Binding, LINKED, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
-export const CONFIG_BUCKET = 'configuration'
+export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
 
