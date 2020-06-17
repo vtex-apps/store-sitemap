@@ -127,6 +127,13 @@ describe('Test rewriter routes generation', () => {
                 id: '4',
                 type: 'userRoute',
               },
+              {
+                binding: '1',
+                disableSitemapEntry: true,
+                from: '/banana-routes',
+                id: '5',
+                type: 'user-canonical',
+              },
             ] as Internal[],
           }
       }

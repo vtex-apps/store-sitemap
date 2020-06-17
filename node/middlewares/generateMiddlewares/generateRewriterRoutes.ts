@@ -23,7 +23,11 @@ type RoutesByBinding = Record<string, Record<string, Route[]>>
 const createRoutesByBinding = (routes: Internal[], report: Record<string, number>) => routes.reduce(
   (acc, internal) => {
     report[internal.type] = (report[internal.type] || 0) + 1
-    if (!startsWith('notFound', internal.type) && internal.type !== 'product') {
+    const validRoute =
+      !startsWith('notFound', internal.type) &&
+      internal.type !== 'product' &&
+      !internal.disableSitemapEntry
+    if (validRoute) {
       const { binding } = internal
       const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
       const route: Route = {
