@@ -28,6 +28,7 @@ export class Rewriter extends AppGraphQLClient {
               imagePath
               imageTitle
               id
+              disableSitemapEntry
             }
             next
           }
