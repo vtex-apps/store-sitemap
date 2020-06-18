@@ -1,5 +1,9 @@
 import { startSitemapGeneration } from '../../utils'
-import { GENERATE_PRODUCT_ROUTES_EVENT, GENERATE_REWRITER_ROUTES_EVENT } from './utils'
+import {
+  GENERATE_APPS_ROUTES_EVENT,
+  GENERATE_PRODUCT_ROUTES_EVENT,
+  GENERATE_REWRITER_ROUTES_EVENT
+} from './utils'
 
 export async function generateSitemapFromREST(ctx: Context) {
   ctx.status = 200
@@ -29,4 +33,5 @@ export async function generateSitemap(ctx: EventContext) {
       processedProducts: 0,
     } as ProductRoutesGenerationEvent)
   }
+  events.sendEvent('', GENERATE_APPS_ROUTES_EVENT, { generationId })
 }
