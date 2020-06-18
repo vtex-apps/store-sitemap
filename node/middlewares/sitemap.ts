@@ -3,7 +3,10 @@ import * as cheerio from 'cheerio'
 import { all } from 'ramda'
 
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
-import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
+import {
+  currentDate,
+  SitemapIndex
+} from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -62,6 +65,7 @@ const sitemapIndex = async (
   if (indexFiles.length === 0 || !all(Boolean, indexFiles)) {
     throw new SitemapNotFound('Sitemap not found')
   }
+
   const indexData = {
     index: indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[]),
     lastUpdated: indexFiles[0].lastUpdated,
