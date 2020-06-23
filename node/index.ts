@@ -12,6 +12,7 @@ import {
 import { Clients } from './clients'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
+import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
 import { generateRewriterRoutes } from './middlewares/generateMiddlewares/generateRewriterRoutes'
 import {
@@ -78,6 +79,7 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
+    generateAppsRoutes: [generationPrepare, generateAppsRoutes],
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],

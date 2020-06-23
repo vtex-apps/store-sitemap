@@ -3,7 +3,11 @@ import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
 import { generateSitemap } from './generateSitemap'
-import { GENERATE_PRODUCT_ROUTES_EVENT, GENERATE_REWRITER_ROUTES_EVENT } from './utils'
+import {
+  GENERATE_APPS_ROUTES_EVENT,
+  GENERATE_PRODUCT_ROUTES_EVENT,
+  GENERATE_REWRITER_ROUTES_EVENT
+} from './utils'
 
 const eventsTypeMock = TypeMoq.Mock.ofInstance(Events)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
@@ -12,6 +16,10 @@ const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
 const eventSent = jest.fn()
+
+const DEFAULT_APPS_ROUTES_PAYLOAD = {
+  generationId: '1',
+}
 
 const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
   count: 0,
@@ -58,8 +66,9 @@ describe('Test generate sitemap', () => {
       state: {
         ...state.object,
         settings: {
+          enableAppsRoutes: true,
+          enableNavigationRoutes: true,
           enableProductRoutes: true,
-          enableRewriterRoutes: true,
         },
       },
       vtex: {
@@ -72,25 +81,27 @@ describe('Test generate sitemap', () => {
   it('Should send both events', async () => {
     await generateSitemap(context)
     expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
-
-    await generateSitemap(context)
     expect(eventSent).toHaveBeenCalledWith('', GENERATE_PRODUCT_ROUTES_EVENT, DEFAULT_PRODUCT_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledWith('', GENERATE_APPS_ROUTES_EVENT, DEFAULT_APPS_ROUTES_PAYLOAD)
   })
 
   it('Should send only enabled events', async () => {
     context.state.settings = {
+      enableAppsRoutes: true,
+      enableNavigationRoutes: true,
       enableProductRoutes: false,
-      enableRewriterRoutes: true,
     }
 
     await generateSitemap(context)
     expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
-    expect(eventSent).toHaveBeenCalledTimes(1)
+    expect(eventSent).toHaveBeenCalledWith('', GENERATE_APPS_ROUTES_EVENT, DEFAULT_APPS_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledTimes(2)
 
     jest.clearAllMocks()
     context.state.settings = {
+      enableAppsRoutes: false,
+      enableNavigationRoutes: false,
       enableProductRoutes: true,
-      enableRewriterRoutes: false,
     }
 
     await generateSitemap(context)

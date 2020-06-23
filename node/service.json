@@ -36,6 +36,10 @@
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:product-routes"]
     },
+    "generateAppsRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:apps-routes"]
+    },
     "groupEntries": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:group-entries"]
