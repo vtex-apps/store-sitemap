@@ -24,6 +24,7 @@ import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
+import { settings } from './middlewares/settings'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
@@ -71,7 +72,7 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [prepare, sitemap]
+const sitemapPipeline = [settings,prepare, sitemap]
 const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
@@ -79,8 +80,8 @@ export default new Service<Clients, State, ParamsContext>({
   events: {
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
-    generateSitemap: [generationPrepare, generateSitemap],
-    groupEntries: [generationPrepare, groupEntries],
+    generateSitemap: [settings, generationPrepare, generateSitemap],
+    groupEntries: [settings, generationPrepare, groupEntries],
   },
   routes: {
     generateSitemap: generateSitemapFromREST,

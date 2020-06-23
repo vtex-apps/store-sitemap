@@ -1,4 +1,5 @@
 import { LINKED, Tenant, VBase } from '@vtex/api'
+import { all } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
@@ -112,23 +113,20 @@ export const createTranslator = (service: Messages) => async (
 }
 
 
-export const isSitemapComplete = async (vbase: VBase) => {
-  const [
-    isProductsRoutesComplete,
-    isRewriterRoutesComplete,
-  ] = await Promise.all([
-    vbase.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true),
-    vbase.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true),
-  ])
-  return isProductsRoutesComplete && isRewriterRoutesComplete
+export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBase) => {
+  const indexFiles = await Promise.all(enabledIndexFiles.map(
+    indexFile =>
+      vbase.getJSON(CONFIG_BUCKET, indexFile, true)
+   ))
+  return all(Boolean, indexFiles)
 }
 
 export const completeRoutes = async (file: string, vbase: VBase) =>
   vbase.saveJSON(CONFIG_BUCKET, file, 'OK')
 
-export const cleanConfigBucket = async (vbase: VBase) =>
+export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
   Promise.all([
     vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE),
-    vbase.deleteFile(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX),
-    vbase.deleteFile(CONFIG_BUCKET, REWRITER_ROUTES_INDEX),
+    ...enabledIndexFiles.map(
+    indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])

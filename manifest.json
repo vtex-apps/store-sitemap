@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "2.6.0",
+  "version": "2.7.0-beta.0",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
@@ -84,5 +84,23 @@
   "credentialType": "absolute",
   "scripts": {
     "prereleasy": "bash lint.sh"
+  },
+  "settingsSchema": {
+    "title": "VTEX Store sitemap",
+    "type": "object",
+    "properties": {
+      "enableProductRoutes": {
+        "title": "Enable product routes source",
+        "description": "This will enable the product routes source, generating product routes for the final sitemap.",
+        "type": "boolean",
+        "default": true
+      },
+      "enableRewriterRoutes": {
+        "title": "Enable rewriter routes source",
+        "description": "This will enable the rewriter routes source, generating routes from rewriter for the final sitemap.",
+        "type": "boolean",
+        "default": true
+      }
+    }
   }
 }

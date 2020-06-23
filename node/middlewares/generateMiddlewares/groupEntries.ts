@@ -53,7 +53,19 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
 }
 
 export async function groupEntries(ctx: EventContext) {
-  const { body, clients: { tenant, vbase }, vtex: { logger } } = ctx
+  const {
+    body,
+    clients: {
+      tenant,
+      vbase,
+    },
+    vtex: {
+      logger,
+    },
+    state: {
+      enabledIndexFiles,
+    },
+  } = ctx
   const { indexFile }: GroupEntriesEvent = body
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
@@ -94,14 +106,14 @@ export async function groupEntries(ctx: EventContext) {
   }))
   await completeRoutes(indexFile, vbase)
 
-  const isComplete = await isSitemapComplete(vbase)
+  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase)
   if (isComplete) {
     logger.info(`Sitemap complete`)
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,
     })
-    await cleanConfigBucket(vbase)
+    await cleanConfigBucket(enabledIndexFiles, vbase)
     return
   }
 }

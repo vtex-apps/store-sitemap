@@ -47,6 +47,8 @@ describe('Test generate sitemap', () => {
       }
     }
 
+    jest.clearAllMocks()
+
     context = {
       body: {
         generationId: '1',
@@ -55,21 +57,44 @@ describe('Test generate sitemap', () => {
       ...contextMock.object,
       state: {
         ...state.object,
+        settings: {
+          enableProductRoutes: true,
+          enableRewriterRoutes: true,
         },
-        vtex: {
-          ...ioContext.object,
-          logger: loggerMock.object,
-        },
-      }
-    })
+      },
+      vtex: {
+        ...ioContext.object,
+        logger: loggerMock.object,
+      },
+    }
+  })
 
-   it('Should send default rewriter event', async () => {
-     await generateSitemap(context)
-     expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
-   })
+  it('Should send both events', async () => {
+    await generateSitemap(context)
+    expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
 
-  it('Should send default product event', async () => {
     await generateSitemap(context)
     expect(eventSent).toHaveBeenCalledWith('', GENERATE_PRODUCT_ROUTES_EVENT, DEFAULT_PRODUCT_ROUTES_PAYLOAD)
+  })
+
+  it('Should send only enabled events', async () => {
+    context.state.settings = {
+      enableProductRoutes: false,
+      enableRewriterRoutes: true,
+    }
+
+    await generateSitemap(context)
+    expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledTimes(1)
+
+    jest.clearAllMocks()
+    context.state.settings = {
+      enableProductRoutes: true,
+      enableRewriterRoutes: false,
+    }
+
+    await generateSitemap(context)
+    expect(eventSent).toHaveBeenCalledWith('', GENERATE_PRODUCT_ROUTES_EVENT, DEFAULT_PRODUCT_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledTimes(1)
   })
 })
