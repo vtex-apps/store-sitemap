@@ -111,11 +111,14 @@ describe('Test group entries', () => {
       }
     }
 
+    jest.clearAllMocks()
+
     context = {
       clients: new ClientsImpl({}, ioContext.object),
       ...contextMock.object,
       state: {
         ...state.object,
+        enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX]
       },
       vtex: {
         ...ioContext.object,
@@ -144,6 +147,29 @@ describe('Test group entries', () => {
     const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
     const configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
     expect(productCompleteFile).toBeNull()
+    expect(rewriterCompleteFile).toBeNull()
+    expect(configCompleteFile).toBeNull()
+  })
+
+  it('Should complete if enabled files were processed', async () => {
+    const { vbase: vbaseClient } = context.clients
+    context.state.enabledIndexFiles = [PRODUCT_ROUTES_INDEX]
+
+    context.body = { indexFile: PRODUCT_ROUTES_INDEX }
+    await groupEntries(context)
+
+    const productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true)
+    let configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+    expect(productCompleteFile).toBeNull()
+    expect(configCompleteFile).toBeNull()
+
+
+    context.body = { indexFile: REWRITER_ROUTES_INDEX }
+    context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
+    await groupEntries(context)
+
+    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
+    configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
     expect(rewriterCompleteFile).toBeNull()
     expect(configCompleteFile).toBeNull()
   })
@@ -186,7 +212,7 @@ describe('Test group entries', () => {
     const expectedIndex = ['product-0', 'product-1']
     expect(index).toStrictEqual(expectedIndex)
 
-    const { routes: routes0} = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes: routes0 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
     expect(routes0.length).toEqual(5000)
 
     const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[1])
