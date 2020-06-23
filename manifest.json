@@ -84,5 +84,23 @@
   "credentialType": "absolute",
   "scripts": {
     "prereleasy": "bash lint.sh"
+  },
+  "settingsSchema": {
+    "title": "VTEX Store sitemap",
+    "type": "object",
+    "properties": {
+      "enableProductRoutes": {
+        "title": "Enable product routes source",
+        "description": "This will enable the product routes source, generating product routes for the final sitemap.",
+        "type": "boolean",
+        "default": true
+      },
+       "enableRewriterRoutes": {
+        "title": "Enable rewriter routes source",
+        "description": "This will enable the rewriter routes source, generating routes from rewriter for the final sitemap.",
+        "type": "boolean",
+        "default": true
+      }
+    }
   }
 }

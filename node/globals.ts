@@ -4,11 +4,14 @@ import {
   RecorderState,
   ServiceContext,
 } from '@vtex/api'
+import { Settings } from './middlewares/settings'
 
 import { Clients } from './clients'
 
 declare global {
   interface State extends RecorderState {
+    settings: Settings
+    enabledIndexFiles: string[]
     platform?: string
     binding: Binding
     bucket: string
