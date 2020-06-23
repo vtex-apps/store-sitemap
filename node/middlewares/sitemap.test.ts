@@ -1,7 +1,7 @@
 import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
-import { PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
 import { sitemap } from './sitemap'
@@ -29,6 +29,11 @@ describe('Test sitemap middleware', () => {
       __?: boolean | undefined
     ): Promise<T> => {
       switch (file) {
+        case APPS_ROUTES_INDEX:
+          return {
+            index: [ 'appsRoutes-0' ],
+            lastUpdated: '2019-12-04',
+          } as unknown as T
         case REWRITER_ROUTES_INDEX:
           return {
             index: [ 'brand-0', 'department-0'],
@@ -82,7 +87,7 @@ describe('Test sitemap middleware', () => {
             id: '1',
           } as Binding,
           bucket: 'bucket',
-          enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
+          enabledIndexFiles: [APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
           forwardedHost: 'www.host.com',
           forwardedPath: '/sitemap/file1.xml',
           matchingBindings: [
@@ -90,6 +95,7 @@ describe('Test sitemap middleware', () => {
           ],
           rootPath: '',
           settings: {
+            enableAppsRoutes: true,
             enableNavigationRoutes: true,
             enableProductRoutes: true,
           },
@@ -126,6 +132,10 @@ describe('Test sitemap middleware', () => {
       expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
         `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           <sitemap>
+            <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
+            <lastmod>2019-12-04</lastmod>
+          </sitemap>
+          <sitemap>
             <loc>https://www.host.com/sitemap/brand-0.xml</loc>
             <lastmod>2019-12-04</lastmod>
           </sitemap>
@@ -142,10 +152,14 @@ describe('Test sitemap middleware', () => {
   })
 
   it('Should return only enabled index', async () => {
-    context.state.enabledIndexFiles = [PRODUCT_ROUTES_INDEX]
+    context.state.enabledIndexFiles = [APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX]
     await sitemap(context, next)
     expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <sitemap>
+            <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
+            <lastmod>2019-12-04</lastmod>
+          </sitemap>
           <sitemap>
             <loc>https://www.host.com/sitemap/product-0.xml</loc>
             <lastmod>2019-12-04</lastmod>
@@ -181,6 +195,10 @@ describe('Test sitemap middleware', () => {
     expect(removeSpaces(thisContext.body)).toStrictEqual(removeSpaces(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <sitemap>
+          <loc>https://www.host.com/sitemap/appsRoutes-0.xml?__bindingAddress=www.host.com/en</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+        <sitemap>
           <loc>https://www.host.com/sitemap/brand-0.xml?__bindingAddress=www.host.com/en</loc>
           <lastmod>2019-12-04</lastmod>
         </sitemap>
@@ -207,6 +225,10 @@ describe('Test sitemap middleware', () => {
     await sitemap(thisContext, next)
     expect(removeSpaces(thisContext.body)).toStrictEqual(removeSpaces(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <sitemap>
+          <loc>https://www.host.com/en/sitemap/appsRoutes-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
         <sitemap>
           <loc>https://www.host.com/en/sitemap/brand-0.xml</loc>
           <lastmod>2019-12-04</lastmod>

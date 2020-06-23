@@ -10,10 +10,10 @@ import {
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
-import { getBucket, hashString } from '../../utils'
+import { getBucket, hashString, CONFIG_BUCKET } from '../../utils'
 import { } from './../../clients/rewriter'
 import { generateAppsRoutes } from './generateAppsRoutes'
-import { DEFAULT_CONFIG, SitemapIndex, APPS_ROUTES_INDEX, SitemapEntry } from './utils'
+import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, SitemapEntry, SitemapIndex } from './utils'
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
@@ -156,6 +156,9 @@ describe('Test rewriter routes generation', () => {
       { id: '/entry-2', path: '/entry-2' },
       { id: '/entry-3', path: '/entry-3' },
     ])
+
+    const appsCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, APPS_ROUTES_INDEX)
+    expect(appsCompleteFile).toBe('OK')
   })
 
   it('Splits routes if too many saved', async () => {
