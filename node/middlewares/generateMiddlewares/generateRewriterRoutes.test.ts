@@ -184,7 +184,7 @@ describe('Test rewriter routes generation', () => {
           count: 1,
           generationId: '1',
           next: 'NEXT',
-          report: { category: 1, userRoute: 1 },
+          report: { category: 1, 'user-canonical': 1, userRoute: 1 },
         },
      })
    })
