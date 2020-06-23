@@ -10,7 +10,7 @@ import {
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
-import { getBucket, hashString, CONFIG_BUCKET } from '../../utils'
+import { CONFIG_BUCKET, getBucket, hashString } from '../../utils'
 import { } from './../../clients/rewriter'
 import { generateAppsRoutes } from './generateAppsRoutes'
 import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, SitemapEntry, SitemapIndex } from './utils'
