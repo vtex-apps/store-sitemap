@@ -1,7 +1,7 @@
 import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
-import { PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils';
+import { PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
 import { sitemap } from './sitemap'
@@ -14,7 +14,7 @@ const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
 const removeSpaces = (str: string) => str.replace(/(\r\n|\n|\r|\s)/gm, '')
 
-describe('Test sitemap entry', () => {
+describe('Test sitemap middleware', () => {
   let context: Context
 
 
@@ -45,9 +45,7 @@ describe('Test sitemap entry', () => {
     }
   }
 
-  // tslint:disable-next-line:no-empty
-  const next = async (): Promise<void> => {
-  }
+  const next = jest.fn()
 
   const matchingBindings = [
     {
@@ -84,12 +82,17 @@ describe('Test sitemap entry', () => {
             id: '1',
           } as Binding,
           bucket: 'bucket',
+          enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
           forwardedHost: 'www.host.com',
           forwardedPath: '/sitemap/file1.xml',
           matchingBindings: [
             matchingBindings[0],
           ],
           rootPath: '',
+          settings: {
+            enableProductRoutes: true,
+            enableRewriterRoutes: true,
+          },
         },
         vtex: {
           ...ioContext.object,
@@ -138,7 +141,35 @@ describe('Test sitemap entry', () => {
       ))
   })
 
-  it('Should return bindinig index with bindingAddress', async () => {
+  it('Should return only enabled index', async () => {
+    context.state.enabledIndexFiles = [PRODUCT_ROUTES_INDEX]
+    await sitemap(context, next)
+    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
+      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <sitemap>
+            <loc>https://www.host.com/sitemap/product-0.xml</loc>
+            <lastmod>2019-12-04</lastmod>
+          </sitemap>
+        </sitemapindex>`
+    ))
+
+   context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
+    await sitemap(context, next)
+    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
+      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          <sitemap>
+            <loc>https://www.host.com/sitemap/brand-0.xml</loc>
+            <lastmod>2019-12-04</lastmod>
+          </sitemap>
+          <sitemap>
+            <loc>https://www.host.com/sitemap/department-0.xml</loc>
+            <lastmod>2019-12-04</lastmod>
+          </sitemap>
+        </sitemapindex>`
+    ))
+  })
+
+  it('Should return binding index with bindingAddress', async () => {
     const thisContext = {
       ...context,
       state: {
