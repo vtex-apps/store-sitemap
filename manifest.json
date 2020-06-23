@@ -100,6 +100,12 @@
         "description": "This will enable the navigation routes source, generating navigation routes for the final sitemap.",
         "type": "boolean",
         "default": true
+      },
+      "enableAppsRoutes": {
+        "title": "Enable apps routes source",
+        "description": "This will enable the app routes source, adding to the final sitemap routes defined and exported by the routes.json files from apps built by the store@0.x builder.",
+        "type": "boolean",
+        "default": true
       }
     }
   }
