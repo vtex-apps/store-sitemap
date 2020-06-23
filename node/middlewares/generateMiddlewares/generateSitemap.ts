@@ -33,5 +33,8 @@ export async function generateSitemap(ctx: EventContext) {
       processedProducts: 0,
     } as ProductRoutesGenerationEvent)
   }
-  events.sendEvent('', GENERATE_APPS_ROUTES_EVENT, { generationId })
+
+  if (settings.enableAppsRoutes) {
+    events.sendEvent('', GENERATE_APPS_ROUTES_EVENT, { generationId })
+  }
 }
