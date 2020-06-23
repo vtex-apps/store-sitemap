@@ -1,8 +1,9 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
+import { all } from 'ramda'
 
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
-import { currentDate, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX, SitemapIndex } from './generateMiddlewares/utils'
+import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -36,6 +37,7 @@ const sitemapBindingEntry = (
 }
 
 const sitemapIndex = async (
+  enabledIndexFiles: string[],
   forwardedHost: string,
   rootPath: string,
   vbase: VBase,
@@ -49,24 +51,20 @@ const sitemapIndex = async (
     }
   )
 
-  const [productsIndexData, userIndexData] = await Promise.all([
+  const indexFiles = await Promise.all(
+    enabledIndexFiles.map(indexFile =>
       vbase.getJSON<SitemapIndex>(
         bucket,
-        REWRITER_ROUTES_INDEX,
+        indexFile,
         true
-      ),
-      vbase.getJSON<SitemapIndex>(
-        bucket,
-        PRODUCT_ROUTES_INDEX,
-        true
-      ),
-  ])
-  if (!productsIndexData || !userIndexData) {
+      )
+    ))
+  if (indexFiles.length === 0 || !all(Boolean, indexFiles)) {
     throw new SitemapNotFound('Sitemap not found')
   }
   const indexData = {
-    index: productsIndexData.index.concat(userIndexData.index),
-    lastUpdated: productsIndexData.lastUpdated,
+    index: indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[]),
+    lastUpdated: indexFiles[0].lastUpdated,
   }
 
   const { index, lastUpdated } = indexData as SitemapIndex
@@ -113,6 +111,7 @@ const sitemapBindingIndex = async (
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
+      enabledIndexFiles,
       forwardedHost,
       bucket,
       rootPath,
@@ -127,6 +126,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
   try {
     if (hasBindingIdentifier) {
       $ = await sitemapIndex(
+        enabledIndexFiles,
         forwardedHost,
         rootPath,
         vbase,
@@ -137,7 +137,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
         ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
-        : await sitemapIndex(forwardedHost, rootPath, vbase, bucket)
+        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket)
     }
   } catch (err) {
     if (err instanceof SitemapNotFound) {

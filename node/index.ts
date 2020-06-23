@@ -72,7 +72,7 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [prepare, sitemap]
+const sitemapPipeline = [settings,prepare, sitemap]
 const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
