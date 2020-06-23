@@ -10,6 +10,7 @@ import {
 } from '../../utils'
 import {
   APPS_ROUTES_INDEX,
+  completeRoutes,
   createFileName,
   currentDate,
   DEFAULT_CONFIG,
@@ -66,6 +67,7 @@ export async function generateAppsRoutes(ctx: EventContext) {
     })
   }))
 
+  await completeRoutes(APPS_ROUTES_INDEX, vbase)
   logger.info({
     message: 'Apps routes complete',
     numberOfroutes: appsRoutes.length,
