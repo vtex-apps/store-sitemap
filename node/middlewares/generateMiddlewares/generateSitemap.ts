@@ -13,15 +13,20 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
 }
 
 export async function generateSitemap(ctx: EventContext) {
-  const { clients: { events }, body: { generationId } } = ctx
-  events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
-    ...DEFAULT_REWRITER_ROUTES_PAYLOAD,
-    generationId,
-  } as RewriterRoutesGenerationEvent)
-  events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
-    from: 0,
-    generationId,
-    invalidProducts: 0,
-    processedProducts: 0,
-  } as ProductRoutesGenerationEvent)
+  const { clients: { events }, body: { generationId }, state: { settings } } = ctx
+  if (settings.enableRewriterRoutes) {
+    events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
+      ...DEFAULT_REWRITER_ROUTES_PAYLOAD,
+      generationId,
+    } as RewriterRoutesGenerationEvent)
+  }
+
+  if (settings.enableProductRoutes) {
+    events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
+      from: 0,
+      generationId,
+      invalidProducts: 0,
+      processedProducts: 0,
+    } as ProductRoutesGenerationEvent)
+  }
 }

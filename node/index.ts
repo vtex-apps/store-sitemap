@@ -24,6 +24,7 @@ import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
 import { prepare } from './middlewares/prepare'
 import { robots } from './middlewares/robots'
+import { settings } from './middlewares/settings'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
@@ -79,7 +80,7 @@ export default new Service<Clients, State, ParamsContext>({
   events: {
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
-    generateSitemap: [generationPrepare, generateSitemap],
+    generateSitemap: [settings, generationPrepare, generateSitemap],
     groupEntries: [generationPrepare, groupEntries],
   },
   routes: {
