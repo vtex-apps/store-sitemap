@@ -16,8 +16,8 @@ describe('Test settings middleware', () => {
 
   const apps = class AppsMock extends appsTypeMock.object {
     public settings = {
+      enableNavigationRoutes: true,
       enableProductRoutes: true,
-      enableRewriterRoutes: true,
     }
 
     constructor() {
@@ -52,28 +52,28 @@ describe('Test settings middleware', () => {
 
   it('Should get correct apps index files', async () => {
     await settings(context, next)
-    expect(context.state.enabledIndexFiles).toStrictEqual([PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX])
+    expect(context.state.enabledIndexFiles).toStrictEqual([REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX])
 
     let appClient = context.clients.apps as any
     appClient.settings = {
+      enableNavigationRoutes: true,
       enableProductRoutes: false,
-      enableRewriterRoutes: true,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([REWRITER_ROUTES_INDEX])
 
     appClient = context.clients.apps as any
     appClient.settings = {
+      enableNavigationRoutes: false,
       enableProductRoutes: true,
-      enableRewriterRoutes: false,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([PRODUCT_ROUTES_INDEX])
 
     appClient = context.clients.apps as any
     appClient.settings = {
+      enableNavigationRoutes: false,
       enableProductRoutes: false,
-      enableRewriterRoutes: false,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([])

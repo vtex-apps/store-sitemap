@@ -59,7 +59,7 @@ describe('Test generate sitemap', () => {
         ...state.object,
         settings: {
           enableProductRoutes: true,
-          enableRewriterRoutes: true,
+          enableNavigationRoutes: true,
         },
       },
       vtex: {
@@ -80,7 +80,7 @@ describe('Test generate sitemap', () => {
   it('Should send only enabled events', async () => {
     context.state.settings = {
       enableProductRoutes: false,
-      enableRewriterRoutes: true,
+      enableNavigationRoutes: true,
     }
 
     await generateSitemap(context)
@@ -90,7 +90,7 @@ describe('Test generate sitemap', () => {
     jest.clearAllMocks()
     context.state.settings = {
       enableProductRoutes: true,
-      enableRewriterRoutes: false,
+      enableNavigationRoutes: false,
     }
 
     await generateSitemap(context)

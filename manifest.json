@@ -95,9 +95,9 @@
         "type": "boolean",
         "default": true
       },
-      "enableRewriterRoutes": {
-        "title": "Enable rewriter routes source",
-        "description": "This will enable the rewriter routes source, generating routes from rewriter for the final sitemap.",
+      "enableNavigationRoutes": {
+        "title": "Enable navigation routes source",
+        "description": "This will enable the navigation routes source, generating navigation routes for the final sitemap.",
         "type": "boolean",
         "default": true
       }

@@ -90,8 +90,8 @@ describe('Test sitemap middleware', () => {
           ],
           rootPath: '',
           settings: {
+            enableNavigationRoutes: true,
             enableProductRoutes: true,
-            enableRewriterRoutes: true,
           },
         },
         vtex: {

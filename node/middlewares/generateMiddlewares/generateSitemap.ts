@@ -14,7 +14,7 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
 
 export async function generateSitemap(ctx: EventContext) {
   const { clients: { events }, body: { generationId }, state: { settings } } = ctx
-  if (settings.enableRewriterRoutes) {
+  if (settings.enableNavigationRoutes) {
     events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
       ...DEFAULT_REWRITER_ROUTES_PAYLOAD,
       generationId,
