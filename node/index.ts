@@ -81,7 +81,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [generationPrepare, groupEntries],
+    groupEntries: [settings, generationPrepare, groupEntries],
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
