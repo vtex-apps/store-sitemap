@@ -118,7 +118,7 @@ describe('Test group entries', () => {
       ...contextMock.object,
       state: {
         ...state.object,
-        enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX]
+        enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
       },
       vtex: {
         ...ioContext.object,
