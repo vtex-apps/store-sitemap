@@ -3,7 +3,7 @@ import { PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewar
 
 export interface Settings {
   enableProductRoutes: boolean
-  rewriterProductRoutes: boolean
+  enableRewriterRoutes: boolean
 }
 
 const VTEX_APP_ID = process.env.VTEX_APP_ID!
@@ -11,12 +11,12 @@ const VTEX_APP_AT_MAJOR = appIdToAppAtMajor(VTEX_APP_ID)
 
 const DEFAULT_SETTINGS = {
   enableProductRoutes: true,
-  rewriterProductRoutes: true,
+  enableRewriterRoutes: true,
 }
 
 const INDEX_MAP = {
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
-  rewriterProductRoutes: REWRITER_ROUTES_INDEX,
+  enableRewriterRoutes: REWRITER_ROUTES_INDEX,
 }
 
 export async function settings(ctx: Context | EventContext, next: () => Promise<void>) {
