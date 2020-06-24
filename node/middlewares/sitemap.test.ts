@@ -1,7 +1,7 @@
 import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
-import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import { APPS_ROUTES_INDEX, NAVIGATION_ROUTES_INDEX, PRODUCT_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
 import { sitemap } from './sitemap'
@@ -34,7 +34,7 @@ describe('Test sitemap middleware', () => {
             index: [ 'appsRoutes-0' ],
             lastUpdated: '2019-12-04',
           } as unknown as T
-        case REWRITER_ROUTES_INDEX:
+        case NAVIGATION_ROUTES_INDEX:
           return {
             index: [ 'brand-0', 'department-0'],
             lastUpdated: '2019-12-04',
@@ -87,7 +87,7 @@ describe('Test sitemap middleware', () => {
             id: '1',
           } as Binding,
           bucket: 'bucket',
-          enabledIndexFiles: [APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
+          enabledIndexFiles: [APPS_ROUTES_INDEX, NAVIGATION_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
           forwardedHost: 'www.host.com',
           forwardedPath: '/sitemap/file1.xml',
           matchingBindings: [
@@ -98,6 +98,7 @@ describe('Test sitemap middleware', () => {
             enableAppsRoutes: true,
             enableNavigationRoutes: true,
             enableProductRoutes: true,
+            isIOAccount: true,
           },
         },
         vtex: {
@@ -167,7 +168,7 @@ describe('Test sitemap middleware', () => {
         </sitemapindex>`
     ))
 
-   context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
+   context.state.enabledIndexFiles = [NAVIGATION_ROUTES_INDEX]
     await sitemap(context, next)
     expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

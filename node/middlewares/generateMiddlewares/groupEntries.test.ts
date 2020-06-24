@@ -12,9 +12,9 @@ import {
 import { groupEntries } from './groupEntries'
 import {
   DEFAULT_CONFIG,
+  NAVIGATION_ROUTES_INDEX,
   PRODUCT_ROUTES_INDEX,
   RAW_DATA_PREFIX,
-  REWRITER_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex
 } from './utils'
@@ -118,7 +118,7 @@ describe('Test group entries', () => {
       ...contextMock.object,
       state: {
         ...state.object,
-        enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
+        enabledIndexFiles: [NAVIGATION_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
       },
       vtex: {
         ...ioContext.object,
@@ -128,7 +128,7 @@ describe('Test group entries', () => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const { vbase: vbaseClient } = context.clients
     vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: [] })
-    vbaseClient.saveJSON(rawBucket, REWRITER_ROUTES_INDEX, { index: [] })
+    vbaseClient.saveJSON(rawBucket, NAVIGATION_ROUTES_INDEX, { index: [] })
   })
 
   it('Should complete', async () => {
@@ -140,11 +140,11 @@ describe('Test group entries', () => {
     let productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX)
     expect(productCompleteFile).toBe('OK')
 
-    context.body = { indexFile: REWRITER_ROUTES_INDEX }
+    context.body = { indexFile: NAVIGATION_ROUTES_INDEX }
     await groupEntries(context)
 
     productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true)
-    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
+    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, NAVIGATION_ROUTES_INDEX, true)
     const configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
     expect(productCompleteFile).toBeNull()
     expect(rewriterCompleteFile).toBeNull()
@@ -164,11 +164,11 @@ describe('Test group entries', () => {
     expect(configCompleteFile).toBeNull()
 
 
-    context.body = { indexFile: REWRITER_ROUTES_INDEX }
-    context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
+    context.body = { indexFile: NAVIGATION_ROUTES_INDEX }
+    context.state.enabledIndexFiles = [NAVIGATION_ROUTES_INDEX]
     await groupEntries(context)
 
-    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
+    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, NAVIGATION_ROUTES_INDEX, true)
     configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
     expect(rewriterCompleteFile).toBeNull()
     expect(configCompleteFile).toBeNull()

@@ -10,8 +10,8 @@ import {
   GENERATE_REWRITER_ROUTES_EVENT,
   GROUP_ENTRIES_EVENT,
   initializeSitemap,
+  NAVIGATION_ROUTES_INDEX,
   RAW_DATA_PREFIX,
-  REWRITER_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex
 } from './utils'
@@ -76,8 +76,8 @@ const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Cl
       return entry
     })
   )
-  const { index } = await vbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
-  await vbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
+  const { index } = await vbase.getJSON<SitemapIndex>(bucket, NAVIGATION_ROUTES_INDEX, true)
+  await vbase.saveJSON<SitemapIndex>(bucket, NAVIGATION_ROUTES_INDEX, {
     index: [...index, ...newEntries],
     lastUpdated: currentDate(),
   })
@@ -85,7 +85,7 @@ const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Cl
 
 export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: () => Promise<void>) {
   if (!ctx.body.count) {
-    await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
+    await initializeSitemap(ctx, NAVIGATION_ROUTES_INDEX)
   }
   const { clients: { rewriter }, body } = ctx
   const {
@@ -126,7 +126,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       event: GROUP_ENTRIES_EVENT,
       payload: {
         generationId,
-        indexFile: REWRITER_ROUTES_INDEX,
+        indexFile: NAVIGATION_ROUTES_INDEX,
       },
     }
   }

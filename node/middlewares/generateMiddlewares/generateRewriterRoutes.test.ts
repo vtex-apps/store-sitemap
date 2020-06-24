@@ -10,8 +10,8 @@ import {
   GENERATE_REWRITER_ROUTES_EVENT,
   GROUP_ENTRIES_EVENT,
   initializeSitemap,
+  NAVIGATION_ROUTES_INDEX,
   RAW_DATA_PREFIX,
-  REWRITER_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex,
 } from './utils'
@@ -199,12 +199,12 @@ describe('Test rewriter routes generation', () => {
         report: { category: 1, userRoute: 1 },
       },
     }
-    await initializeSitemap(thisContext, REWRITER_ROUTES_INDEX)
+    await initializeSitemap(thisContext, NAVIGATION_ROUTES_INDEX)
     await generateRewriterRoutes(thisContext, next)
     expect(next).toBeCalled()
     expect(context.state.nextEvent).toStrictEqual({
       event: GROUP_ENTRIES_EVENT,
-      payload: { generationId: '1', indexFile: 'rewriterRoutesIndex.json' },
+      payload: { generationId: '1', indexFile: NAVIGATION_ROUTES_INDEX },
     }
     )
   })
@@ -213,7 +213,7 @@ describe('Test rewriter routes generation', () => {
     await generateRewriterRoutes(context, next)
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, NAVIGATION_ROUTES_INDEX, true)
     const expectedIndex = ['category-0', 'userRoute-0']
     expect(index).toStrictEqual(expectedIndex)
     const { routes: categoryRoutes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])

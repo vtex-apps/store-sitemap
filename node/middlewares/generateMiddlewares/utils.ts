@@ -7,7 +7,7 @@ import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRO
 
 export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 
-export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
+export const NAVIGATION_ROUTES_INDEX = 'navigationRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 export const APPS_ROUTES_INDEX = 'appsRoutesIndex.json'
 
