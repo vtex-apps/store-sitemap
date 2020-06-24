@@ -13,6 +13,7 @@ import { Clients } from './clients'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
 import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
+import { generateMasterdataRoutes } from './middlewares/generateMiddlewares/generateMasterdataRoutes'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
 import { generateRewriterRoutes } from './middlewares/generateMiddlewares/generateRewriterRoutes'
 import {
@@ -80,6 +81,7 @@ export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
     generateAppsRoutes: [generationPrepare, generateAppsRoutes],
+    generateMasterdataRoutes: [generationPrepare, generateMasterdataRoutes],
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],

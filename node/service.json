@@ -28,6 +28,10 @@
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate"]
     },
+    "generateMasterdataRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:masterdata-routes"]
+    },
     "generateRewriterRoutes": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:rewriter-routes"]
