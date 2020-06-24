@@ -8,6 +8,7 @@ import {
   hashString,
   TENANT_CACHE_TTL_S
 } from '../../utils'
+import { FILE_LIMIT } from './groupEntries'
 import {
   APPS_ROUTES_INDEX,
   completeRoutes,
@@ -20,7 +21,6 @@ import {
 
 const APP_ROUTES_ENTITY = 'appsRoutes'
 const STORE_SITEMAP_BUILD_FILE =`/dist/vtex.store-sitemap/build.json`
-const FILE_LIMIT = 5000
 
 interface SitemapBuild {
   entries: string[]

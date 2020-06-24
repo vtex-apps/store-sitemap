@@ -12,7 +12,7 @@ import {
   splitFileName
 } from './utils'
 
-const FILE_LIMIT = 5000
+export const FILE_LIMIT = 5000
 
 const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, ctx: EventContext) => {
   const { clients: { vbase }, vtex: { logger } } = ctx
