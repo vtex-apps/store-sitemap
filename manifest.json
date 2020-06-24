@@ -106,6 +106,12 @@
         "description": "This will enable the app routes source, adding to the final sitemap routes defined and exported by the routes.json files from apps built by the store@0.x builder.",
         "type": "boolean",
         "default": true
+      },
+      "isIOAccount": {
+        "title": "Verifies if is an account in VTEX IO",
+        "description": "If the account is not an IO account it will get the navigation from the correct source",
+        "type": "boolean",
+        "default": true
       }
     }
   }
