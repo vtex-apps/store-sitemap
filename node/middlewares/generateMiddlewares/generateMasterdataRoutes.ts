@@ -1,7 +1,7 @@
 import { flatten, splitEvery } from 'ramda'
 
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
-import { Clients } from './../../clients/index'
+import { Clients } from '../../clients/index'
 import { FILE_LIMIT } from './groupEntries'
 import {
   completeRoutes,
@@ -60,7 +60,7 @@ const saveRoutes = (routesByEntity: Record<string, MDRoute[]>, clients: Clients)
   })
 }
 
-export async function generatedMasterDataRoutes(ctx: EventContext) {
+export async function generateMasterdataRoutes(ctx: EventContext) {
   await initializeSitemap(ctx, NAVIGATION_ROUTES_INDEX)
   const { clients: { masterdata, tenant, vbase } } = ctx
 
