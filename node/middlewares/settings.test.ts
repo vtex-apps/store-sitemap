@@ -60,6 +60,7 @@ describe('Test settings middleware', () => {
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
+      isIOAccount: true,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([APPS_ROUTES_INDEX, NAVIGATION_ROUTES_INDEX])
@@ -69,6 +70,7 @@ describe('Test settings middleware', () => {
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
+      isIOAccount: true,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([PRODUCT_ROUTES_INDEX])
@@ -78,6 +80,7 @@ describe('Test settings middleware', () => {
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: false,
+      isIOAccount: true,
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([])

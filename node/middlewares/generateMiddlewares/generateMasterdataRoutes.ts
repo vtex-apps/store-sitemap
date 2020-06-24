@@ -1,12 +1,13 @@
 import { flatten, splitEvery } from 'ramda'
 
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { Clients } from '../../clients/index'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { FILE_LIMIT } from './groupEntries'
 import {
   completeRoutes,
   createFileName,
   currentDate,
+  DEFAULT_CONFIG,
   GENERATE_REWRITER_ROUTES_EVENT,
   initializeSitemap,
   NAVIGATION_ROUTES_INDEX,

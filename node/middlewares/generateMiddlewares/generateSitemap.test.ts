@@ -69,6 +69,7 @@ describe('Test generate sitemap', () => {
           enableAppsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
+          isIOAccount: true,
         },
       },
       vtex: {
@@ -90,6 +91,7 @@ describe('Test generate sitemap', () => {
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
+      isIOAccount: true,
     }
 
     await generateSitemap(context)
@@ -102,6 +104,7 @@ describe('Test generate sitemap', () => {
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
+      isIOAccount: true,
     }
 
     await generateSitemap(context)
