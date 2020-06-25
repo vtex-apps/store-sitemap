@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Uses app's token for catalog api request
+- Increases generation blocking time
+- Increases sitemap cache
 
 ## [2.8.3] - 2020-07-08
 ### Fixed
