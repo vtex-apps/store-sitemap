@@ -48,7 +48,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   ctx.status = 200
   ctx.set(
     'cache-control',
-    production ? `public, max-age=${ONE_DAY}` : 'no-cache'
+    production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
   )
   if (production) {
     startSitemapGeneration(ctx)
