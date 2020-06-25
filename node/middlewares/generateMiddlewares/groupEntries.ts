@@ -106,9 +106,9 @@ export async function groupEntries(ctx: EventContext) {
   }))
   await completeRoutes(indexFile, vbase)
 
-  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase)
+  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
   if (isComplete) {
-    logger.info(`Sitemap complete`)
+    logger.info({ message: `Sitemap complete`, payload: body })
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,

@@ -1,6 +1,5 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import { all } from 'ramda'
 
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
@@ -54,7 +53,7 @@ const sitemapIndex = async (
     }
   )
 
-  const indexFiles = await Promise.all(
+  const rawIndexFiles = await Promise.all(
     enabledIndexFiles.map(indexFile =>
       vbase.getJSON<SitemapIndex>(
         bucket,
@@ -62,16 +61,14 @@ const sitemapIndex = async (
         true
       )
     ))
-  if (indexFiles.length === 0 || !all(Boolean, indexFiles)) {
+  const indexFiles = rawIndexFiles.filter(Boolean)
+  if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
   }
 
-  const indexData = {
-    index: indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[]),
-    lastUpdated: indexFiles[0].lastUpdated,
-  }
+  const index = indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[])
+  const lastUpdated = indexFiles[0].lastUpdated
 
-  const { index, lastUpdated } = indexData as SitemapIndex
   index.forEach(entry =>
     $('sitemapindex').append(
       sitemapIndexEntry(

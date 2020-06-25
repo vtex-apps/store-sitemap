@@ -34,7 +34,7 @@ export async function settings(ctx: Context | EventContext, next: () => Promise<
   const keys = Object.keys(appSettings) as Array<keyof Settings>
   const enabledIndexFiles = keys.reduce(
      (acc, key ) => {
-       if (appSettings[key]) {
+       if (appSettings[key] && INDEX_MAP[key]) {
          acc.push(INDEX_MAP[key])
        }
        return acc
