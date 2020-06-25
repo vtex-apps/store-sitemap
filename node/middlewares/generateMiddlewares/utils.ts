@@ -1,4 +1,4 @@
-import { LINKED, Tenant, VBase } from '@vtex/api'
+import { LINKED, Logger, Tenant, VBase } from '@vtex/api'
 import { all } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
@@ -116,11 +116,15 @@ export const createTranslator = (service: Messages) => async (
 }
 
 
-export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBase) => {
+export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBase, logger: Logger) => {
   const indexFiles = await Promise.all(enabledIndexFiles.map(
     indexFile =>
       vbase.getJSON(CONFIG_BUCKET, indexFile, true)
    ))
+  logger.debug({
+    enabledIndexFiles,
+    indexFiles,
+  })
   return all(Boolean, indexFiles)
 }
 
