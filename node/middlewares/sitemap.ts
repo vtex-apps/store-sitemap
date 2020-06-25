@@ -1,6 +1,5 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
-import { all } from 'ramda'
 
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
