@@ -167,7 +167,7 @@ describe('Test sitemap middleware', () => {
         </sitemapindex>`
     ))
 
-   context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
+   context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX, 'non-existant-index']
     await sitemap(context, next)
     expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
