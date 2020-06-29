@@ -5,11 +5,11 @@ import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S }
 import { FILE_LIMIT } from './groupEntries'
 import {
   completeRoutes,
+  completeSitemap,
   createFileName,
   currentDate,
   DEFAULT_CONFIG,
   GENERATE_REWRITER_ROUTES_EVENT,
-  initializeSitemap,
   NAVIGATION_ROUTES_INDEX,
   SitemapEntry,
   SitemapIndex
@@ -18,7 +18,7 @@ import {
 const SITEMAP_DOCUMENT_INPUT = {
   dataEntity: 'sitemap',
   fields: ['routes'],
-  id: 'sitemap-navigationRoutes',
+  id: 'navigation-routes',
 }
 
 interface MDRoute extends Route {
@@ -28,6 +28,9 @@ interface MDRoute extends Route {
 const createRoutesByEntity = (routes: MDRoute[], report: Record<string, number>) => routes.reduce(
   (acc, route) => {
     report[route.type] = (report[route.type] || 0) + 1
+    if (!acc[route.type]) {
+      acc[route.type] = []
+    }
     acc[route.type].push(route)
     return acc
   },
@@ -54,23 +57,29 @@ const saveRoutes = (routesByEntity: Record<string, MDRoute[]>, clients: Clients)
     })
   )
   const entries: string[] = flatten(newEntries) as any
-  const { index } = await vbase.getJSON<SitemapIndex>(bucket, NAVIGATION_ROUTES_INDEX, true)
   await vbase.saveJSON<SitemapIndex>(bucket, NAVIGATION_ROUTES_INDEX, {
-    index: [...index, ...entries],
+    index: entries,
     lastUpdated: currentDate(),
   })
 }
 
 export async function generateMasterdataRoutes(ctx: EventContext) {
-  await initializeSitemap(ctx, NAVIGATION_ROUTES_INDEX)
-  const { clients: { masterdata, tenant, vbase } } = ctx
+  const {
+    clients: { masterdata, tenant, vbase },
+    state: {
+      enabledIndexFiles,
+    },
+    vtex: {
+      logger,
+    },
+  } = ctx
 
   // TODO: Handle correctly bindingless accounts
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
 
-  const routes: MDRoute[] = await masterdata.getDocument(SITEMAP_DOCUMENT_INPUT)
+  const { routes } = await masterdata.getDocument<{ routes: MDRoute[] }>(SITEMAP_DOCUMENT_INPUT)
   const report = {}
 
   const routesByEntity = createRoutesByEntity(routes, report)
@@ -85,6 +94,7 @@ export async function generateMasterdataRoutes(ctx: EventContext) {
     report,
     type: GENERATE_REWRITER_ROUTES_EVENT,
   })
+  await completeSitemap(enabledIndexFiles, vbase, logger)
 }
 
 
