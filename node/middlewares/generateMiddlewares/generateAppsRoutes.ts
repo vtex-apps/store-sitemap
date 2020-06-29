@@ -12,6 +12,7 @@ import { FILE_LIMIT } from './groupEntries'
 import {
   APPS_ROUTES_INDEX,
   completeRoutes,
+  completeSitemap,
   createFileName,
   currentDate,
   DEFAULT_CONFIG,
@@ -48,7 +49,11 @@ const saveRoutes = async (routes: string[], idx: number, bucket: string, vbase: 
 }
 
 export async function generateAppsRoutes(ctx: EventContext) {
-  const { clients: { apps, tenant, vbase }, vtex: { logger } } = ctx
+  const {
+    clients: { apps, tenant, vbase },
+    vtex: { logger },
+    state: { enabledIndexFiles },
+  } = ctx
 
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
@@ -73,4 +78,5 @@ export async function generateAppsRoutes(ctx: EventContext) {
     numberOfroutes: appsRoutes.length,
     type: 'apps-routes',
   })
+  await completeSitemap(enabledIndexFiles, vbase, logger)
 }

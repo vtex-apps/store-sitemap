@@ -1,11 +1,10 @@
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import {
-  cleanConfigBucket,
   completeRoutes,
+  completeSitemap,
   createFileName,
   currentDate,
   DEFAULT_CONFIG,
-  isSitemapComplete,
   RAW_DATA_PREFIX,
   SitemapEntry,
   SitemapIndex,
@@ -70,7 +69,7 @@ export async function groupEntries(ctx: EventContext) {
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
-  const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
 
   await Promise.all(storeBindings.map(async binding => {
@@ -105,15 +104,5 @@ export async function groupEntries(ctx: EventContext) {
     })
   }))
   await completeRoutes(indexFile, vbase)
-
-  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase)
-  if (isComplete) {
-    logger.info(`Sitemap complete`)
-    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
-      generationPrefix: productionPrefix,
-      productionPrefix: generationPrefix,
-    })
-    await cleanConfigBucket(enabledIndexFiles, vbase)
-    return
-  }
+  await completeSitemap(enabledIndexFiles, vbase, logger)
 }

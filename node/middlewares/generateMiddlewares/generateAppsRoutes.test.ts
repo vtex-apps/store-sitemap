@@ -13,7 +13,7 @@ import { Clients } from '../../clients'
 import { CONFIG_BUCKET, getBucket, hashString } from '../../utils'
 import { } from './../../clients/rewriter'
 import { generateAppsRoutes } from './generateAppsRoutes'
-import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, SitemapEntry, SitemapIndex } from './utils'
+import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, NAVIGATION_ROUTES_INDEX, SitemapEntry, SitemapIndex } from './utils'
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
@@ -55,6 +55,11 @@ describe('Test rewriter routes generation', () => {
         this.jsonData[bucket] = {}
       }
       this.jsonData[bucket][file] = data
+    }
+
+    public deleteFile = async (bucket: string, file: string, _: any, __: any): Promise<any> => {
+      this.jsonData[bucket][file] = undefined
+      return
     }
   }
 
@@ -135,6 +140,7 @@ describe('Test rewriter routes generation', () => {
       ...contextMock.object,
       state: {
         ...state.object,
+        enabledIndexFiles: [NAVIGATION_ROUTES_INDEX, APPS_ROUTES_INDEX],
       },
       vtex: {
         ...ioContext.object,

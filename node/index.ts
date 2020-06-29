@@ -80,8 +80,8 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [generationPrepare, generateAppsRoutes],
-    generateMasterdataRoutes: [generationPrepare, generateMasterdataRoutes],
+    generateAppsRoutes: [settings, generationPrepare, generateAppsRoutes],
+    generateMasterdataRoutes: [settings, generationPrepare, generateMasterdataRoutes],
     generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],

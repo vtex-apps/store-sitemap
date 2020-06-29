@@ -19,7 +19,6 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
 
 export async function generateSitemap(ctx: EventContext) {
   const { clients: { events }, body: { generationId }, state: { settings } } = ctx
-  console.log(settings)
   if (settings.enableNavigationRoutes) {
     if (settings.isIOAccount) {
       events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {

@@ -1,9 +1,9 @@
-import { LINKED, Tenant, VBase } from '@vtex/api'
+import { LINKED, Logger, Tenant, VBase } from '@vtex/api'
 import { all } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 
@@ -116,7 +116,7 @@ export const createTranslator = (service: Messages) => async (
 }
 
 
-export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBase) => {
+const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBase) => {
   const indexFiles = await Promise.all(enabledIndexFiles.map(
     indexFile =>
       vbase.getJSON(CONFIG_BUCKET, indexFile, true)
@@ -127,9 +127,23 @@ export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBas
 export const completeRoutes = async (file: string, vbase: VBase) =>
   vbase.saveJSON(CONFIG_BUCKET, file, 'OK')
 
-export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
+const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
   Promise.all([
     vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE),
     ...enabledIndexFiles.map(
     indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])
+
+export const completeSitemap = async (enabledIndexFiles: string[], vbase: VBase, logger: Logger) => {
+  const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase)
+  if (isComplete) {
+    logger.info(`Sitemap complete`)
+    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
+      generationPrefix: productionPrefix,
+      productionPrefix: generationPrefix,
+    })
+    await cleanConfigBucket(enabledIndexFiles, vbase)
+    return
+  }
+}
