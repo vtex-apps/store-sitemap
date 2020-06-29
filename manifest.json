@@ -79,6 +79,16 @@
     },
     {
       "name": "vtex.graphql-server:resolve-graphql"
+    },
+    {
+      "name": "POWER_USER_DS"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
+        "path": "/api/dataentities/*"
+      }
     }
   ],
   "credentialType": "absolute",
