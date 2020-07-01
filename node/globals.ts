@@ -58,7 +58,6 @@ declare global {
 
   interface GenerationConfig {
     generationId: string
-    authToken: string
     endDate: string
   }
 

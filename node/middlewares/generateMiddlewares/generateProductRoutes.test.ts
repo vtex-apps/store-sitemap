@@ -14,7 +14,7 @@ import { TranslateArgs } from 'vtex.messages'
 
 import { Clients } from '../../clients'
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString } from '../../utils'
+import { getBucket, hashString } from '../../utils'
 import { Catalog, GetProductsAndSkuIdsReponse } from './../../clients/catalog'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import { STORE_PRODUCT } from './../../utils'
@@ -273,7 +273,6 @@ describe('Test product routes generation', () => {
         logger: loggerMock.object,
       },
     }
-    context.clients.vbase.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, { authToken: 'TOKEN' })
     next = jest.fn()
   })
 
