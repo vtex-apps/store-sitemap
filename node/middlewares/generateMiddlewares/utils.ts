@@ -135,7 +135,6 @@ export const completeRoutes = async (file: string, vbase: VBase) =>
 
 export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
   Promise.all([
-    vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE),
     ...enabledIndexFiles.map(
     indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])
