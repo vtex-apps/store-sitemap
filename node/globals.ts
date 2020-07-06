@@ -71,7 +71,7 @@ declare global {
     indexFile: string
   }
 
-  interface WaiitEvent {
+  interface WaitEvent {
     payload: Record<string, any>
     event: string
   }
