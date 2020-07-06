@@ -29,6 +29,7 @@ import { settings } from './middlewares/settings'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
+import { wait } from './middlewares/wait'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -84,6 +85,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],
     groupEntries: [settings, generationPrepare, groupEntries],
+    wait,
   },
   routes: {
     generateSitemap: generateSitemapFromREST,
