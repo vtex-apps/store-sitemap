@@ -43,6 +43,10 @@
     "groupEntries": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:group-entries"]
+    },
+    "wait": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.wait"]
     }
   }
 }

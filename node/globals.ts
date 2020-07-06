@@ -71,6 +71,11 @@ declare global {
     indexFile: string
   }
 
+  interface WaiitEvent {
+    payload: Record<string, any>
+    event: string
+  }
+
   interface RewriterRoutesGenerationEvent extends DefaultEvent  {
     next: Maybe<string>
     report: Record<string, number>
