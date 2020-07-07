@@ -32,10 +32,6 @@ Notice that different `.xml` files are generated according to their entity type 
 
 Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser. 
 
-:warning: *If your store is a cross-border one, when you access `https://{account}.myvtex.com/sitemap.xml`, you’ll first see an index containing the paths for each sitemap of your local stores.*
-
-Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes. 
-
 ## Modus Operandis
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
