@@ -18,11 +18,17 @@ For more information about generating a sitemap, check the following sections.
 4. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
 5. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
 6. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
-7. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap is now saved on our database. 
+7. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
 :blue_book: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
-8. Run `vtex promote` to promote your new workspace and to have your sitemap in your master workspace.
+8. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. 
+
+:warning: *If your store is a cross-border one, when you access `https://{workspace}--{account}.myvtex.com/sitemap.xml`, you’ll first see an index containing the paths for each sitemap of your local stores.*
+
+Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes. 
+
+9. Once you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
 Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser. 
 
