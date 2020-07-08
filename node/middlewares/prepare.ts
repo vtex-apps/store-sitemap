@@ -9,14 +9,9 @@ import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 const TWO_HOURS = 2 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
-    vtex: { adminUserAuthToken, production, logger },
+    vtex: { production },
     clients: { vbase, tenant },
   } = ctx
-  if (!adminUserAuthToken) {
-      ctx.status = 401
-      logger.error(`Missing adminUserAuth token`)
-      return
-  }
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
   // Defend against malformed root path. It should always start with `/`.

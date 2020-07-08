@@ -108,12 +108,12 @@ export async function groupEntries(ctx: EventContext) {
 
   const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
   if (isComplete) {
-    logger.info({ message: `Sitemap complete`, payload: body })
     await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,
     })
     await cleanConfigBucket(enabledIndexFiles, vbase)
+    logger.info({ message: `Sitemap complete`, payload: body })
     return
   }
 }

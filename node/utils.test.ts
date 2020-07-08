@@ -18,7 +18,6 @@ const minusOneHourFromNowMS = () => `${new Date(Date.now() - 1 * 60 * 60 * 1000)
 const eventSent = jest.fn()
 
 const DEFAULT_CONFIG = {
-  authToken: 'TOKEN',
   endDate: oneHourFromNowMS(),
   generationId: '10',
 }
@@ -96,25 +95,12 @@ describe('Test startSitemapGeneration', () => {
         },
         vtex: {
           ...ioContext.object,
-          adminUserAuthToken: 'TOKEN',
           logger: loggerMock.object,
         },
       }
     })
 
-   it('Should return 401 if auth token isnt found', async () => {
-     const thisContext = {
-       ...context,
-       vtex: {
-         ...context.vtex,
-         adminUserAuthToken: undefined,
-       },
-     }
-     await startSitemapGeneration(thisContext)
-     expect(thisContext.status).toStrictEqual(401)
-   })
-
-   it('Should not start a generation if has already started', async () => {
+    it('Should not start a generation if has already started', async () => {
      const { vbase: vbaseClient } = context.clients
      await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, DEFAULT_CONFIG)
      await startSitemapGeneration(context)

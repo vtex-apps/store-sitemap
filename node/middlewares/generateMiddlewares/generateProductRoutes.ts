@@ -3,7 +3,7 @@ import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
 import { Clients } from '../../clients'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
   createFileName,
@@ -179,10 +179,8 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-  const { authToken } = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE)
-
   const to = from + PAGE_LIMIT - 1
-  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to, authToken)
+  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to)
 
   const productsInfo = await Promise.all(Object.keys(data).map(getProductInfo(data, tenantInfo, ctx.clients)))
 
