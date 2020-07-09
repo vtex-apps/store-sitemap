@@ -37,6 +37,30 @@ Notice that different `.xml` files are generated according to their entity type 
 
 Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser. 
 
+### Settings
+
+You can also configure the content of the sitemap of your store via this apps settings:
+
+ Name         | Description                                                                                                 | Type    | Default value |
+|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
+| enableProductRoutes | Controls if the product routes data will be generated and displayed in the final sitemap.            | boolean | true       |
+|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
+| enableNavigationRoutes | Controls if the navigation routes (e.g. category, brand and user routes) data will be generated and displayed in the final sitemap.          | boolean | true        |
+|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
+| enableAppsRoutes | Controls if the routes defined in the `routes.json` file of apps built by the store-builder will be generated and displayed in the final sitemap.                            | boolean | true        |
+
+## Adding an app route to your sitemap
+
+In the `routes.json` file of apps built by the store-builder, is possible to define some of your store's routes, you can add them to the sitemap 
+by adding the prop: `isSitemapEntry = true` to the definition for example:
+{
+    "store.custom#about-us": {
+      "path": "/about-us",
+      "isSitemapEntry": true
+  }
+}
+and now these routes will be in the appsRoutes sitemap entries.
+
 ## Modus Operandis
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
