@@ -13,48 +13,53 @@ For more information about generating a sitemap, check the following sections.
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/)  from scratch.
 
 :warning: *Remember to replace the values between the curly brackets according to your scenario.*
-	
-3. Run `vtex local token` to generate a unique and temporary API token. Save the generated token to use later.
-4. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
-5. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
-6. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
-7. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
-:blue_book: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
+3. Run `vtex install vtex.store-sitemap@2.x` to install the Sitemap app.
 
-8. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. 
+:warning: *Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the Advanced Configuration section for more information before proceeding any further.*
 
-:warning: *If your store is a cross-border one, when you access `https://{workspace}--{account}.myvtex.com/sitemap.xml`, you’ll first see an index containing the paths for each sitemap of your local stores.*
+4. Run `vtex local token` to generate a unique and temporary API token. Save the generated token to use later.
+5. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
+6. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
+7. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
+8. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
-Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes. 
+:information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
-9. Once you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
+
+:information_source: *Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.*
+
+10. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
 Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser. 
 
-### Settings
+### Advanced configuration
 
-You can also configure the content of the sitemap of your store via this apps settings:
+#### Managing routes
 
- Name         | Description                                                                                                 | Type    | Default value |
-|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
-| enableProductRoutes | Controls if the product routes data will be generated and displayed in the final sitemap.            | boolean | true       |
-|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
-| enableNavigationRoutes | Controls if the navigation routes (e.g. category, brand and user routes) data will be generated and displayed in the final sitemap.          | boolean | true        |
-|--------------|-------------------------------------------------------------------------------------------------------------|---------|---------------|
-| enableAppsRoutes | Controls if the routes defined in the `routes.json` file of apps built by the store-builder will be generated and displayed in the final sitemap.                            | boolean | true        |
+You can manage if you want to include product, navigation and/or apps routes in your sitemap or not. To do that, check the following step by step.
 
-## Adding an app route to your sitemap
+1. In your browser, access the admin of the VTEX account in which you are working using the Production workspace used in the step 2 of the Configuration section (`{workspaceName}--{accountName}.myvtex.com/admin`).
+2. In the left menu, access Sitemap under CMS.
+3. Enable or disable product, navigation, or app routes according to your scenario.
 
-In the `routes.json` file of apps built by the store-builder, is possible to define some of your store's routes, you can add them to the sitemap 
-by adding the prop: `isSitemapEntry = true` to the definition for example:
+![sitemap-admin](https://user-images.githubusercontent.com/60782333/87038950-d6d11980-c1c4-11ea-8c73-b4569081fb1d.png)
+
+#### Enabling custom routes
+
+If you have [custom pages](https://vtex.io/docs/recipes/templates/creating-a-new-custom-page/) configured in a `routes.json` file and want them to be included in your store's sitemap, add `isSitemapEntry=true` as a prop of the routes you want to include in the sitemap. Take the following example:
+
+```
 {
     "store.custom#about-us": {
       "path": "/about-us",
       "isSitemapEntry": true
   }
 }
-and now these routes will be in the appsRoutes sitemap entries.
+```
+
+Once everything is set up, go back to the step 4 of the Configuration section.
 
 ## Modus Operandis
 
