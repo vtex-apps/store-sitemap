@@ -3,7 +3,7 @@ import { all } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 
@@ -135,7 +135,6 @@ export const completeRoutes = async (file: string, vbase: VBase) =>
 
 export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
   Promise.all([
-    vbase.deleteFile(CONFIG_BUCKET, GENERATION_CONFIG_FILE),
     ...enabledIndexFiles.map(
     indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])

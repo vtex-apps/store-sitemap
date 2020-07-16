@@ -11,7 +11,7 @@ export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'
 
-const oneHourFromNowMS = () => `${new Date(Date.now() + 1 * 60 * 60 * 1000)}`
+const oneWeekFromNowMS = () => `${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}`
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT
@@ -70,7 +70,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
   const generationId = (Math.random() * 10000).toString()
   logger.info({ message: 'New generation starting', generationId })
   await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
-    endDate: oneHourFromNowMS(),
+    endDate: oneWeekFromNowMS(),
     generationId,
   })
   events.sendEvent('', GENERATE_SITEMAP_EVENT, { generationId })
