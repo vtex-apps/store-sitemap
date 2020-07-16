@@ -1,168 +1,66 @@
-# Sitemap.xml and Robots.txt
+# Store Sitemap
 
-## Sitemap 
-We leveraged `vtex.rewriter` to develop the new sitemap, currently we index all store's routes in this app so a simple list will provide all the information needed to create the sitemap. The image bellow shows the final architecture
+Our Store Sitemap app, `vtex.store-sitemap`, is responsible for automatically generating a `sitemap.xml` file of your VTEX IO Store. 
+One of our app’s important SEO features for cross-border stores is handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding.
 
-The main idea is to split the sitemap generator from the service that delivers the sitemap.xml, this will avoid having to wait to list all routes in rewrites, an operation that may take some time depending on the size of the catalog. Therefore, this version of the `vtex.store-sitemap` has one endpoint that upon a request makes asynchronous requests to rewriter, getting all the store's routes and saves the data in VBase
+For more information about generating a sitemap, check the following sections.
 
-Generate sitemap API: 
+:warning: *This app is available to stores using `vtex.edition-store@3.x` [Edition App](https://vtex.io/docs/concepts/edition-app/). To check which Edition App is installed on your account, run `vtex edition get`. If it's a different Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) to VTEX Support asking for the installation of the `vtex.edition-store@3.x` Edition App.*
 
-- Listens to `sitemap.generate` event
-- POST to 
-[`https://app.io.vtex.com/vtex.store-sitemap/v2/{{account}}/{{workspace}}/generate-sitemap`](https://app.io.vtex.com/vtex.store-sitemap/v2/powerplanet/newsitemap/generate-sitemap)
+## Configuration
 
-With all the data in VBase, when you access the sitemap `vtex.store-sitemap` returns the xml faster. One thing to note, since our architecture is asynchrous, the sitemap delivered may be not complete, so we return a `cache-control` of one day, meaning it updates daily getting all the new routes.
+1. Using your terminal and the [VTEX IO Toolbelt](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log into your account.
+2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/)  from scratch.
 
-### Sitemap stucture
+:warning: *Remember to replace the values between the curly brackets according to your scenario.*
 
-1. Store with one binding
+3. Run `vtex install vtex.store-sitemap@2.x` to install the Sitemap app.
 
-When you access the path: `/sitemap.xml`  you get an index with an entry that some of the routes the code below shows an example
+:warning: *Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the Advanced Configuration section for more information before proceeding any further.*
 
-***/sitemap.xml***
+4. Run `vtex local token` to generate a unique and temporary API token. Save the generated token to use later.
+5. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
+6. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
+7. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
+8. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
-    ```<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    	<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-0-7.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    		<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-7-11.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    		<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-11-17.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    		<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-17-25.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    	<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-25-28.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    	<sitemap>
-    		<loc>
-    			https://storetheme.com/sitemap/sitemap-28-202.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    </sitemapindex>```
+:information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
-***/sitemap/sitemap-11-17.xml***
+9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
 
-   ``` <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/TR/xhtml11/xhtml11_schema.html">
-    	<url>
-    		<loc>
-    			https://storetheme.com/gorgeous-watch/p
-    		</loc>
-    		<xhtml:link rel="alternate" hreflang="es-AR" href="https://newsitemap--storecomponents.myvtex.com/gorgeous-watch/p?cultureInfo=es-AR"/>
-    		<xhtml:link rel="alternate" hreflang="pt-BR" href="https://newsitemap--storecomponents.myvtex.com/gorgeous-watch/p?cultureInfo=pt-BR"/>
-    		<xhtml:link rel="alternate" hreflang="en-US" href="https://newsitemap--storecomponents.myvtex.com/gorgeous-watch/p?cultureInfo=en-US"/>
-    		<xhtml:link rel="alternate" hreflang="ja-JP" href="https://newsitemap--storecomponents.myvtex.com/gorgeous-watch/p?cultureInfo=ja-JP"/>
-    		<lastmod>2020-04-08</lastmod>
-    		<changefreq>daily</changefreq>
-    		<priority>0.4</priority>
-    	</url>
-    	<url>
-    		<loc>
-    			https://storetheme.com/tank-top/p
-    		</loc>
-    		<xhtml:link rel="alternate" hreflang="es-AR" href="https://storetheme.com/tank-top/p?cultureInfo=es-AR"/>
-    		<xhtml:link rel="alternate" hreflang="pt-BR" href="https://storetheme.com/tank-top/p?cultureInfo=pt-BR"/>
-    		<xhtml:link rel="alternate" hreflang="en-US" href="https://storetheme.myvtex.com/tank-top/p?cultureInfo=en-US"/>
-    		<xhtml:link rel="alternate" hreflang="ja-JP" href="https://storetheme.myvtex.com/tank-top/p?cultureInfo=ja-JP"/>
-    		<lastmod>2020-04-08</lastmod>
-    		<changefreq>daily</changefreq>
-    		<priority>0.4</priority>
-    		</url>
-    	<url>
-    		<loc>
-    			https://storetheme.com/fashion-eyeglasses/p
-    		</loc>
-    		<xhtml:link rel="alternate" hreflang="es-AR" href="https://storetheme.com/fashion-eyeglasses/p?cultureInfo=es-AR"/>
-    		<xhtml:link rel="alternate" hreflang="pt-BR" href="https://storetheme.com/fashion-eyeglasses/p?cultureInfo=pt-BR"/>
-    		<xhtml:link rel="alternate" hreflang="en-US" href="https://storetheme.com/fashion-eyeglasses/p?cultureInfo=en-US"/>
-    		<xhtml:link rel="alternate" hreflang="ja-JP" href="https://storetheme.com/fashion-eyeglasses/p?cultureInfo=ja-JP"/>
-    		<lastmod>2020-04-08</lastmod>
-    		<changefreq>daily</changefreq>
-    		<priority>0.4</priority>
-    	</url>
-    	<url>
-     ....```
+:information_source: *Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.*
 
-Note that we added localization to the new sitemap, by adding all alternate routes in other supported languages.
+10. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
-2. Store with binding
+Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser. 
 
-When you access the path: `/sitemap.xml`  you get an index that has an entry for all the sitemaps by binding, which in turn has all the routes in that bindings, separated by entries.
+### Advanced configuration
 
-Example
+#### Managing routes
 
-***/sitemap.xml***
+You can manage if you want to include product, navigation and/or apps routes in your sitemap or not. To do that, check the following step by step.
 
-   ``` <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    	<sitemap>
-    		<loc>
-    			https://powerplanet.com/es/sitemap.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    	<sitemap>
-    		<loc>
-    			https://powerplanet.com/pt/sitemap.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    	<sitemap>
-    		<loc>
-    			https://powerplanet.com/fr/sitemap.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    	<sitemap>
-    		<loc>
-    			https://powerplanet.com/en/sitemap.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    </sitemapindex>```
+1. In your browser, access the admin of the VTEX account in which you are working using the Production workspace used in the step 2 of the Configuration section (`{workspaceName}--{accountName}.myvtex.com/admin`).
+2. In the left menu, access Sitemap under CMS.
+3. Enable or disable product, navigation, or app routes according to your scenario.
 
-***/es/sitemap.xml***
+![sitemap-admin](https://user-images.githubusercontent.com/60782333/87038950-d6d11980-c1c4-11ea-8c73-b4569081fb1d.png)
 
-    ```<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    	<sitemap>
-    		<loc>
-    			https://powerplanet.com/es/sitemap/sitemap-0-200.xml
-    		</loc>
-    		<lastmod>2020-04-08</lastmod>
-    	</sitemap>
-    ....
+#### Enabling custom routes
+
+If you have [custom pages](https://vtex.io/docs/recipes/templates/creating-a-new-custom-page/) configured in a `routes.json` file and want them to be included in your store's sitemap, add `isSitemapEntry=true` as a prop of the routes you want to include in the sitemap. Take the following example:
+
+```
+{
+    "store.custom#about-us": {
+      "path": "/about-us",
+      "isSitemapEntry": true
+  }
+}
 ```
 
-***/es/sitemap/sitemap-0-200.xml***
+Once everything is set up, go back to the step 4 of the Configuration section.
 
-    ```<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/TR/xhtml11/xhtml11_schema.html">
-    	<url>
-    		<loc>
-    			https://powerplanet.com/es/vivo-nex-3-8gb-256gb-glowing-night/p
-    		</loc>
-    		<xhtml:link rel="alternate" hreflang="es-ES" href="https://powerplanet.com/es/vivo-nex-3-8gb-256gb-glowing-night/p?cultureInfo=es-ES"/>
-    		<xhtml:link rel="alternate" hreflang="pt-PT" href="https://powerplanet.com/es/vivo-nex-3-8gb-256gb-glowing-night/p?cultureInfo=pt-PT"/>
-    		<xhtml:link rel="alternate" hreflang="en-GB" href="https://powerplanet.com/es/vivo-nex-3-8gb-256gb-glowing-night/p?cultureInfo=en-GB"/>
-    		<xhtml:link rel="alternate" hreflang="fr-FR" href="https://powerplanet.com/es/vivo-nex-3-8gb-256gb-glowing-night/p?cultureInfo=fr-FR"/>
-    		<lastmod>2020-04-08</lastmod>
-    		<changefreq>daily</changefreq>
-    		<priority>0.4</priority>
-    	</url>```
+## Modus Operandis
+
+Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
