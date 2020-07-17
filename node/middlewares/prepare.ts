@@ -1,7 +1,7 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString, startSitemapGeneration } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString } from '../utils'
 import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
 const ONE_DAY_S = 24 * 60 * 60
@@ -50,9 +50,10 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     'cache-control',
     production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
   )
-  if (production) {
-    startSitemapGeneration(ctx)
-  }
+  // TODO: Re-enable generation
+  // if (production) {
+  //   startSitemapGeneration(ctx)
+  // }
 
   return
 }

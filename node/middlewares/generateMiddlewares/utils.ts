@@ -17,9 +17,6 @@ export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
 export const GENERATE_APPS_ROUTES_EVENT = 'sitemap.generate:apps-routes'
 export const GROUP_ENTRIES_EVENT = 'sitemap.generate:group-entries'
 
-export const SITEMAP_GENERATION_ENABLED = false
-
-
 export const DEFAULT_CONFIG: Config = {
   generationPrefix: `${LINKED ? 'L' : ''}B`,
   productionPrefix: `${LINKED ? 'L' : ''}A`,
