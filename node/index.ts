@@ -29,6 +29,7 @@ import { settings } from './middlewares/settings'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
+import { throttle } from './middlewares/throttle'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -79,11 +80,11 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [generationPrepare, tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [generationPrepare, generateRewriterRoutes, sendNextEvent],
+    generateAppsRoutes: [throttle, generationPrepare, generateAppsRoutes],
+    generateProductRoutes: [throttle, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
+    generateRewriterRoutes: [throttle, generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [settings, generationPrepare, groupEntries],
+    groupEntries: [throttle, settings, generationPrepare, groupEntries],
   },
   routes: {
     generateSitemap: generateSitemapFromREST,

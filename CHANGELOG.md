@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.9.0] - 2020-07-16
+### Feature
+- Adds throttling middleware
+
 ## [2.8.5] - 2020-07-16
 ### Fixed
 - Increases generation blocking time
