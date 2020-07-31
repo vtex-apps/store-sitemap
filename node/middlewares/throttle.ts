@@ -1,7 +1,7 @@
 import { TooManyRequestsError } from '@vtex/api'
 import { sleep } from './generateMiddlewares/utils'
 
-const MAX_REQUEST = 5
+const MAX_REQUEST = 4
 let COUNTER = 0
 
 export async function throttle(
