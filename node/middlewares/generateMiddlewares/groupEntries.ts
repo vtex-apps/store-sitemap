@@ -1,3 +1,4 @@
+import { uniq } from 'ramda'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   cleanConfigBucket,
@@ -5,6 +6,7 @@ import {
   createFileName,
   currentDate,
   DEFAULT_CONFIG,
+  GROUP_ENTRIES_EVENT,
   isSitemapComplete,
   RAW_DATA_PREFIX,
   SitemapEntry,
@@ -13,6 +15,7 @@ import {
   uniq
 } from './utils'
 
+const FILE_PROCESS_LIMIT = 6000
 const FILE_LIMIT = 5000
 
 const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, ctx: EventContext) => {
@@ -53,7 +56,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
   return newFiles
 }
 
-export async function groupEntries(ctx: EventContext) {
+export async function groupEntries(ctx: EventContext, next: () => Promise<void>) {
   const {
     body,
     clients: {
@@ -67,19 +70,23 @@ export async function groupEntries(ctx: EventContext) {
       enabledIndexFiles,
     },
   } = ctx
-  const { indexFile }: GroupEntriesEvent = body
+  const { indexFile, generationId, from }: GroupEntriesEvent = body
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
   const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
 
-  await Promise.all(storeBindings.map(async binding => {
+  const isCompleteArray = await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
     const indexData = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
-    const index = uniq(indexData.index)
-
+    const rawIndex = uniq(indexData.index)
+    const { index: newIndex } = await vbase.getJSON<SitemapIndex>(bucket, indexFile, true) || { index: [] }
+    if (from > rawIndex.length) {
+      return true
+    }
+    const index = rawIndex.slice(from, from + FILE_PROCESS_LIMIT)
     const filesByEntity = index.reduce((acc, file) => {
       const entity = splitFileName(file)[0]
       if (!acc[entity]) {
@@ -100,22 +107,39 @@ export async function groupEntries(ctx: EventContext) {
         )
       ))
 
-    const newIndex: string[] = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
+    const indexes = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
     await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
-      index: newIndex,
+      index: uniq(newIndex.concat(indexes)),
       lastUpdated: currentDate(),
     })
-  }))
-  await completeRoutes(indexFile, vbase)
 
-  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
-  if (isComplete) {
-    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
-      generationPrefix: productionPrefix,
-      productionPrefix: generationPrefix,
-    })
-    await cleanConfigBucket(enabledIndexFiles, vbase)
-    logger.info({ message: `Sitemap complete`, payload: body })
-    return
+    return from + FILE_PROCESS_LIMIT > rawIndex.length
+  }))
+
+  const isGroupingComplete = isCompleteArray.every(Boolean)
+  if (isGroupingComplete) {
+     await completeRoutes(indexFile, vbase)
+
+    const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
+    if (isComplete) {
+      await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
+        generationPrefix: productionPrefix,
+        productionPrefix: generationPrefix,
+      })
+      await cleanConfigBucket(enabledIndexFiles, vbase)
+      logger.info({ message: `Sitemap complete`, payload: body })
+      return
+    }
+  } else {
+    ctx.state.nextEvent = {
+      event: GROUP_ENTRIES_EVENT,
+      payload: {
+        from: from + FILE_PROCESS_LIMIT,
+        generationId,
+        indexFile,
+      },
+    }
+
+    await next()
   }
 }
