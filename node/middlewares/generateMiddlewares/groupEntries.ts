@@ -1,4 +1,4 @@
-import { uniq } from 'ramda'
+import { last, uniq } from 'ramda'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   cleanConfigBucket,
@@ -15,14 +15,17 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 6000
+const FILE_PROCESS_LIMIT = 1
 const FILE_LIMIT = 5000
 
-const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, ctx: EventContext) => {
+const groupEntityEntries = async (entity: string, files: string[], index: string[] | undefined, bucket: string, rawBucket: string, ctx: EventContext) => {
   const { clients: { vbase }, vtex: { logger } } = ctx
-  let count = 0
-  let routesCount = 0
-  let currentRoutes: Route[] = []
+  const lastFile = index && last(index)
+  const lastFileData = lastFile ? await vbase.getJSON<SitemapEntry>(bucket, lastFile) : { routes: [] as Route[] }
+  let currentRoutes = lastFileData.routes
+  let routesCount = currentRoutes.length
+  let count = lastFile ? Number(splitFileName(lastFile)[1]) : 0
+
   const newFiles: string[] = []
   for (const file of files) {
     const { routes } = await vbase.getJSON<SitemapEntry>(rawBucket, file)
@@ -96,11 +99,21 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
       return acc
     }, {} as Record<string, string[]>)
 
+    const indexByEntity = newIndex.reduce((acc, file) => {
+      const entity = splitFileName(file)[0]
+      if (!acc[entity]) {
+        acc[entity] = []
+      }
+      acc[entity].push(file)
+      return acc
+    }, {} as Record<string, string[]>)
+
     const entries = await Promise.all(
       Object.keys(filesByEntity).map(async entity =>
         groupEntityEntries(
           entity,
           filesByEntity[entity],
+          indexByEntity[entity],
           bucket,
           rawBucket,
           ctx
@@ -117,6 +130,7 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
   }))
 
   const isGroupingComplete = isCompleteArray.every(Boolean)
+  logger.debug({ message: '[group] is Grouping complete', isGroupingComplete })
   if (isGroupingComplete) {
      await completeRoutes(indexFile, vbase)
 
