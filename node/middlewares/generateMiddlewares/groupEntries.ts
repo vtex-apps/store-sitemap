@@ -15,7 +15,7 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 1
+const FILE_PROCESS_LIMIT = 3000
 const FILE_LIMIT = 5000
 
 const groupEntityEntries = async (entity: string, files: string[], index: string[] | undefined, bucket: string, rawBucket: string, ctx: EventContext) => {
@@ -84,12 +84,15 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
     const indexData = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
-    const rawIndex = uniq(indexData.index)
-    const { index: newIndex } = await vbase.getJSON<SitemapIndex>(bucket, indexFile, true) || { index: [] }
-    if (from > rawIndex.length) {
+    const fullIndex = uniq(indexData.index)
+    const { index: newIndex } = from === 0
+      ? { index: [] as string[] }
+      : await vbase.getJSON<SitemapIndex>(bucket, indexFile, true) || { index: []as string[] }
+    logger.debug({ message: '[group] Receiving', payload: body, totalFile: fullIndex.length })
+    if (from > fullIndex.length) {
       return true
     }
-    const index = rawIndex.slice(from, from + FILE_PROCESS_LIMIT)
+    const index = fullIndex.slice(from, from + FILE_PROCESS_LIMIT)
     const filesByEntity = index.reduce((acc, file) => {
       const entity = splitFileName(file)[0]
       if (!acc[entity]) {
@@ -126,7 +129,7 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
       lastUpdated: currentDate(),
     })
 
-    return from + FILE_PROCESS_LIMIT > rawIndex.length
+    return from + FILE_PROCESS_LIMIT > fullIndex.length
   }))
 
   const isGroupingComplete = isCompleteArray.every(Boolean)
