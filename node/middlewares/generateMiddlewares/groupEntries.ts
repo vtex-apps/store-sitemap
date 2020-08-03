@@ -15,7 +15,7 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 3000
+const FILE_PROCESS_LIMIT = 1500
 const FILE_LIMIT = 5000
 
 const groupEntityEntries = async (entity: string, files: string[], index: string[] | undefined, bucket: string, rawBucket: string, ctx: EventContext) => {
