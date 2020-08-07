@@ -18,6 +18,15 @@ import {
 const FILE_PROCESS_LIMIT = 1500
 const FILE_LIMIT = 5000
 
+const reduceByEntity = (array: string[]) => array.reduce((acc, file) => {
+  const entity = splitFileName(file)[0]
+  if (!acc[entity]) {
+    acc[entity] = []
+  }
+  acc[entity].push(file)
+  return acc
+}, {} as Record<string, string[]>)
+
 const groupEntityEntries = async (entity: string, files: string[], index: string[] | undefined, bucket: string, rawBucket: string, ctx: EventContext) => {
   const { clients: { vbase }, vtex: { logger } } = ctx
   const lastFile = index && last(index)
@@ -80,36 +89,21 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
   const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
 
-  const isCompleteArray = await Promise.all(storeBindings.map(async binding => {
+  const isBindingGroupingComplete = await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
     const indexData = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
-    const fullIndex = uniq(indexData.index)
+    const rawIndex = uniq(indexData.index)
     const { index: newIndex } = from === 0
       ? { index: [] as string[] }
       : await vbase.getJSON<SitemapIndex>(bucket, indexFile, true) || { index: []as string[] }
-    logger.debug({ message: '[group] Receiving', payload: body, totalFile: fullIndex.length })
-    if (from > fullIndex.length) {
+
+    if (from > rawIndex.length) {
       return true
     }
-    const index = fullIndex.slice(from, from + FILE_PROCESS_LIMIT)
-    const filesByEntity = index.reduce((acc, file) => {
-      const entity = splitFileName(file)[0]
-      if (!acc[entity]) {
-        acc[entity] = []
-      }
-      acc[entity].push(file)
-      return acc
-    }, {} as Record<string, string[]>)
-
-    const indexByEntity = newIndex.reduce((acc, file) => {
-      const entity = splitFileName(file)[0]
-      if (!acc[entity]) {
-        acc[entity] = []
-      }
-      acc[entity].push(file)
-      return acc
-    }, {} as Record<string, string[]>)
+    const slicedRawIndex = rawIndex.slice(from, from + FILE_PROCESS_LIMIT)
+    const filesByEntity = reduceByEntity(slicedRawIndex)
+    const indexByEntity = reduceByEntity(newIndex)
 
     const entries = await Promise.all(
       Object.keys(filesByEntity).map(async entity =>
@@ -123,18 +117,17 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
         )
       ))
 
-    const indexes = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
+    const index = uniq(entries.reduce((acc, entryList) => acc.concat(entryList), newIndex))
     await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
-      index: uniq(newIndex.concat(indexes)),
+      index,
       lastUpdated: currentDate(),
     })
 
-    return from + FILE_PROCESS_LIMIT > fullIndex.length
+    return from + FILE_PROCESS_LIMIT > rawIndex.length
   }))
 
-  const isGroupingComplete = isCompleteArray.every(Boolean)
-  logger.debug({ message: '[group] is Grouping complete', isGroupingComplete })
-  if (isGroupingComplete) {
+  const isAllGroupingsComplete = isBindingGroupingComplete.every(Boolean)
+  if (isAllGroupingsComplete) {
      await completeRoutes(indexFile, vbase)
 
     const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
