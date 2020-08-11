@@ -73,7 +73,6 @@ export const startSitemapGeneration = async (ctx: Context) => {
     endDate: oneWeekFromNowMS(),
     generationId,
   })
-  await sleep(1000)
   events.sendEvent('', GENERATE_SITEMAP_EVENT, { generationId })
 }
 
