@@ -22,7 +22,6 @@ import {
   Translator
 } from './utils'
 
-const PAGE_LIMIT = 50
 const PRODUCT_QUERY =  `query Product($identifier: ProductUniqueIdentifier) {
   product(identifier: $identifier) @context(provider: "vtex.search-graphql") {
 		productId
@@ -47,12 +46,8 @@ const isProductSearchResponseEmpty = async (productId: string, graphqlServer: Gr
   return searchResponse !== null
 }
 
-const getProductInfo = (data: Record<string, number[]>, tenantInfo: Tenant, clients: Clients) => async (productId: string): Promise<ProductInfo | undefined> => {
+const getProductInfo = (tenantInfo: Tenant, clients: Clients) => async (productId: string): Promise<ProductInfo | undefined> => {
     const { catalogGraphQL, graphqlServer } = clients
-    const hasSKUs = data[productId].length > 0
-    if (!hasSKUs) {
-      return
-    }
     const [catalogResponse, hasSearchResponse] = await Promise.all([
       catalogGraphQL.product(productId),
       isProductSearchResponseEmpty(productId, graphqlServer),
@@ -152,7 +147,7 @@ const saveRoutes = (
 }
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
-  if (ctx.body.from === 0) {
+  if (ctx.body.page === 1) {
     await initializeSitemap(ctx, PRODUCT_ROUTES_INDEX)
   }
   const {
@@ -173,16 +168,16 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   })
 
   const {
-    from,
+    page,
     generationId,
     processedProducts,
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-  const to = from + PAGE_LIMIT - 1
-  const { data, range: { total } } = await catalog.getProductsAndSkuIds(from, to)
+  const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page)
 
-  const productsInfo = await Promise.all(Object.keys(data).map(getProductInfo(data, tenantInfo, ctx.clients)))
+  const getProductInfoFn = getProductInfo(tenantInfo, ctx.clients)
+  const productsInfo = await Promise.all(items.map(productId => getProductInfoFn(productId.toString())))
 
   const {
     currentInvalidProducts,
@@ -200,22 +195,22 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const bindingsIds = Object.keys(messagesByBinding)
   const routesByBinding: Record<string, Route[]> = zipObj(bindingsIds, routesList)
-  const entry = createFileName('product', from)
+  const entry = createFileName('product', page)
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, pathsDictionary, bindingsIds, entry, vbase))
   )
 
   const payload: ProductRoutesGenerationEvent = {
-    from: from + PAGE_LIMIT,
     generationId,
     invalidProducts: invalidProducts + currentInvalidProducts,
+    page: page + 1,
     processedProducts: processedProducts + currentProcessedProducts,
   }
   ctx.state.nextEvent = {
     event: GENERATE_PRODUCT_ROUTES_EVENT,
     payload,
   }
-  if (payload.processedProducts >= total || payload.from >= total) {
+  if (page >= totalPages) {
     logger.info({
       invalidProducts: payload.invalidProducts,
       message: `Product routes complete`,

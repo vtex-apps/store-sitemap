@@ -78,7 +78,7 @@ declare global {
   }
 
   interface ProductRoutesGenerationEvent extends DefaultEvent   {
-    from: number
+    page: number
     processedProducts: number
     invalidProducts: number
   }
