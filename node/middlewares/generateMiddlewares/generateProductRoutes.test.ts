@@ -119,25 +119,17 @@ describe('Test product routes generation', () => {
       super(ioContext.object)
     }
 
-    public getProductsAndSkuIds = async (from: number, _: number, __?: string) => {
-      switch (from) {
-        case 50:
+    public getProductsIds = async (page: number) => {
+      switch (page) {
+        case 2:
           return {
-            data: {
-              '5': [1, 2],
-              '6': [10, 20],
-            },
-            range: { total: 51 },
+            items: [4, 5, 6],
+            paging: { pages: 2, total: 51 },
           } as unknown as GetProductsAndSkuIdsReponse
         default:
           return {
-            data: {
-              '1': [1, 2],
-              '2': [10, 20],
-              '3': [100, 200],
-              '4': [],
-            },
-            range: { total: 51 },
+            items: [1, 2, 3],
+            paging: { pages: 2, total: 51 },
           } as unknown as GetProductsAndSkuIdsReponse
       }
     }
@@ -258,7 +250,7 @@ describe('Test product routes generation', () => {
     }
     context = {
       body: {
-        from: 0,
+        page: 1,
         generationId: '1',
         invalidProducts: 0,
         processedProducts: 0,
@@ -281,7 +273,7 @@ describe('Test product routes generation', () => {
      expect(next).toBeCalled()
      const { event, payload } = context.state.nextEvent
      expect(event).toEqual(GENERATE_PRODUCT_ROUTES_EVENT)
-     expect((payload as any).from).toEqual(50)
+     expect((payload as any).page).toEqual(2)
    })
 
   it('Complete event is sent', async () => {
@@ -289,7 +281,7 @@ describe('Test product routes generation', () => {
       ...context,
       body: {
         ...context.body,
-        from: 50,
+        page: 2,
       },
     }
     await initializeSitemap(thisContext, PRODUCT_ROUTES_INDEX)
@@ -306,7 +298,7 @@ describe('Test product routes generation', () => {
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
-    const expectedIndex = ['product-0']
+    const expectedIndex = ['product-1']
     expect(index).toStrictEqual(expectedIndex)
     const { routes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
     expect(routes).toStrictEqual([
