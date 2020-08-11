@@ -1,8 +1,7 @@
-import { Binding, Tenant, VBase, Logger } from '@vtex/api'
+import { Binding, Logger, Tenant, VBase } from '@vtex/api'
 import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
-import { Clients } from '../../clients'
 import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
