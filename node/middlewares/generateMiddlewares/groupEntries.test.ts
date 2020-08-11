@@ -126,13 +126,13 @@ describe('Test group entries', () => {
       },
     }
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: [] })
     vbaseClient.saveJSON(rawBucket, REWRITER_ROUTES_INDEX, { index: [] })
   })
 
   it('Should complete', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
 
     context.body = { indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context)
@@ -152,7 +152,7 @@ describe('Test group entries', () => {
   })
 
   it('Should complete if enabled files were processed', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     context.state.enabledIndexFiles = [PRODUCT_ROUTES_INDEX]
 
     context.body = { indexFile: PRODUCT_ROUTES_INDEX }
@@ -175,7 +175,7 @@ describe('Test group entries', () => {
   })
 
   it('Should group data', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     context.body = { indexFile: PRODUCT_ROUTES_INDEX }
     const { generationPrefix } = DEFAULT_CONFIG
 
@@ -195,7 +195,7 @@ describe('Test group entries', () => {
   })
 
   it('Should create new file if one gets too big', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     context.body = { indexFile: PRODUCT_ROUTES_INDEX }
     const { generationPrefix } = DEFAULT_CONFIG
 

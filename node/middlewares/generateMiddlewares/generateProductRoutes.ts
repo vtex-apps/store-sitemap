@@ -1,8 +1,9 @@
-import { Binding, Tenant, VBase } from '@vtex/api'
+import { Binding, Tenant } from '@vtex/api'
 import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
 import { Clients } from '../../clients'
+import { CVBase } from '../../clients/Vbase'
 import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
@@ -131,20 +132,20 @@ const saveRoutes = (
   pathsDictionary: Record<string, string>,
   bindingsIds: string[],
   entry: string,
-  vbase: VBase
+  cVbase: CVBase
 ) =>
   async (bindingId: string) => {
     const routes = routesByBinding[bindingId].map(completeRoutes(pathsDictionary, bindingsIds))
     const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
-    const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
+    const { index } = await cVbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
     index.push(entry)
     const lastUpdated = currentDate()
     await Promise.all([
-      vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
+      cVbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
         index,
         lastUpdated,
     }),
-    vbase.saveJSON<SitemapEntry>(bucket, entry, {
+    cVbase.saveJSON<SitemapEntry>(bucket, entry, {
       lastUpdated,
       routes,
     }),

@@ -6,7 +6,6 @@ import {
   RequestTracingConfig,
   Tenant,
   TenantClient,
-  VBase
 } from '@vtex/api'
 import { Product } from '@vtex/api/lib/clients/apps/catalogGraphQL/product'
 import * as TypeMoq from 'typemoq'
@@ -14,6 +13,7 @@ import { TranslateArgs } from 'vtex.messages'
 
 import { Clients } from '../../clients'
 import { Messages } from '../../clients/messages'
+import { CVBase } from '../../clients/Vbase'
 import { getBucket, hashString } from '../../utils'
 import { Catalog, GetProductsAndSkuIdsReponse } from './../../clients/catalog'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
@@ -35,7 +35,7 @@ const messagesTypeMock = TypeMoq.Mock.ofInstance(Messages)
 const graphqlServerTypeMock = TypeMoq.Mock.ofInstance(GraphQLServer)
 const catalogTypeMock = TypeMoq.Mock.ofInstance(Catalog)
 const catalogGraphQLTypeMock = TypeMoq.Mock.ofInstance(CatalogGraphQL)
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const vbaseTypeMock = TypeMoq.Mock.ofInstance(CVBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -47,7 +47,7 @@ let next: any
 describe('Test product routes generation', () => {
   let context: EventContext
 
-  const vbase = class VBaseMock extends vbaseTypeMock.object {
+  const cVbase = class VBaseMock extends vbaseTypeMock.object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private jsonData: Record<string, any> = {}
 
@@ -232,8 +232,8 @@ describe('Test product routes generation', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
-        return this.getOrSet('vbase', vbase)
+      get cVbase() {
+        return this.getOrSet('cVbase', cVbase)
       }
 
       get catalog() {
@@ -303,7 +303,7 @@ describe('Test product routes generation', () => {
 
   it('Routes were saved', async () => {
     await generateProductRoutes(context, next)
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
     const expectedIndex = ['product-0']

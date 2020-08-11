@@ -1,10 +1,11 @@
-import { Binding, IOContext, Logger, VBase } from '@vtex/api'
+import { Binding, IOContext, Logger  } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
+import { CVBase } from '../clients/Vbase'
 import { sitemapEntry, URLEntry } from './sitemapEntry'
 
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const vbaseTypeMock = TypeMoq.Mock.ofInstance(CVBase)
 const contextMock = TypeMoq.Mock.ofType<Context>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -16,7 +17,7 @@ describe('Test sitemap entry', () => {
   let context: Context
 
 
-  const vbase = class VBaseMock extends vbaseTypeMock.object {
+  const cVbase = class VBaseMock extends vbaseTypeMock.object {
     constructor() {
       super(ioContext.object)
     }
@@ -63,8 +64,8 @@ describe('Test sitemap entry', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
-        return this.getOrSet('vbase', vbase)
+      get cVbase() {
+        return this.getOrSet('cVbase', cVbase)
       }
     }
 

@@ -59,7 +59,7 @@ const completeRoute = (rewriter: Rewriter, type: string) => async (route: Route)
 }
 
 const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Clients) => async (bindingId: string) => {
-  const { vbase, rewriter } = clients
+  const { cVbase, rewriter } = clients
   const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
   const groupedRoutes = routesByBinding[bindingId]
   const newEntries = await Promise.all(
@@ -69,15 +69,15 @@ const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Cl
       )
       const entry = createFileName(entityType, count)
       const lastUpdated = currentDate()
-      await vbase.saveJSON<SitemapEntry>(bucket, entry, {
+      await cVbase.saveJSON<SitemapEntry>(bucket, entry, {
           lastUpdated,
           routes: entityRoutes,
       })
       return entry
     })
   )
-  const { index } = await vbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
-  await vbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
+  const { index } = await cVbase.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
+  await cVbase.saveJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, {
     index: [...index, ...newEntries],
     lastUpdated: currentDate(),
   })

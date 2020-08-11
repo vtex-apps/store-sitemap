@@ -1,6 +1,7 @@
-import { Binding, VBase } from '@vtex/api'
+import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
+import { CVBase } from '../clients/Vbase'
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
   currentDate,
@@ -42,7 +43,7 @@ const sitemapIndex = async (
   enabledIndexFiles: string[],
   forwardedHost: string,
   rootPath: string,
-  vbase: VBase,
+  cVbase: CVBase,
   bucket: string,
   bindingAddress?: string
 ) => {
@@ -55,7 +56,7 @@ const sitemapIndex = async (
 
   const rawIndexFiles = await Promise.all(
     enabledIndexFiles.map(indexFile =>
-      vbase.getJSON<SitemapIndex>(
+      cVbase.getJSON<SitemapIndex>(
         bucket,
         indexFile,
         true
@@ -119,7 +120,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       matchingBindings,
       bindingAddress,
     },
-    clients: { vbase },
+    clients: { cVbase },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
@@ -130,7 +131,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
         enabledIndexFiles,
         forwardedHost,
         rootPath,
-        vbase,
+        cVbase,
         bucket,
         bindingAddress
       )
@@ -138,7 +139,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
         ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
-        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket)
+        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, cVbase, bucket)
     }
   } catch (err) {
     if (err instanceof SitemapNotFound) {

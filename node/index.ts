@@ -48,6 +48,9 @@ metrics.trackCache('vbase', vbaseCacheStorage)
 const clients: ClientsConfig<Clients> = {
   implementation: Clients,
   options: {
+    cVbase: {
+      memoryCache: vbaseCacheStorage,
+    },
     catalog: {
       timeout: EIGHT_SECOND_MS,
     },
@@ -68,9 +71,6 @@ const clients: ClientsConfig<Clients> = {
     },
     tenant: {
       memoryCache: tenantCacheStorage,
-    },
-    vbase: {
-      memoryCache: vbaseCacheStorage,
     },
   },
 }

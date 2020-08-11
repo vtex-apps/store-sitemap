@@ -1,10 +1,11 @@
-import { IOContext, Logger, VBase } from '@vtex/api'
+import { IOContext, Logger } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { Clients } from '../../clients'
+import { CVBase } from '../../clients/Vbase'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE } from '../../utils'
 import { prepare } from './prepare'
 
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const vbaseTypeMock = TypeMoq.Mock.ofInstance(CVBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -15,7 +16,7 @@ const next = jest.fn()
 describe('Test generation prepare', () => {
   let context: EventContext
 
-  const vbase = class VBaseMock extends vbaseTypeMock.object {
+  const cVbase = class VBaseMock extends vbaseTypeMock.object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private jsonData: Record<string, any> = {}
 
@@ -48,8 +49,8 @@ describe('Test generation prepare', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
-        return this.getOrSet('vbase', vbase)
+      get cVbase() {
+        return this.getOrSet('cVbase', cVbase)
       }
     }
     context = {
@@ -80,7 +81,7 @@ describe('Test generation prepare', () => {
    })
 
    it('Shouldnt continue if generationId is not the one in VBae', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
       generationId: '2',
     })
@@ -94,7 +95,7 @@ describe('Test generation prepare', () => {
   })
 
   it('Should continue if generationId matches the config', async () => {
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
       generationId: '1',
     })

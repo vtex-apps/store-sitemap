@@ -1,6 +1,7 @@
-import { Apps, VBase } from '@vtex/api'
+import { Apps } from '@vtex/api'
 import { flatten, splitEvery } from 'ramda'
 
+import { CVBase } from '../../clients/Vbase'
 import {
   CONFIG_BUCKET,
   CONFIG_FILE,
@@ -37,10 +38,10 @@ const getRoutes = async (apps: Apps): Promise<string[]> => {
   return flatten<string>(routes)
 }
 
-const saveRoutes = async (routes: string[], idx: number, bucket: string, vbase: VBase) => {
+const saveRoutes = async (routes: string[], idx: number, bucket: string, cVbase: CVBase) => {
   const sitemapRoutes = routes.map(route => ({ id: route, path: route }))
   const entry = createFileName(APP_ROUTES_ENTITY, idx)
-  await vbase.saveJSON<SitemapEntry>(bucket, entry, {
+  await cVbase.saveJSON<SitemapEntry>(bucket, entry, {
     lastUpdated: currentDate(),
     routes: sitemapRoutes,
   })
@@ -48,26 +49,26 @@ const saveRoutes = async (routes: string[], idx: number, bucket: string, vbase: 
 }
 
 export async function generateAppsRoutes(ctx: EventContext) {
-  const { clients: { apps, tenant, vbase }, vtex: { logger } } = ctx
+  const { clients: { apps, tenant, cVbase }, vtex: { logger } } = ctx
 
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
-  const { generationPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { generationPrefix } = await cVbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
 
   const appsRoutes = await getRoutes(apps)
 
   await Promise.all(bindings.map(async binding => {
     const bucket = getBucket(generationPrefix, hashString(binding.id))
     const splittedRoutes = splitEvery(FILE_LIMIT, appsRoutes)
-    const index = await Promise.all(splittedRoutes.map((routes, idx) => saveRoutes(routes, idx, bucket, vbase)))
-    await vbase.saveJSON<SitemapIndex>(bucket, APPS_ROUTES_INDEX, {
+    const index = await Promise.all(splittedRoutes.map((routes, idx) => saveRoutes(routes, idx, bucket, cVbase)))
+    await cVbase.saveJSON<SitemapIndex>(bucket, APPS_ROUTES_INDEX, {
       index,
       lastUpdated: currentDate(),
     })
   }))
 
-  await completeRoutes(APPS_ROUTES_INDEX, vbase)
+  await completeRoutes(APPS_ROUTES_INDEX, cVbase)
   logger.info({
     message: 'Apps routes complete',
     numberOfroutes: appsRoutes.length,

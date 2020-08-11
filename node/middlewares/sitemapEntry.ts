@@ -64,7 +64,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
       forwardedPath,
       bucket,
     },
-    clients: { vbase },
+    clients: { cVbase },
   } = ctx
 
   const sitemapRoute = new RouteParser(SITEMAP_URL)
@@ -83,7 +83,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     }
   )
   const fileName = path.split('.')[0]
-  const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
+  const maybeRoutesInfo = await cVbase.getJSON<SitemapEntry>(
     bucket,
     fileName,
     true

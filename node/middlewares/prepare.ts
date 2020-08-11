@@ -9,7 +9,7 @@ const ONE_DAY_S = 24 * 60 * 60
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
     vtex: { production },
-    clients: { vbase, tenant },
+    clients: { cVbase, tenant },
   } = ctx
   const forwardedHost = ctx.get('x-forwarded-host')
   let rootPath = ctx.get('x-vtex-root-path')
@@ -27,7 +27,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const query = parse(queryString)
 
-  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { productionPrefix } = await cVbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
 
   const bucket = getBucket(productionPrefix, hashString(binding.id))
 

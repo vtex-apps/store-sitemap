@@ -15,20 +15,20 @@ import {
 const FILE_LIMIT = 5000
 
 const groupEntityEntries = async (entity: string, files: string[], bucket: string, rawBucket: string, ctx: EventContext) => {
-  const { clients: { vbase }, vtex: { logger } } = ctx
+  const { clients: { cVbase }, vtex: { logger } } = ctx
   let count = 0
   let routesCount = 0
   let currentRoutes: Route[] = []
   const newFiles: string[] = []
   for (const file of files) {
-    const { routes } = await vbase.getJSON<SitemapEntry>(rawBucket, file)
+    const { routes } = await cVbase.getJSON<SitemapEntry>(rawBucket, file)
     routesCount += routes.length
     currentRoutes = [...currentRoutes, ...routes]
     if (currentRoutes.length > FILE_LIMIT) {
       const rest = currentRoutes.splice(FILE_LIMIT)
       const entry = createFileName(entity, count)
       newFiles.push(entry)
-      await vbase.saveJSON<SitemapEntry>(bucket, entry, {
+      await cVbase.saveJSON<SitemapEntry>(bucket, entry, {
         lastUpdated: currentDate(),
         routes: currentRoutes,
       })
@@ -39,7 +39,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
   if (currentRoutes.length > 0) {
     const entry = createFileName(entity, count)
     newFiles.push(entry)
-    await vbase.saveJSON<SitemapEntry>(bucket, entry, {
+    await cVbase.saveJSON<SitemapEntry>(bucket, entry, {
       lastUpdated: currentDate(),
       routes: currentRoutes,
     })
@@ -57,7 +57,7 @@ export async function groupEntries(ctx: EventContext) {
     body,
     clients: {
       tenant,
-      vbase,
+      cVbase,
     },
     vtex: {
       logger,
@@ -70,13 +70,13 @@ export async function groupEntries(ctx: EventContext) {
   const { bindings } = await tenant.info({
     forceMaxAge: TENANT_CACHE_TTL_S,
   })
-  const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { generationPrefix, productionPrefix } = await cVbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
 
   await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
-    const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
+    const { index } = await cVbase.getJSON<SitemapIndex>(rawBucket, indexFile)
 
     const filesByEntity = index.reduce((acc, file) => {
       const entity = splitFileName(file)[0]
@@ -99,20 +99,20 @@ export async function groupEntries(ctx: EventContext) {
       ))
 
     const newIndex: string[] = entries.reduce((acc, entryList) => [...acc, ...entryList], [] as string[])
-    await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
+    await cVbase.saveJSON<SitemapIndex>(bucket, indexFile, {
       index: newIndex,
       lastUpdated: currentDate(),
     })
   }))
-  await completeRoutes(indexFile, vbase)
+  await completeRoutes(indexFile, cVbase)
 
-  const isComplete = await isSitemapComplete(enabledIndexFiles, vbase, logger)
+  const isComplete = await isSitemapComplete(enabledIndexFiles, cVbase, logger)
   if (isComplete) {
-    await vbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
+    await cVbase.saveJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, {
       generationPrefix: productionPrefix,
       productionPrefix: generationPrefix,
     })
-    await cleanConfigBucket(enabledIndexFiles, vbase)
+    await cleanConfigBucket(enabledIndexFiles, cVbase)
     logger.info({ message: `Sitemap complete`, payload: body })
     return
   }

@@ -1,8 +1,9 @@
-import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase } from '@vtex/api'
+import { IOContext, Logger, RequestConfig, Tenant, TenantClient } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { EntityLocator, Internal } from 'vtex.rewriter'
 
 import { Clients } from '../../clients'
+import { CVBase } from '../../clients/Vbase'
 import { getBucket, hashString } from '../../utils'
 import { Rewriter } from './../../clients/rewriter'
 import { generateRewriterRoutes } from './generateRewriterRoutes'
@@ -18,7 +19,7 @@ import {
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const rewriterTypeMock = TypeMoq.Mock.ofInstance(Rewriter)
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const vbaseTypeMock = TypeMoq.Mock.ofInstance(CVBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -30,7 +31,7 @@ let next: any
 describe('Test rewriter routes generation', () => {
   let context: EventContext
 
-  const vbase = class VBaseMock extends vbaseTypeMock.object {
+  const cVbase = class VBaseMock extends vbaseTypeMock.object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private jsonData: Record<string, any> = {}
 
@@ -143,8 +144,8 @@ describe('Test rewriter routes generation', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
-        return this.getOrSet('vbase', vbase)
+      get cVbase() {
+        return this.getOrSet('cVbase', cVbase)
       }
 
       get rewriter() {
@@ -211,7 +212,7 @@ describe('Test rewriter routes generation', () => {
 
   it('Routes were saved', async () => {
     await generateRewriterRoutes(context, next)
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
     const expectedIndex = ['category-0', 'userRoute-0']

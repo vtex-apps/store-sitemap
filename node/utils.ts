@@ -59,9 +59,9 @@ export const hashString = (str: string) => {
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
 
 export const startSitemapGeneration = async (ctx: Context) => {
-  const { clients: { vbase, events }, vtex: { logger } } = ctx
+  const { clients: { cVbase, events }, vtex: { logger } } = ctx
   const force = ctx.query.__force !== undefined
-  const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+  const config = await cVbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
   if (config && validDate(config.endDate) && !force) {
     ctx.status = 202
     ctx.body = 'Sitemap generation already in place'
@@ -69,7 +69,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
   }
   const generationId = (Math.random() * 10000).toString()
   logger.info({ message: 'New generation starting', generationId })
-  await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
+  await cVbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
     endDate: oneWeekFromNowMS(),
     generationId,
   })

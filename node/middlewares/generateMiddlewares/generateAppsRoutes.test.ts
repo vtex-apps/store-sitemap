@@ -5,11 +5,11 @@ import {
   RequestConfig,
   Tenant,
   TenantClient,
-  VBase
 } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
+import { CVBase } from '../../clients/Vbase'
 import { CONFIG_BUCKET, getBucket, hashString } from '../../utils'
 import { } from './../../clients/rewriter'
 import { generateAppsRoutes } from './generateAppsRoutes'
@@ -17,7 +17,7 @@ import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, SitemapEntry, SitemapIndex } from '.
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
-const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const vbaseTypeMock = TypeMoq.Mock.ofInstance(CVBase)
 const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -27,7 +27,7 @@ const loggerMock = TypeMoq.Mock.ofType<Logger>()
 describe('Test rewriter routes generation', () => {
   let context: EventContext
 
-  const vbase = class VBaseMock extends vbaseTypeMock.object {
+  const cVbase = class VBaseMock extends vbaseTypeMock.object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private jsonData: Record<string, any> = {}
 
@@ -114,8 +114,8 @@ describe('Test rewriter routes generation', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
-        return this.getOrSet('vbase', vbase)
+      get cVbase() {
+        return this.getOrSet('cVbase', cVbase)
       }
 
       get apps() {
@@ -145,7 +145,7 @@ describe('Test rewriter routes generation', () => {
 
   it('Routes were saved', async () => {
     await generateAppsRoutes(context)
-    const { vbase: vbaseClient } = context.clients
+    const { cVbase: vbaseClient } = context.clients
     const bucket = getBucket(DEFAULT_CONFIG.generationPrefix, hashString('1'))
     const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, APPS_ROUTES_INDEX, true)
     const expectedIndex = ['appsRoutes-0']
@@ -162,7 +162,7 @@ describe('Test rewriter routes generation', () => {
   })
 
   it('Splits routes if too many saved', async () => {
-    const { vbase: vbaseClient, } = context.clients
+    const { cVbase: vbaseClient, } = context.clients
     const appsClient = context.clients.apps as any
 
     const tooManyRoutes = new Array(5000).fill('/entry-1')
