@@ -3,7 +3,6 @@ import {
   GENERATE_APPS_ROUTES_EVENT,
   GENERATE_PRODUCT_ROUTES_EVENT,
   GENERATE_REWRITER_ROUTES_EVENT,
-  sleep,
 } from './utils'
 
 export async function generateSitemapFromREST(ctx: Context) {
