@@ -1,13 +1,16 @@
 import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 
 export interface GetProductsAndSkuIdsReponse {
-  data: Record<string, number[]>
-  range: {
+  items: number[]
+  paging: {
     total: number
-    from: number
-    to: number
+    page: number
+    perPage: number
+    pages: number
   }
 }
+
+const PAGE_SIZE = 5000
 
 export class Catalog extends ExternalClient {
   constructor(protected context: IOContext, options?: InstanceOptions) {
@@ -26,11 +29,11 @@ export class Catalog extends ExternalClient {
     )
   }
 
-  public getProductsAndSkuIds (from: number, to: number): Promise<GetProductsAndSkuIdsReponse>{
-    return this.http.get('/api/catalog_system/pvt/products/GetProductAndSkuIds', {
+  public getProductsIds (page: number): Promise<GetProductsAndSkuIdsReponse> {
+    return this.http.get('/api/catalog_system/pvt/products/GetProductsIds', {
       params: {
-        _from: from,
-        _to: to,
+        Page: page,
+        pageSize: PAGE_SIZE,
       },
     })
   }
