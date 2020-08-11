@@ -1,4 +1,4 @@
-import { Binding, Tenant, VBase } from '@vtex/api'
+import { Binding, Tenant, VBase, Logger } from '@vtex/api'
 import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
@@ -31,7 +31,7 @@ const PRODUCT_QUERY =  `query Product($identifier: ProductUniqueIdentifier) {
 type ProductInfo = Array<[Binding, Product]>
 type MessagesByBinding = Record<string, { bindingLocale: string, messages: Message[] }>
 
-const isProductSearchResponseEmpty = async (productId: string, graphqlServer: GraphQLServer) => {
+const isProductSearchResponseEmpty = async (productId: string, graphqlServer: GraphQLServer, logger: Logger) => {
   const searchResponse = await graphqlServer.query(PRODUCT_QUERY, { identifier: { field: 'id', value: productId } }, {
     persistedQuery: {
       provider: 'vtex.search-graphql@0.x',
@@ -41,16 +41,21 @@ const isProductSearchResponseEmpty = async (productId: string, graphqlServer: Gr
     if (error instanceof ProductNotFound) {
       return null
     }
-    throw error
+    logger.error({
+      error,
+      message: 'Error in product search',
+      productId,
+    })
+    return null
   })
   return searchResponse !== null
 }
 
-const getProductInfo = (tenantInfo: Tenant, clients: Clients) => async (productId: string): Promise<ProductInfo | undefined> => {
-    const { catalogGraphQL, graphqlServer } = clients
+const getProductInfo = (tenantInfo: Tenant, ctx: EventContext) => async (productId: string): Promise<ProductInfo | undefined> => {
+    const { clients: { catalogGraphQL, graphqlServer }, vtex: { logger } } = ctx
     const [catalogResponse, hasSearchResponse] = await Promise.all([
       catalogGraphQL.product(productId),
-      isProductSearchResponseEmpty(productId, graphqlServer),
+      isProductSearchResponseEmpty(productId, graphqlServer, logger),
     ])
     const product = catalogResponse?.product
     if (!product || !product.isActive || !hasSearchResponse) {
@@ -176,7 +181,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page)
 
-  const getProductInfoFn = getProductInfo(tenantInfo, ctx.clients)
+  const getProductInfoFn = getProductInfo(tenantInfo, ctx)
   const productsInfo = await Promise.all(items.map(productId => getProductInfoFn(productId.toString())))
 
   const {
