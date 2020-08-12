@@ -6,8 +6,12 @@ import { Messages } from './messages'
 import { Rewriter } from './rewriter'
 import { Robots } from './robots'
 import { RobotsGC } from './robotsGC'
+import { CVBase } from './vbase'
 
 export class Clients extends IOClients {
+  public get vbsae() {
+    return this.getOrSet('vbase', CVBase)
+  }
   public get robots() {
     return this.getOrSet('robots', Robots)
   }
