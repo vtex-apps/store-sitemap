@@ -37,6 +37,8 @@ export interface Message {
   context: string
 }
 
+export const uniq = <T>(array: T[]) => array.filter((value, idx) => array.indexOf(value) === idx)
+
 export const createFileName = (entity: string, count: number) => `${entity}-${count}`
 
 export const splitFileName = (file: string) => file.split('-')

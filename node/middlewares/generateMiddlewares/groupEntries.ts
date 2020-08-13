@@ -1,4 +1,3 @@
-import { uniq } from 'ramda'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   cleanConfigBucket,
@@ -10,7 +9,8 @@ import {
   RAW_DATA_PREFIX,
   SitemapEntry,
   SitemapIndex,
-  splitFileName
+  splitFileName,
+  uniq
 } from './utils'
 
 const FILE_LIMIT = 5000
