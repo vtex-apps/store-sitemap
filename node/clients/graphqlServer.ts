@@ -17,7 +17,7 @@ export class ProductNotFound extends Error {
 }
 
 const handleNotFoundErrror = (error: any) => {
-  if (error.graphQLErrors.length === 1) {
+  if (error.graphQLErrors && error.graphQLErrors.length === 1) {
     const hasNotFounError = any((err: any )=> err.message.startsWith('No product was found'), error.graphQLErrors)
     if (hasNotFounError) {
       throw new ProductNotFound(error.graphQLErrors)

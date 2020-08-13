@@ -27,9 +27,9 @@ export async function generateSitemap(ctx: EventContext) {
 
   if (settings.enableProductRoutes) {
     events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
-      from: 0,
       generationId,
       invalidProducts: 0,
+      page: 1,
       processedProducts: 0,
     } as ProductRoutesGenerationEvent)
   }

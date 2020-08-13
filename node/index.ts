@@ -51,12 +51,16 @@ const clients: ClientsConfig<Clients> = {
     catalog: {
       timeout: EIGHT_SECOND_MS,
     },
+    catalogGraphQL: {
+      concurrency: 10,
+    },
     default: {
       concurrency: 5,
       retries: 1,
       timeout: THREE_SECONDS_MS,
     },
     graphqlServer: {
+      concurrency: 10,
       retries: 1,
       timeout: EIGHT_SECOND_MS,
     },
