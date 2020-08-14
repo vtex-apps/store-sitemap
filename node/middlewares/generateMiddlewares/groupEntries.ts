@@ -9,7 +9,8 @@ import {
   RAW_DATA_PREFIX,
   SitemapEntry,
   SitemapIndex,
-  splitFileName
+  splitFileName,
+  uniq
 } from './utils'
 
 const FILE_LIMIT = 5000
@@ -30,7 +31,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
       newFiles.push(entry)
       await vbase.saveJSON<SitemapEntry>(bucket, entry, {
         lastUpdated: currentDate(),
-        routes: currentRoutes,
+        routes: uniq(currentRoutes),
       })
       currentRoutes = rest
       count++
@@ -41,7 +42,7 @@ const groupEntityEntries = async (entity: string, files: string[], bucket: strin
     newFiles.push(entry)
     await vbase.saveJSON<SitemapEntry>(bucket, entry, {
       lastUpdated: currentDate(),
-      routes: currentRoutes,
+      routes: uniq(currentRoutes),
     })
   }
   logger.info({
@@ -76,7 +77,8 @@ export async function groupEntries(ctx: EventContext) {
   await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))
     const bucket = getBucket(generationPrefix, hashString(binding.id))
-    const { index } = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
+    const indexData = await vbase.getJSON<SitemapIndex>(rawBucket, indexFile)
+    const index = uniq(indexData.index)
 
     const filesByEntity = index.reduce((acc, file) => {
       const entity = splitFileName(file)[0]
