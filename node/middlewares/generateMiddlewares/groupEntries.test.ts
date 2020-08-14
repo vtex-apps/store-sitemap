@@ -118,8 +118,8 @@ describe('Test group entries', () => {
     next = jest.fn()
 
     context = {
-      clients: new ClientsImpl({}, ioContext.object),
       ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
       state: {
         ...state.object,
         enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
@@ -205,7 +205,18 @@ describe('Test group entries', () => {
 
     // Saves two product routes in different files
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const tooManyRoutes = new Array(5001).fill(BANANA_PRODUCT_ROUTE)
+    const tooManyRoutes = []
+    for (let i = 0; i <= 5000; i++) {
+      tooManyRoutes.push(
+        {
+          alternates: [
+            { bindingId: '1', path: `/banana-${i}/p` },
+          ],
+          id: i,
+          path: `/banana-${i}/p`,
+        }
+      )
+    }
     await vbaseClient.saveJSON(rawBucket, 'product-0', { routes: tooManyRoutes })
     await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: ['product-0'] })
 
