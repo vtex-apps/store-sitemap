@@ -1,4 +1,4 @@
-import { last, uniq } from 'ramda'
+import { last } from 'ramda'
 import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
 import {
   cleanConfigBucket,
