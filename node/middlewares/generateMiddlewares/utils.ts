@@ -1,5 +1,5 @@
 import { LINKED, Logger, Tenant, VBase } from '@vtex/api'
-import { all, uniqBy } from 'ramda'
+import { uniqBy } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
@@ -141,7 +141,7 @@ export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBas
     enabledIndexFiles,
     indexFiles,
   })
-  return all(Boolean, indexFiles)
+  return allTruthy(indexFiles)
 }
 
 export const completeRoutes = async (file: string, vbase: VBase) =>
@@ -152,3 +152,5 @@ export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBas
     ...enabledIndexFiles.map(
     indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])
+
+const allTruthy = <T>(array: T[]) => !array.some(e => !e)
