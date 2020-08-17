@@ -1,5 +1,5 @@
 import { LINKED, Logger, Tenant, VBase } from '@vtex/api'
-import { all } from 'ramda'
+import { all, uniqBy } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
@@ -61,6 +61,21 @@ export const initializeSitemap = async (ctx: EventContext, indexFile: string) =>
   ))
 }
 
+export const getAccountSalesChannels = (
+  tenantInfo: Tenant
+): string[] | undefined => {
+  const salesChannels = tenantInfo.bindings.reduce((acc, binding) => {
+    if (binding.targetProduct === STORE_PRODUCT) {
+      const bindingSC: number | undefined =
+        binding.extraContext.portal?.salesChannel
+      if (bindingSC) {
+        acc.push(bindingSC.toString())
+      }
+    }
+    return acc
+  }, [] as string[])
+  return uniqBy(i => i, salesChannels)
+}
 
 export const filterBindingsBySalesChannel = (
   tenantInfo: Tenant,
