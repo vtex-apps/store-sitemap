@@ -128,11 +128,11 @@ describe('Test rewriter routes generation', () => {
       }
     }
     context = {
+      ...contextMock.object,
       body: {
         generationId: '1',
       },
       clients: new ClientsImpl({}, ioContext.object),
-      ...contextMock.object,
       state: {
         ...state.object,
       },

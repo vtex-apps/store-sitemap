@@ -114,8 +114,8 @@ describe('Test group entries', () => {
     jest.clearAllMocks()
 
     context = {
-      clients: new ClientsImpl({}, ioContext.object),
       ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
       state: {
         ...state.object,
         enabledIndexFiles: [REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],

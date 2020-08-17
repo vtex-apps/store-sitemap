@@ -53,11 +53,11 @@ describe('Test generation prepare', () => {
       }
     }
     context = {
+      ...contextMock.object,
       body: {
         generationId: '1',
       },
       clients: new ClientsImpl({}, ioContext.object),
-      ...contextMock.object,
       state: {
         ...state.object,
       },

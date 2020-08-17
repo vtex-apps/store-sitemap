@@ -58,11 +58,11 @@ describe('Test generate sitemap', () => {
     jest.clearAllMocks()
 
     context = {
+      ...contextMock.object,
       body: {
         generationId: '1',
       },
       clients: new ClientsImpl({}, ioContext.object),
-      ...contextMock.object,
       state: {
         ...state.object,
         settings: {
