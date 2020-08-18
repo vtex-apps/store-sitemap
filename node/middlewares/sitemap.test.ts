@@ -107,7 +107,7 @@ describe('Test sitemap middleware', () => {
       }
     })
 
-   it('Should return binding index if it hasmultiple bindings', async () => {
+   it('Should return binding index if it has multiple bindings', async () => {
      const thisContext = {
        ...context,
        state: {
@@ -126,6 +126,32 @@ describe('Test sitemap middleware', () => {
        '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com/de</loc>'
      )).toBeTruthy()
    })
+
+   it('Should return binding index with canonical if it has multiple bindings in production', async () => {
+    const thisContext = {
+      ...context,
+      state: {
+        ...context.state,
+        matchingBindings,
+      },
+       vtex: {
+         ...context.vtex,
+         production: true,
+       },
+    }
+
+    await sitemap(thisContext, next)
+    expect(thisContext.body.includes(
+      '<loc>https://www.host.com/sitemap.xml</loc>'
+    )).toBeTruthy()
+    expect(thisContext.body.includes(
+      '<loc>https://www.host.com/br/sitemap.xml</loc>'
+    )).toBeTruthy()
+    expect(thisContext.body.includes(
+      '<loc>https://www.host.com/de/sitemap.xml</loc>'
+    )).toBeTruthy()
+  })
+
 
     it('Should return index if it doesnt have multiple bindings', async () => {
       await sitemap(context, next)
