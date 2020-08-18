@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Optimization with the new product list API
+- Bindings index improvements
 
 ## [2.9.5] - 2020-08-14
 ### Fixed
