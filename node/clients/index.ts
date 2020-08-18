@@ -9,7 +9,7 @@ import { RobotsGC } from './robotsGC'
 import { CVBase } from './vbase'
 
 export class Clients extends IOClients {
-  public get vbsae() {
+  public get vbase() {
     return this.getOrSet('vbase', CVBase)
   }
   public get robots() {
