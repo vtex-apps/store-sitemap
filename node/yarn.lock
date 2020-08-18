@@ -700,10 +700,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vtex/api@6.36.0":
-  version "6.36.0"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.0.tgz#debc0462cae4196a6580ded8ed88359dcb6ce31d"
-  integrity sha512-kEIHIOA6oXCGq65TpQG6ZBA2r3qQ9SAgoMpjo87dZvbybvxTPI7mz8URKy4jKuArf1mkhzLu9EqsJ+xwljFySg==
+"@vtex/api@6.36.1":
+  version "6.36.1"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.1.tgz#7de05462227cb9619e93fb38767ae9adb906ead2"
+  integrity sha512-DwULwOhK8BULNmZFAZXFIK1u+YvGkbl8zPt2f3DkXXI0PSnWPUkTVt1fANgYbeOtiepGNA+ibssCAGUFHFy0zg==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"

@@ -24,8 +24,7 @@ const sitemapIndexEntry = (
 }
 
 const sitemapBindingEntry = (
-  forwardedHost: string,
-  rootPath: string,
+  host: string,
   lastUpdated: string,
   bindingAddress?: string
 ) => {
@@ -33,7 +32,7 @@ const sitemapBindingEntry = (
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   return `<sitemap>
-      <loc>https://${forwardedHost}${rootPath}/sitemap.xml${querystring}</loc>
+      <loc>https://${host}/sitemap.xml${querystring}</loc>
       <lastmod>${lastUpdated}</lastmod>
     </sitemap>`
 }
@@ -85,7 +84,7 @@ const sitemapIndex = async (
 
 const sitemapBindingIndex = async (
   forwardedHost: string,
-  rootPath: string,
+  production: boolean,
   bindings: Binding[]
 ) => {
   const $ = cheerio.load(
@@ -99,10 +98,9 @@ const sitemapBindingIndex = async (
   bindings.forEach(binding => {
     $('sitemapindex').append(
       sitemapBindingEntry(
-        forwardedHost,
-        rootPath,
+        production ? binding.canonicalBaseAddress : forwardedHost,
         date,
-        rootPath ? '' : binding.canonicalBaseAddress
+        production ? '' : binding.canonicalBaseAddress
       )
     )
   })
@@ -120,6 +118,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       bindingAddress,
     },
     clients: { vbase },
+    vtex: { production },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
@@ -137,7 +136,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
     } else {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
-        ? await sitemapBindingIndex(forwardedHost, rootPath, matchingBindings)
+        ? await sitemapBindingIndex(forwardedHost, production, matchingBindings)
         : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket)
     }
   } catch (err) {

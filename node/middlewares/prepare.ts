@@ -17,6 +17,9 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   if (rootPath && !rootPath.startsWith('/')) {
     rootPath = `/${rootPath}`
   }
+  if (rootPath === '/') {
+    rootPath = ''
+  }
   const [forwardedPath, queryString] = ctx.get('x-forwarded-path').split('?')
   const matchingBindings = await getMatchingBindings(forwardedHost, tenant)
   const bindingResolver = new BindingResolver()
