@@ -26,6 +26,16 @@ For more information about generating a sitemap, check the following sections.
 
 :information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
+:warning: *If you attempt to send a new request to the Sitemap API while your store's sitemap generation is already taking place, the following message will be displayed:*	
+
+```	
+Sitemap generation already in place	
+Next generation available: <End-date>	
+```	
+
+*To make a force restart, add the `__force` query string at the end of the API URL, and send a new request. But, be aware that this will cancel the previous process.*	
+
+
 9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
 
 :information_source: *Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.*
