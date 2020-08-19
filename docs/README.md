@@ -22,18 +22,9 @@ For more information about generating a sitemap, check the following sections.
 5. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
 6. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
 7. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
-8. Create a new request and use the `GET` method to send a request to the following URL: `https://{workspace}--{account}.myvtex.com/_v/generate-sitemap`. This means your sitemap will be available in some minutes, after being processed and saved on our database. Once the process is completed, a body response containing an `OK` in text format will be provided.
+8. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
 :information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
-
-:warning: *If you attempt to send a new request to the Sitemap API while your store's sitemap generation is already taking place, the following message will be displayed:*
-
-```
-Sitemap generation already in place
-Next generation available: <End-date>
-```
-
-*To make a force restart, add the `__force` query string at the end of the API URL, and send a new request. But, be aware that this will cancel the previous process.*
 
 9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
 
