@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [2.9.5] - 2020-08-14
+## [2.9.5] - 2020-08-14 - [YANKED]
 ### Fixed
 - Makes generation route public
 

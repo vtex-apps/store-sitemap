@@ -64,7 +64,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
   const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
   if (config && validDate(config.endDate) && !force) {
     ctx.status = 202
-    ctx.body = `Sitemap generation already in place\nNext generation available: ${config.endDate}`
+    ctx.body = 'Sitemap generation already in place'
     return
   }
   const generationId = (Math.random() * 10000).toString()
