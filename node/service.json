@@ -15,8 +15,8 @@
       "public": true
     },
     "generateSitemap": {
-      "path": "/_v/generate-sitemap",
-      "public": true
+      "path": "/generate-sitemap",
+      "public": false
     },
     "robots": {
       "path": "/robots.txt",
