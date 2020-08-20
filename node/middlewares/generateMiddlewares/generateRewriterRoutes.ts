@@ -125,6 +125,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     ctx.state.nextEvent = {
       event: GROUP_ENTRIES_EVENT,
       payload: {
+        from: 0,
         generationId,
         indexFile: REWRITER_ROUTES_INDEX,
       },

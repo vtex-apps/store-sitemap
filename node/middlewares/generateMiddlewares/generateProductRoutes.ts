@@ -227,6 +227,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     ctx.state.nextEvent = {
       event: GROUP_ENTRIES_EVENT,
       payload: {
+        from: 0,
         generationId,
         indexFile: PRODUCT_ROUTES_INDEX,
       },

@@ -28,10 +28,10 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
   report: {},
 }
 
-const DEFAULT_PRODUCT_ROUTES_PAYLOAD = {
-  from: 0,
+const DEFAULT_PRODUCT_ROUTES_PAYLOAD: ProductRoutesGenerationEvent= {
   generationId: '1',
   invalidProducts: 0,
+  page: 1,
   processedProducts: 0,
 }
 

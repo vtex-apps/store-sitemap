@@ -69,6 +69,7 @@ declare global {
 
   interface GroupEntriesEvent extends DefaultEvent {
     indexFile: string
+    from: number
   }
 
   interface RewriterRoutesGenerationEvent extends DefaultEvent  {

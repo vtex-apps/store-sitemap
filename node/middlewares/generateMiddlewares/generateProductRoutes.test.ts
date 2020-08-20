@@ -289,7 +289,7 @@ describe('Test product routes generation', () => {
     expect(next).toBeCalled()
     expect(context.state.nextEvent).toStrictEqual({
       event: GROUP_ENTRIES_EVENT,
-      payload: { generationId: '1', indexFile: 'productRoutesIndex.json' },
+      payload: { from: 0, generationId: '1', indexFile: 'productRoutesIndex.json' },
     })
   })
 
