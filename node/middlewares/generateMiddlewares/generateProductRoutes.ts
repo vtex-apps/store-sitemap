@@ -10,6 +10,7 @@ import {
   currentDate,
   filterBindingsBySalesChannel,
   GENERATE_PRODUCT_ROUTES_EVENT,
+  getAccountSalesChannels,
   GROUP_ENTRIES_EVENT,
   initializeSitemap,
   Message,
@@ -178,7 +179,8 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-  const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page)
+  const salesChannels = getAccountSalesChannels(tenantInfo)
+  const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page, salesChannels)
 
   const getProductInfoFn = getProductInfo(tenantInfo, ctx)
   const productsInfo = await Promise.all(items.map(productId => getProductInfoFn(productId.toString())))

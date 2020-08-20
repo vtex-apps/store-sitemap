@@ -249,14 +249,14 @@ describe('Test product routes generation', () => {
       }
     }
     context = {
+      ...contextMock.object,
       body: {
-        page: 1,
         generationId: '1',
         invalidProducts: 0,
+        page: 1,
         processedProducts: 0,
       },
       clients: new ClientsImpl({}, ioContext.object),
-      ...contextMock.object,
       state: {
         ...state.object,
       },

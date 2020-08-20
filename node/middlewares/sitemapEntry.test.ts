@@ -69,8 +69,8 @@ describe('Test sitemap entry', () => {
     }
 
     context = {
-      clients: new ClientsImpl({}, ioContext.object),
       ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
       state: {
         ...state.object,
         binding: {

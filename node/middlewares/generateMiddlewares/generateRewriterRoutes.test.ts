@@ -156,6 +156,7 @@ describe('Test rewriter routes generation', () => {
       }
     }
     context = {
+      ...contextMock.object,
       body: {
         count: 0,
         generationId: '1',
@@ -163,7 +164,6 @@ describe('Test rewriter routes generation', () => {
         report: {},
       },
       clients: new ClientsImpl({}, ioContext.object),
-      ...contextMock.object,
       state: {
         ...state.object,
       },

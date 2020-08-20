@@ -29,9 +29,11 @@ export class Catalog extends ExternalClient {
     )
   }
 
-  public getProductsIds (page: number): Promise<GetProductsAndSkuIdsReponse> {
+  public getProductsIds (page: number, salesChannels?: string[]): Promise<GetProductsAndSkuIdsReponse> {
     return this.http.get('/api/catalog_system/pvt/products/GetProductsIds', {
       params: {
+        ...(salesChannels ? { SalesChannelId: salesChannels.join(',')} : {}),
+        Active: true,
         Page: page,
         pageSize: PAGE_SIZE,
       },

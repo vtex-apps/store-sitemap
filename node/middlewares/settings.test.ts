@@ -39,8 +39,8 @@ describe('Test settings middleware', () => {
     }
 
     context = {
-      clients: new ClientsImpl({}, ioContext.object),
       ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
       state: {
         ...state.object,
       },
