@@ -8,6 +8,7 @@
   "mustUpdateAt": "2019-08-01",
   "builders": {
     "node": "6.x",
+    "graphql": "1.x",
     "docs": "0.x"
   },
   "dependencies": {
