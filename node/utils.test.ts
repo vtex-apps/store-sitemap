@@ -1,6 +1,7 @@
 import { Binding, Events, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
+import { MultipleSitemapGenerationError } from './errors'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, startSitemapGeneration } from './utils'
 
 import { Clients } from './clients'
@@ -103,8 +104,12 @@ describe('Test startSitemapGeneration', () => {
     it('Should not start a generation if has already started', async () => {
      const { vbase: vbaseClient } = context.clients
      await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, DEFAULT_CONFIG)
-     await startSitemapGeneration(context)
-     expect(context.status).toStrictEqual(202)
+      try {
+        await startSitemapGeneration(context)
+        expect(true).toBe(false)
+      } catch(err) {
+        expect(err instanceof MultipleSitemapGenerationError).toBe(true)
+      }
    })
 
    it('Should start a generation if date is expired', async () => {
@@ -127,16 +132,10 @@ describe('Test startSitemapGeneration', () => {
     expect(eventSent).toBeCalled()
    })
 
-   it('Should start a generation with the force querystring', async () => {
-    const thisContext = {
-      ...context,
-      query: {
-        __force: undefined,
-      },
-    }
+   it('Should start a generation with the force param', async () => {
     const { vbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, DEFAULT_CONFIG)
-    await startSitemapGeneration(thisContext)
+    await startSitemapGeneration(context, true)
     expect(eventSent).toBeCalled()
    })
 

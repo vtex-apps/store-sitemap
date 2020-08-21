@@ -76,7 +76,7 @@ export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
 
 export const validDate = (endDate: string) => {
   const date = new Date(endDate)
-  if (date && date.toString() !== 'Invalid Date' && date <= new Date()) {
+  if (date  && date <= new Date() || date.toString() === 'Invalid Date') {
     return false
   }
   return true

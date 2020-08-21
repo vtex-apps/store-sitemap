@@ -132,7 +132,7 @@ describe('Test sitemap entry', () => {
   it('Should create corrects sitemap entries', async () => {
     await sitemapEntry(context, next)
     expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
-      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/TR/xhtml11/xhtml11_schema.html">
+      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
         <url>
           <loc>https://host.com/banana</loc>
           <lastmod>2019-12-04</lastmod>
