@@ -18,11 +18,34 @@ For more information about generating a sitemap, check the following sections.
 
 :warning: *Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the Advanced Configuration section for more information before proceeding any further.*
 
-4. Run `vtex local token` to generate a unique and temporary API token. Save the generated token to use later.
-5. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
-6. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
-7. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
-8. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
+4. Open GraphQL IDE in the admin and select `vtex.routes-bootstrap@0.x`
+
+:information_source: If there isn't an `GraphQL IDE` option under `Store Setup`, you need to install the app: `vtex.admin-graphql-ide@3.x`
+
+5. Run the folowwing query: 
+```
+{
+  bootstrap {
+    brands
+    categories
+  }
+}
+```
+In the response, you'll get the containing information about the number of routes that were saved in the database. The department, categories and subcategories routes will be under the `category` property and number of brand routes under the `brands` property.
+
+If this query has already been run and there isn't any change it these types of routes you don't need to run again.
+
+6. Open GraphQL IDE in the admin and select `vtex.store-sitemap@2.x`
+
+7. Run the folowwing query: 
+```
+{
+  generateSitemap
+}
+```
+
+The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
+
 
 :information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
@@ -33,7 +56,7 @@ Sitemap generation already in place
 Next generation available: <End-date>	
 ```	
 
-*To make a force restart, add the `__force` query string at the end of the API URL, and send a new request. But, be aware that this will cancel the previous process.*	
+*To make a force restart, add the `force` aqgument to the query like: `generateSitemap(force: true)`. But, be aware that this will cancel the previous process.*	
 
 
 9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
