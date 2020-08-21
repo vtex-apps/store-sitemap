@@ -59,9 +59,8 @@ export const hashString = (str: string) => {
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
 
-export const startSitemapGeneration = async (ctx: Context) => {
+export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
   const { clients: { vbase, events }, vtex: { logger } } = ctx
-  const force = ctx.query.__force !== undefined
   const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
   if (config && validDate(config.endDate) && !force) {
     throw new MultipleSitemapGenerationError(config.endDate)

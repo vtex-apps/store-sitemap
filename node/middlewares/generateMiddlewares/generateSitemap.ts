@@ -10,7 +10,7 @@ import {
 export async function generateSitemapFromREST(ctx: Context) {
   ctx.status = 200
   try {
-    await startSitemapGeneration(ctx)
+    await startSitemapGeneration(ctx, ctx.query.__force !== undefined)
   } catch (err) {
     if (err instanceof MultipleSitemapGenerationError) {
       ctx.status = 202
