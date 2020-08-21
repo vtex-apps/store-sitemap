@@ -1,6 +1,7 @@
-
 import { Binding, LINKED, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
+
+import { MultipleSitemapGenerationError } from './errors'
 import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
@@ -63,9 +64,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
   const force = ctx.query.__force !== undefined
   const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
   if (config && validDate(config.endDate) && !force) {
-    ctx.status = 202
-    ctx.body = `Sitemap generation already in place\nNext generation available: ${config.endDate}`
-    return
+    throw new MultipleSitemapGenerationError(config.endDate)
   }
   const generationId = (Math.random() * 10000).toString()
   logger.info({ message: 'New generation starting', generationId })

@@ -1,6 +1,7 @@
 import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
+import { MultipleSitemapGenerationError } from '../errors'
 import { SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
   currentDate,
@@ -144,8 +145,11 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       ctx.status = 404
       ctx.body = 'Generating sitemap...'
       ctx.vtex.logger.error(err.message)
-      await startSitemapGeneration(ctx)
-      return
+      await startSitemapGeneration(ctx).catch(err => {
+        if (!(err instanceof MultipleSitemapGenerationError)) {
+          throw err
+        }
+      })
     }
     throw err
   }

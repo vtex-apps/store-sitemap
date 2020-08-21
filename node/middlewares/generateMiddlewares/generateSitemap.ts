@@ -1,4 +1,6 @@
 import { startSitemapGeneration } from '../../utils'
+import { MultipleSitemapGenerationError } from './../../errors'
+
 import {
   GENERATE_APPS_ROUTES_EVENT,
   GENERATE_PRODUCT_ROUTES_EVENT,
@@ -7,7 +9,16 @@ import {
 
 export async function generateSitemapFromREST(ctx: Context) {
   ctx.status = 200
-  await startSitemapGeneration(ctx)
+  try {
+    await startSitemapGeneration(ctx)
+  } catch (err) {
+    if (err instanceof MultipleSitemapGenerationError) {
+      ctx.status = 202
+      ctx.body = err.message
+      return
+    }
+    throw err
+  }
 }
 
 const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
