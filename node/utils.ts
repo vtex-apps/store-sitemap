@@ -1,6 +1,7 @@
-
 import { Binding, LINKED, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
+
+import { MultipleSitemapGenerationError } from './errors'
 import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
@@ -58,14 +59,11 @@ export const hashString = (str: string) => {
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
 
-export const startSitemapGeneration = async (ctx: Context) => {
+export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
   const { clients: { vbase, events }, vtex: { logger } } = ctx
-  const force = ctx.query.__force !== undefined
   const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
   if (config && validDate(config.endDate) && !force) {
-    ctx.status = 202
-    ctx.body = `Sitemap generation already in place\nNext generation available: ${config.endDate}`
-    return
+    throw new MultipleSitemapGenerationError(config.endDate)
   }
   const generationId = (Math.random() * 10000).toString()
   logger.info({ message: 'New generation starting', generationId })
@@ -78,7 +76,7 @@ export const startSitemapGeneration = async (ctx: Context) => {
 
 export const validDate = (endDate: string) => {
   const date = new Date(endDate)
-  if (date && date.toString() !== 'Invalid Date' && date <= new Date()) {
+  if (date  && date <= new Date() || date.toString() === 'Invalid Date') {
     return false
   }
   return true

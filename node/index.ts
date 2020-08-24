@@ -30,6 +30,7 @@ import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
+import { resolvers } from './resolvers'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -90,6 +91,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateSitemap: [settings, generationPrepare, generateSitemap],
     groupEntries: [throttle, settings, generationPrepare, groupEntries, sendNextEvent],
   },
+  graphql: { resolvers },
   routes: {
     generateSitemap: generateSitemapFromREST,
     robots: method({
