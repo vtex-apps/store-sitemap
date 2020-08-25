@@ -34,9 +34,8 @@ For more information about generating a sitemap, check the following sections.
   }
 }
 ```
-In the response, you'll get the containing information about the number of routes that were saved in the database. The department, categories and subcategories routes will be under the `category` property and number of brand routes under the `brands` property.
 
-If this query has already been run and there isn't any change it these types of routes you don't need to run again.
+The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
 
 6. Open GraphQL IDE in the admin and select `vtex.store-sitemap@2.x`
 
