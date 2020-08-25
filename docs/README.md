@@ -37,9 +37,9 @@ For more information about generating a sitemap, check the following sections.
 
 The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
 
-6. Open GraphQL IDE in the admin and select `vtex.store-sitemap@2.x`
+8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
 
-7. Run the folowwing query: 
+9. Run the following query: 
 ```
 {
   generateSitemap
