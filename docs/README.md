@@ -18,11 +18,14 @@ For more information about generating a sitemap, check the following sections.
 
 :warning: *Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the Advanced Configuration section for more information before proceeding any further.*
 
-4. Open GraphQL IDE in the admin and select `vtex.routes-bootstrap@0.x`
+4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
 
-:information_source: If there isn't an `GraphQL IDE` option under `Store Setup`, you need to install the app: `vtex.admin-graphql-ide@3.x`
+![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
 
-5. Run the folowwing query: 
+6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+7. If this is **not** the **first time** you're generating your store's sitemap or if your store's routes **didn't suffer any changes** since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query: 
+
 ```
 {
   bootstrap {
