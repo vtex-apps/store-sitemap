@@ -46,8 +46,7 @@ The expected response is a `JSON` object containing the number of brand routes u
 }
 ```
 
-The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
-
+The expected response body is `true`. This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
 :information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
