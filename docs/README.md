@@ -18,11 +18,43 @@ For more information about generating a sitemap, check the following sections.
 
 :warning: *Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the Advanced Configuration section for more information before proceeding any further.*
 
-4. Run `vtex local token` to generate a unique and temporary API token. Save the generated token to use later.
-5. Open an API testing tool such as [Postman](https://www.postman.com/) and [create a basic request](https://learning.postman.com/docs/postman/sending-api-requests/requests/#creating-requests).
-6. In the "Authorization" tab, select "Bearer Token" as type and paste the token generated in the previous step into the "Token" field.
-7. Use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.routes-bootstrap/v0/{account}/{workspace}/bootstrap`. In the response body, you'll see a `json` containing information about the number of department, category and brand routes that were saved in the database.
-8. Create a new request and use the `GET` method to send a request to the following URL: `https://app.io.vtex.com/vtex.store-sitemap/v2/{account}/{workspace}/generate-sitemap`. The expected response body is an `OK` in text format. This means your sitemap will be available in some minutes, after being processed and saved on our database.
+4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
+
+![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
+
+6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+7. If this is **not** the **first time** you're generating your store's sitemap or if your store's routes **didn't suffer any changes** since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query: 
+
+```
+{
+  bootstrap {
+    brands
+    categories
+  }
+}
+```
+
+The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
+
+8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
+
+9. Run the following query: 
+```
+{
+  generateSitemap
+}
+```
+
+The expected response body is 
+```  
+{
+  "data": {
+    "generateSitemap": true
+  }
+}
+```
+This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
 :information_source: *Keep in mind that the time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.*
 
@@ -33,10 +65,10 @@ Sitemap generation already in place
 Next generation available: <End-date>	
 ```	
 
-*To make a force restart, add the `__force` query string at the end of the API URL, and send a new request. But, be aware that this will cancel the previous process.*	
+*To make a force restart, add the `force` argument to the query, as in: `generateSitemap(force: true)`. But, be aware that this will cancel the previous process.*	
 
 
-9. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
+10. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you'll first see an index containing a website's sitemap for each locale.
 
 :information_source: *Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.*
 
