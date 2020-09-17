@@ -53,7 +53,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     'cache-control',
     production ? `public, max-age=${ONE_DAY_S}` : 'no-cache'
   )
-  if (production && Math.random() < 0.2) {
+  if (production && Math.random() < 0.7) {
     startSitemapGeneration(ctx)
   }
 
