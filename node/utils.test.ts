@@ -63,7 +63,7 @@ describe('Test startSitemapGeneration', () => {
       super(ioContext.object)
     }
 
-    public sendEvent = async (_: string, __:string, ___: any, ____: any) => {
+    public sendEvent = async (_: any, __:string, ___: any, ____: any) => {
       eventSent()
     }
   }
