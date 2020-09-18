@@ -1,7 +1,8 @@
-import { IOClients } from '@vtex/api'
+import { IOClients, Sphinx } from '@vtex/api'
 
 import { Catalog } from './catalog'
 import { GraphQLServer } from './graphqlServer'
+import { VtexID } from './id'
 import { Messages } from './messages'
 import { Rewriter } from './rewriter'
 import { Robots } from './robots'
@@ -35,4 +36,13 @@ export class Clients extends IOClients {
   public get graphqlServer(): GraphQLServer {
     return this.getOrSet('graphqlServer', GraphQLServer)
   }
+
+  public get vtexID() {
+    return this.getOrSet('vtexID', VtexID)
+  }
+
+  public get sphinx() {
+    return this.getOrSet('sphinx', Sphinx)
+  }
+
 }
