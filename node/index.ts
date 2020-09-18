@@ -10,6 +10,7 @@ import {
 } from '@vtex/api'
 
 import { Clients } from './clients'
+import { Authorization } from './directives/auth'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
 import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
@@ -91,7 +92,12 @@ export default new Service<Clients, State, ParamsContext>({
     generateSitemap: [settings, generationPrepare, generateSitemap],
     groupEntries: [throttle, settings, generationPrepare, groupEntries, sendNextEvent],
   },
-  graphql: { resolvers },
+  graphql: {
+    resolvers,
+    schemaDirectives: {
+      requiresAuth: Authorization,
+    },
+  },
   routes: {
     generateSitemap: generateSitemapFromREST,
     robots: method({
