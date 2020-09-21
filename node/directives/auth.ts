@@ -5,7 +5,7 @@ const canBypass = (email: string) => {
   return email.includes('@vtex.com')
 }
 
-const authFromCookie = async (ctx: Context) => {
+export const authFromCookie = async (ctx: Context) => {
   const {
     clients: { sphinx, vtexID },
     vtex: { authToken },
