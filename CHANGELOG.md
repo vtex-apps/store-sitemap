@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Athentication directive
+
+### Fixed
+- Decreases number of products processed in an event
+- Remoes randomness in sitemap generation
 
 ## [2.11.3] - 2020-09-17
 ### Fixed

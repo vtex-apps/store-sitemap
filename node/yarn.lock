@@ -700,10 +700,10 @@
   dependencies:
     "@types/yargs-parser" "*"
 
-"@vtex/api@6.36.2":
-  version "6.36.2"
-  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.2.tgz#98295c5f3e8ae492a55d996f7074e5fe09067e1e"
-  integrity sha512-J72dBwQG0hLJTGnFUwCJgW5v9iRubrQZ13aA2fwHohLeEcBOG/OAdd/eF3tuQY7lh8giCv4w0l0+oWvNor9vTg==
+"@vtex/api@6.36.3":
+  version "6.36.3"
+  resolved "https://registry.yarnpkg.com/@vtex/api/-/api-6.36.3.tgz#d827944829fb289d3a826cac12874f8e33ce62f5"
+  integrity sha512-i7zZ0Mj5pGEr6wd8VCK/hhiKTmmiuTn44v9MlWn36MRvtfBfOsKlhMFUEv3HBT1MH+fQTNM9vY08uSy7BsG44w==
   dependencies:
     "@types/koa" "^2.11.0"
     "@types/koa-compose" "^3.2.3"
@@ -2301,13 +2301,6 @@ graphql-upload@^8.1.0:
     fs-capacitor "^2.0.4"
     http-errors "^1.7.3"
     object-path "^0.11.4"
-
-graphql@^14.1.1:
-  version "14.1.1"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-14.1.1.tgz#d5d77df4b19ef41538d7215d1e7a28834619fac0"
-  integrity sha512-C5zDzLqvfPAgTtP8AUPIt9keDabrdRAqSWjj2OPRKrKxI9Fb65I36s1uCs1UUBFnSWTdO7hyHi7z1ZbwKMKF6Q==
-  dependencies:
-    iterall "^1.2.2"
 
 graphql@^14.5.8:
   version "14.6.0"
@@ -4558,7 +4551,7 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
-"stats-lite@github:vtex/node-stats-lite#dist":
+stats-lite@vtex/node-stats-lite#dist:
   version "2.2.0"
   resolved "https://codeload.github.com/vtex/node-stats-lite/tar.gz/1b0d39cc41ef7aaecfd541191f877887a2044797"
   dependencies:

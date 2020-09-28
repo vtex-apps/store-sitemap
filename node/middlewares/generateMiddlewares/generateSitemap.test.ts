@@ -42,8 +42,8 @@ describe('Test generate sitemap', () => {
       super(ioContext.object)
     }
 
-    public sendEvent = async (subject: string, route: string, message: any, _: any) => {
-      eventSent(subject, route, message)
+    public sendEvent = async (_: any,route: string, message?: any, __?: any)=> {
+      eventSent(_, route, message)
     }
   }
 

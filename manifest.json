@@ -80,6 +80,16 @@
     },
     {
       "name": "vtex.graphql-server:resolve-graphql"
+    },
+    {
+      "name": "sphinx-is-admin"
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "vtexid.vtex.com.br",
+        "path": "/api/vtexid/pub/authenticated/user"
+      }
     }
   ],
   "credentialType": "absolute",
