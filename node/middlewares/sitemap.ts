@@ -2,7 +2,7 @@ import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
 import { MultipleSitemapGenerationError } from '../errors'
-import { SitemapNotFound, startSitemapGeneration } from '../utils'
+import { EXTENDED_INDEX_FILE, getBucket, hashString, SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
   currentDate,
   SitemapIndex
@@ -44,6 +44,7 @@ const sitemapIndex = async (
   rootPath: string,
   vbase: VBase,
   bucket: string,
+  binding: string,
   bindingAddress?: string
 ) => {
   const $ = cheerio.load(
@@ -54,13 +55,20 @@ const sitemapIndex = async (
   )
 
   const rawIndexFiles = await Promise.all(
-    enabledIndexFiles.map(indexFile =>
+    [
+      ...enabledIndexFiles.map(indexFile =>
       vbase.getJSON<SitemapIndex>(
         bucket,
         indexFile,
         true
-      )
-    ))
+      )),
+      vbase.getJSON<SitemapIndex>(
+        getBucket('', hashString(binding)),
+        EXTENDED_INDEX_FILE,
+        true
+      ),
+    ]
+  )
   const indexFiles = rawIndexFiles.filter(Boolean)
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
@@ -113,6 +121,7 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
     state: {
       enabledIndexFiles,
       forwardedHost,
+      binding,
       bucket,
       rootPath,
       matchingBindings,
@@ -132,13 +141,14 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
         rootPath,
         vbase,
         bucket,
+        binding.id,
         bindingAddress
       )
     } else {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
         ? await sitemapBindingIndex(forwardedHost, production, matchingBindings)
-        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket)
+        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket, binding.id)
     }
   } catch (err) {
     if (err instanceof SitemapNotFound) {
