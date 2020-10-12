@@ -1,4 +1,3 @@
-import { Binding, VBase } from '@vtex/api'
 import * as cheerio from 'cheerio'
 
 import { MultipleSitemapGenerationError } from '../errors'
@@ -38,15 +37,19 @@ const sitemapBindingEntry = (
     </sitemap>`
 }
 
-const sitemapIndex = async (
-  enabledIndexFiles: string[],
-  forwardedHost: string,
-  rootPath: string,
-  vbase: VBase,
-  bucket: string,
-  binding: string,
-  bindingAddress?: string
-) => {
+const sitemapIndex = async (ctx: Context) => {
+  const {
+    state: {
+      enabledIndexFiles,
+      forwardedHost,
+      binding,
+      bucket,
+      rootPath,
+      bindingAddress,
+    },
+    clients: { vbase },
+  } = ctx
+
   const $ = cheerio.load(
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     {
@@ -63,7 +66,7 @@ const sitemapIndex = async (
         true
       )),
       vbase.getJSON<SitemapIndex>(
-        getBucket('', hashString(binding)),
+        getBucket('', hashString(binding.id)),
         EXTENDED_INDEX_FILE,
         true
       ),
@@ -91,11 +94,15 @@ const sitemapIndex = async (
   return $
 }
 
-const sitemapBindingIndex = async (
-  forwardedHost: string,
-  production: boolean,
-  bindings: Binding[]
-) => {
+const sitemapBindingIndex = async (ctx: Context) => {
+  const {
+    state: {
+      forwardedHost,
+      matchingBindings: bindings,
+    },
+    vtex: { production },
+  } = ctx
+
   const $ = cheerio.load(
     '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     {
@@ -119,36 +126,22 @@ const sitemapBindingIndex = async (
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
     state: {
-      enabledIndexFiles,
-      forwardedHost,
-      binding,
-      bucket,
-      rootPath,
       matchingBindings,
       bindingAddress,
+      rootPath,
     },
-    clients: { vbase },
-    vtex: { production },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
   let $: any
   try {
     if (hasBindingIdentifier) {
-      $ = await sitemapIndex(
-        enabledIndexFiles,
-        forwardedHost,
-        rootPath,
-        vbase,
-        bucket,
-        binding.id,
-        bindingAddress
-      )
+      $ = await sitemapIndex(ctx)
     } else {
       const hasMultipleMatchingBindings = matchingBindings.length > 1
       $ = hasMultipleMatchingBindings
-        ? await sitemapBindingIndex(forwardedHost, production, matchingBindings)
-        : await sitemapIndex(enabledIndexFiles, forwardedHost, rootPath, vbase, bucket, binding.id)
+        ? await sitemapBindingIndex(ctx)
+        : await sitemapIndex(ctx)
     }
   } catch (err) {
     if (err instanceof SitemapNotFound) {
