@@ -1,4 +1,5 @@
 import { Binding, PUBLIC_DOMAINS, Tenant } from '@vtex/api'
+import { TENANT_CACHE_TTL_S } from '../utils'
 
 export interface BindingDiscoveryResult {
   binding: Binding | null
@@ -17,6 +18,27 @@ const defaultOptions: BindingDiscoveryOptions = {
 
 const ensureEndingSlash = (address: string) => {
   return address.endsWith('/') ? address : `${address}/`
+}
+
+const getStoreBinding = (bindings: Binding[]) => {
+  const storeBinding = bindings.find(b => b.targetProduct === 'vtex-storefront')
+  if (!storeBinding) {
+    throw new Error('No binding found')
+  }
+  return storeBinding
+}
+
+
+export const getDefaultStoreBinding = async (ctx: Context) => {
+  const {
+    clients: { tenant },
+  } = ctx
+
+  const { bindings = [] } = await tenant.info({
+    forceMaxAge: TENANT_CACHE_TTL_S,
+  })
+  const defaultStoreBinding = getStoreBinding(bindings)
+  return defaultStoreBinding.id
 }
 
 export class BindingResolver {
@@ -138,15 +160,7 @@ export class BindingResolver {
       headers: ctx.request.headers,
       message: 'No binding found, falling back to the first store binding',
     })
-    return this.getStoreBinding(bindings)
-  }
-
-  private getStoreBinding(bindings: Binding[]) {
-    const storeBinding = bindings.find(b => b.targetProduct === 'vtex-storefront')
-    if (!storeBinding) {
-      throw new Error('No binding found')
-    }
-    return storeBinding
+    return getStoreBinding(bindings)
   }
 
   private getBindingById(bindingId: string, bindings: Binding[]): Binding {
