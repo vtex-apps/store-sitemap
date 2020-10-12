@@ -103,6 +103,28 @@ If you have [custom pages](https://vtex.io/docs/recipes/templates/creating-a-new
 
 Once everything is set up, go back to the step 4 of the Configuration section.
 
+#### Extending the sitemap
+
+Yan can extend the sitemap by adding new index and have your own app responding this XML.
+
+1. Creating your app
+
+If you have a situation where you need to have extra index XML in the sitemap you can create an app that respond to the route: `/sitemap/<your-index>.xml`, and returns a XML with the data google should index. 
+
+:information_source: A good practice is to have the XML pre-created and not build it from scratch on every request.
+
+2. Adding the new index
+
+Afteyou created your app you will notice that the new index won't be showing in the sitemap root file, returned in the path `/sitemap.xml`. To add it you can do the following mutation:
+
+```
+mutation {
+  saveIndex(index: "<your-index>")
+}
+```
+
+:information_source: The `saveIndex` mutation also receives the binding id as a argument, so you can add new index for each binding. If it is not present it will use the default store binding.
+
 ## Modus Operandis
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
