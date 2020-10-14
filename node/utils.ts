@@ -81,3 +81,11 @@ export const validDate = (endDate: string) => {
   }
   return true
 }
+
+export const getStoreBindings = async (tenant: TenantClient) => {
+  const { bindings } = await tenant.info({
+    forceMaxAge: TENANT_CACHE_TTL_S,
+  })
+  const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
+  return storeBindings
+}

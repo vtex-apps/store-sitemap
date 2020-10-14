@@ -29,7 +29,7 @@ export class CVBase extends VBase {
       headers, inflightKey, metric, nullIfNotFound, tracing: {
         requestSpanNameSuffix: metric,
         ...tracingConfig?.tracing,
-      }
+      },
     } as IgnoreNotFoundRequestConfig)
       .catch(async (error: AxiosError<T>) => {
         const { response } = error

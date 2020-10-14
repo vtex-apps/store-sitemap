@@ -1,9 +1,10 @@
-import { Clients } from './../../clients/index'
-import { Rewriter } from './../../clients/rewriter'
-
+import { Binding } from '@vtex/api'
 import { path as Rpath, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
-import { getBucket, hashString } from '../../utils'
+
+import { getBucket, getStoreBindings, hashString } from '../../utils'
+import { Clients } from './../../clients/index'
+import { Rewriter } from './../../clients/rewriter'
 import {
   createFileName,
   currentDate,
@@ -20,38 +21,42 @@ const LIST_LIMIT = 300
 
 type RoutesByBinding = Record<string, Record<string, Route[]>>
 
-const createRoutesByBinding = (routes: Internal[], report: Record<string, number>) => routes.reduce(
-  (acc, internal) => {
-    report[internal.type] = (report[internal.type] || 0) + 1
-    const validRoute =
-      !startsWith('notFound', internal.type) &&
-      internal.type !== 'product' &&
-      !internal.disableSitemapEntry
-    if (validRoute) {
-      const { binding } = internal
-      const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
-      const route: Route = {
-        id: internal.id,
-        imagePath: internal.imagePath || undefined,
-        imageTitle: internal.imageTitle || undefined,
-        path: internal.from,
+const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[]) => {
+  const storeBindingsIds = storeBindings.map(({ id }) => id)
+  return routes.reduce(
+    (acc, internal) => {
+      report[internal.type] = (report[internal.type] || 0) + 1
+      const validRoute =
+        !startsWith('notFound', internal.type) &&
+        internal.type !== 'product' &&
+        !internal.disableSitemapEntry &&
+        storeBindingsIds.includes(internal.binding)
+      if (validRoute) {
+        const { binding } = internal
+        const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
+        const route: Route = {
+          id: internal.id,
+          imagePath: internal.imagePath || undefined,
+          imageTitle: internal.imageTitle || undefined,
+          path: internal.from,
+        }
+        acc[binding] = {
+          ...acc[binding] || {},
+          [internal.type]: bindingRoutes.concat(route),
+        }
       }
-      acc[binding] = {
-        ...acc[binding] || {},
-        [internal.type]: bindingRoutes.concat(route),
-      }
-    }
-    return acc
-  },
-  {} as RoutesByBinding
-)
+      return acc
+    },
+    {} as RoutesByBinding
+  )
+}
 
 const completeRoute = (rewriter: Rewriter, type: string) => async (route: Route) => {
   const routesById = await rewriter.routesById({
     id: route.id,
     type,
   })
-  const alternates = routesById.map(({ route: path, binding: bindingId}) => ({ path, bindingId}))
+  const alternates = routesById.map(({ route: path, binding: bindingId }) => ({ path, bindingId }))
   return {
     ...route,
     alternates,
@@ -70,8 +75,8 @@ const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Cl
       const entry = createFileName(entityType, count)
       const lastUpdated = currentDate()
       await vbase.saveJSON<SitemapEntry>(bucket, entry, {
-          lastUpdated,
-          routes: entityRoutes,
+        lastUpdated,
+        routes: entityRoutes,
       })
       return entry
     })
@@ -87,7 +92,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
-  const { clients: { rewriter }, body } = ctx
+  const { clients: { rewriter, tenant } , body } = ctx
   const {
     count,
     generationId,
@@ -99,7 +104,9 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
-  const routesByBinding = createRoutesByBinding(routes, report)
+  const storeBindings = await getStoreBindings(tenant)
+
+  const routesByBinding = createRoutesByBinding(routes, report, storeBindings)
 
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, count, ctx.clients))
