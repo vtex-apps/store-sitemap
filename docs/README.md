@@ -105,25 +105,35 @@ Once everything is set up, go back to the step 4 of the Configuration section.
 
 #### Extending the sitemap
 
-You can extend the sitemap by adding new index and have your own app responding this XML.
+To add custom routes created by an app (for example, the ones created by the [`store-locator`](https://github.com/vtex-apps/store-locator)) to your store's sitemap, the app must respond to an XML file containing a list of the routes created by that app. Lastly, you must include the path to the XML file that your app responds to as an index of your store's sitemap.
 
-1. Creating your app
+For implementation details, check the following step by step.
 
-If you have a situation where you need to have extra index XML in the sitemap you can create an app that respond to the route: `/sitemap/<your-index>.xml`, and returns a XML with the data google should index. 
+1. Create or modify your app to respond to the following route `/sitemap/{index-name}.xml` and to return an XML file containing the data that you want the search engine (e.g., Google) to index.
 
-:information_source: A good practice is to have the XML pre-created and not build it from scratch on every request.
+⚠️ Remember to replace the values between the curly brackets according to your scenario.
 
-2. Adding the new index
+:information_source: *We recommend that you use a pre-created XML file. Otherwise, for every request, the XML file will be built from scratch, consuming more time to complete the task.*
 
-Afte the app is created, you will notice that the new index won't be showing in the sitemap root file, returned in the path `/sitemap.xml`. To add it you can do the following mutation:
+2. [Publish](https://vtex.io/docs/recipes/development/publishing-an-app/) and install your app in a production workspace.
 
-```
+3. Now, to make your index available in the sitemap root file (`/sitemap.xml`), access your account's admin, relative to the workspace you're working on, and select the GraphQL IDE.
+
+4. From the dropdown list, choose the `vtex.store-sitemap@2.x` app and perform the following mutation, adapting it to your scenario:
+
+```gql
 mutation {
-  saveIndex(index: "<your-index>")
+  saveIndex(index: "{index-name}")
 }
 ```
 
-:information_source: The `saveIndex` mutation also receives the binding id as a argument, so you can add new index for each binding. If it is not present it will use the default store binding.
+:information_source: **If your store is a cross-border one**, *keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.*
+
+5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
+
+6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+
+## Modus Operandi
 
 ## Modus Operandis
 
