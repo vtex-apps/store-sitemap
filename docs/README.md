@@ -105,7 +105,7 @@ Once everything is set up, go back to the step 4 of the Configuration section.
 
 #### Extending the sitemap
 
-Yan can extend the sitemap by adding new index and have your own app responding this XML.
+You can extend the sitemap by adding new index and have your own app responding this XML.
 
 1. Creating your app
 
@@ -115,7 +115,7 @@ If you have a situation where you need to have extra index XML in the sitemap yo
 
 2. Adding the new index
 
-Afteyou created your app you will notice that the new index won't be showing in the sitemap root file, returned in the path `/sitemap.xml`. To add it you can do the following mutation:
+Afte the app is created, you will notice that the new index won't be showing in the sitemap root file, returned in the path `/sitemap.xml`. To add it you can do the following mutation:
 
 ```
 mutation {
