@@ -72,6 +72,7 @@ describe('Test rewriter routes generation', () => {
         bindings: [
         {
           id: '1',
+          targetProduct: 'vtex-storefront',
         },
         {
           id: '2',
@@ -105,6 +106,12 @@ describe('Test rewriter routes generation', () => {
               },
               {
                 binding: '1',
+                from: '/coconut-water',
+                id: '2',
+                type: 'brand',
+              },
+              {
+                binding: '2',
                 from: '/coconut-water',
                 id: '2',
                 type: 'brand',
