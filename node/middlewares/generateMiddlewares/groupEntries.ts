@@ -1,5 +1,5 @@
 import { last } from 'ramda'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getStoreBindings, hashString } from '../../utils'
 import {
   cleanConfigBucket,
   completeRoutes,
@@ -83,11 +83,9 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     },
   } = ctx
   const { indexFile, generationId, from }: GroupEntriesEvent = body
-  const { bindings } = await tenant.info({
-    forceMaxAge: TENANT_CACHE_TTL_S,
-  })
+
   const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
-  const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
+  const storeBindings = await getStoreBindings(tenant)
 
   const isBindingGroupingComplete = await Promise.all(storeBindings.map(async binding => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString(binding.id))

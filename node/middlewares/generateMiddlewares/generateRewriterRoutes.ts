@@ -1,10 +1,10 @@
-import { Clients } from './../../clients/index'
-import { Rewriter } from './../../clients/rewriter'
-
 import { Binding } from '@vtex/api'
 import { path as Rpath, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
-import { getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+
+import { getBucket, getStoreBindings, hashString } from '../../utils'
+import { Clients } from './../../clients/index'
+import { Rewriter } from './../../clients/rewriter'
 import {
   createFileName,
   currentDate,
@@ -92,7 +92,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
-  const { clients: { rewriter, tenant }, body } = ctx
+  const { clients: { rewriter, tenant } , body } = ctx
   const {
     count,
     generationId,
@@ -104,10 +104,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
-  const { bindings } = await tenant.info({
-    forceMaxAge: TENANT_CACHE_TTL_S,
-  })
-  const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
+  const storeBindings = await getStoreBindings(tenant)
 
   const routesByBinding = createRoutesByBinding(routes, report, storeBindings)
 
