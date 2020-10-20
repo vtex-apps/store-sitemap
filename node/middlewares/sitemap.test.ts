@@ -4,6 +4,7 @@ import * as TypeMoq from 'typemoq'
 import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
+import { EXTENDED_INDEX_FILE } from '../utils'
 import { sitemap } from './sitemap'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
@@ -16,7 +17,7 @@ const removeSpaces = (str: string) => str.replace(/(\r\n|\n|\r|\s)/gm, '')
 
 describe('Test sitemap middleware', () => {
   let context: Context
-
+  let hasExtendedFiles: boolean
 
   const vbase = class VBaseMock extends vbaseTypeMock.object {
     constructor() {
@@ -44,6 +45,13 @@ describe('Test sitemap middleware', () => {
             index: [ 'product-0'],
             lastUpdated: '2019-12-04',
           } as unknown as T
+        case EXTENDED_INDEX_FILE:
+          return (hasExtendedFiles
+            ? {
+              index: ['extra-0'],
+              lastUpdated: '2019-12-04',
+            }
+            : null) as unknown as T
         default:
           return null as unknown as T
       }
@@ -78,6 +86,7 @@ describe('Test sitemap middleware', () => {
         }
       }
 
+      hasExtendedFiles = false
       context = {
         ...contextMock.object,
         clients: new ClientsImpl({}, ioContext.object),
@@ -270,4 +279,34 @@ describe('Test sitemap middleware', () => {
       </sitemapindex>`
     ))
   })
+
+  it('Should return extra index if any', async () => {
+    hasExtendedFiles = true
+    await sitemap(context, next)
+    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
+      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <sitemap>
+          <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+        <sitemap>
+          <loc>https://www.host.com/sitemap/brand-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+        <sitemap>
+          <loc>https://www.host.com/sitemap/department-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+        <sitemap>
+          <loc>https://www.host.com/sitemap/product-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+        <sitemap>
+          <loc>https://www.host.com/sitemap/extra-0.xml</loc>
+          <lastmod>2019-12-04</lastmod>
+        </sitemap>
+      </sitemapindex>`
+    ))
+})
+
 })

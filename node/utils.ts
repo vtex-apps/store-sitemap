@@ -7,6 +7,7 @@ import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
+export const EXTENDED_INDEX_FILE = 'extendedIndex.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 

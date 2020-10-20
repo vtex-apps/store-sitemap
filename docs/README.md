@@ -103,6 +103,38 @@ If you have [custom pages](https://vtex.io/docs/recipes/templates/creating-a-new
 
 Once everything is set up, go back to the step 4 of the Configuration section.
 
+#### Extending the sitemap
+
+To add custom routes created by an app (for example, the ones created by the [`store-locator`](https://github.com/vtex-apps/store-locator)) to your store's sitemap, the app must respond to an XML file containing a list of the routes created by that app. Lastly, you must include the path to the XML file that your app responds to as an index of your store's sitemap.
+
+For implementation details, check the following step by step.
+
+1. Create or modify your app to respond to the following route `/sitemap/{index-name}.xml` and to return an XML file containing the data that you want the search engine (e.g., Google) to index.
+
+⚠️ Remember to replace the values between the curly brackets according to your scenario.
+
+:information_source: *We recommend that you use a pre-created XML file. Otherwise, for every request, the XML file will be built from scratch, consuming more time to complete the task.*
+
+2. [Publish](https://vtex.io/docs/recipes/development/publishing-an-app/) and install your app in a production workspace.
+
+3. Now, to make your index available in the sitemap root file (`/sitemap.xml`), access your account's admin, relative to the workspace you're working on, and select the GraphQL IDE.
+
+4. From the dropdown list, choose the `vtex.store-sitemap@2.x` app and perform the following mutation, adapting it to your scenario:
+
+```gql
+mutation {
+  saveIndex(index: "{index-name}")
+}
+```
+
+:information_source: **If your store is a cross-border one**, *keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.*
+
+5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
+
+6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+
+## Modus Operandi
+
 ## Modus Operandis
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
