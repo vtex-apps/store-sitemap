@@ -13,6 +13,7 @@ import { Clients } from './clients'
 import { Authorization } from './directives/auth'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
+import { errors } from './middlewares/errors'
 import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
 import { generateRewriterRoutes } from './middlewares/generateMiddlewares/generateRewriterRoutes'
@@ -80,17 +81,17 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [settings,prepare, sitemap]
+const sitemapPipeline = [settings, prepare, sitemap]
 const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [throttle, generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [throttle, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [throttle, generationPrepare, generateRewriterRoutes, sendNextEvent],
+    generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
+    generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
+    generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [throttle, settings, generationPrepare, groupEntries, sendNextEvent],
+    groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
   },
   graphql: {
     resolvers,
