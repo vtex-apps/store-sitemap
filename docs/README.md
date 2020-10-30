@@ -133,8 +133,6 @@ mutation {
 
 6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
-## Modus Operandi
-
 ## Modus Operandis
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
