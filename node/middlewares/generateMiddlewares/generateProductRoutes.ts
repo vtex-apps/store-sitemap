@@ -1,8 +1,8 @@
-import { Binding, Logger, Tenant, VBase } from '@vtex/api'
+import { Binding, Logger, VBase } from '@vtex/api'
 import { zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
-import { getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import { getBucket, getStoreBindings, hashString, TENANT_CACHE_TTL_S  } from '../../utils'
 import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
 import {
   createFileName,
@@ -51,7 +51,7 @@ const isProductSearchResponseEmpty = async (productId: string, graphqlServer: Gr
   return searchResponse !== null
 }
 
-const getProductInfo = (tenantInfo: Tenant, ctx: EventContext) => async (productId: string): Promise<ProductInfo | undefined> => {
+const getProductInfo = (storeBindings: Binding[], hasSalesChannels: boolean, ctx: EventContext) => async (productId: string): Promise<ProductInfo | undefined> => {
     const { clients: { catalogGraphQL, graphqlServer }, vtex: { logger } } = ctx
     const [catalogResponse, hasSearchResponse] = await Promise.all([
       catalogGraphQL.product(productId),
@@ -62,10 +62,12 @@ const getProductInfo = (tenantInfo: Tenant, ctx: EventContext) => async (product
       return
     }
 
-    const bindings = filterBindingsBySalesChannel(
-        tenantInfo,
-        product.salesChannel as Product['salesChannel']
-      )
+    const bindings = hasSalesChannels
+      ? filterBindingsBySalesChannel(
+          storeBindings,
+          product.salesChannel as Product['salesChannel']
+        )
+      : storeBindings
 
     return bindings.map(binding => [binding, product] as [Binding, Product])
 }
@@ -179,10 +181,13 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-  const salesChannels = getAccountSalesChannels(tenantInfo)
+
+  const storeBindings = await getStoreBindings(tenant)
+  const salesChannels = getAccountSalesChannels(storeBindings)
+  const hasSalesChannels = !!salesChannels?.length
   const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page, salesChannels)
 
-  const getProductInfoFn = getProductInfo(tenantInfo, ctx)
+  const getProductInfoFn = getProductInfo(storeBindings, hasSalesChannels, ctx)
   const productsInfo = await Promise.all(items.map(productId => getProductInfoFn(productId.toString())))
 
   const {
