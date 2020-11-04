@@ -43,6 +43,31 @@ const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
 
 let next: any
+let tenantInfo = {
+  bindings: [
+  {
+    defaultLocale: 'en-US',
+    extraContext: {
+      portal: {
+        salesChannel: '1',
+      },
+    },
+    id: '1',
+    targetProduct: STORE_PRODUCT,
+  },
+  {
+      defaultLocale: 'pt-BR',
+      extraContext: {
+        portal: {
+          salesChannel: '1',
+        },
+      },
+      id: '2',
+      targetProduct: STORE_PRODUCT,
+    },
+  ] as any,
+  defaultLocale: 'en-US',
+}
 
 describe('Test product routes generation', () => {
   let context: EventContext
@@ -85,31 +110,7 @@ describe('Test product routes generation', () => {
     }
 
     public info = async (_?: RequestConfig) => {
-      return {
-        bindings: [
-        {
-          defaultLocale: 'en-US',
-          extraContext: {
-            portal: {
-              salesChannel: '1',
-            },
-          },
-          id: '1',
-          targetProduct: STORE_PRODUCT,
-        },
-        {
-            defaultLocale: 'pt-BR',
-            extraContext: {
-              portal: {
-                salesChannel: '1',
-              },
-            },
-            id: '2',
-            targetProduct: STORE_PRODUCT,
-          },
-        ] as any,
-        defaultLocale: 'en-US',
-      } as Tenant
+      return tenantInfo as Tenant
     }
   }
 
@@ -306,6 +307,36 @@ describe('Test product routes generation', () => {
         alternates: [
           { bindingId: '1', path: '/banana/p' },
           { bindingId: '2', path: '/banana/p' },
+        ],
+        id: '1',
+        path: '/banana/p',
+      },
+    ])
+  })
+
+  it('Checks binding without SC case', async () => {
+    tenantInfo = {
+      bindings: [
+        {
+          defaultLocale: 'en-US',
+          extraContext: {},
+          id: '1',
+          targetProduct: STORE_PRODUCT,
+        },
+      ],
+      defaultLocale: 'en-US',
+    } as Tenant
+    await generateProductRoutes(context, next)
+    const { vbase: vbaseClient } = context.clients
+    const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const expectedIndex = ['product-1']
+    expect(index).toStrictEqual(expectedIndex)
+    const { routes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    expect(routes).toStrictEqual([
+      {
+        alternates: [
+          { bindingId: '1', path: '/banana/p' },
         ],
         id: '1',
         path: '/banana/p',
