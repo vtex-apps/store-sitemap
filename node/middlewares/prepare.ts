@@ -1,7 +1,7 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString, startSitemapGeneration } from '../utils'
+import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString } from '../utils'
 import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
 const ONE_DAY_S = 24 * 60 * 60
