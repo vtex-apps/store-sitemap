@@ -95,11 +95,9 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     return
   }
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-  routes.forEach((route: Route) => {
-    $('urlset').append(
-      URLEntry(ctx, route, lastUpdated)
-    )
-  })
+  const entryXML = routes.map((route: Route) => URLEntry(ctx, route, lastUpdated))
+
+  $('urlset').append(entryXML.join('\n'))
 
   ctx.body = $.xml()
   next()
