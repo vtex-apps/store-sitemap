@@ -110,13 +110,13 @@ const sitemapBindingIndex = async (ctx: Context) => {
   )
 
   const date = currentDate()
-  const bindingsIndexXML = bindings.map(binding => {
+  const bindingsIndexXML = bindings.map(binding =>
     sitemapBindingEntry(
       production ? binding.canonicalBaseAddress : forwardedHost,
       date,
       production ? '' : binding.canonicalBaseAddress
     )
-  })
+  )
   $('sitemapindex').append(bindingsIndexXML.join('\n'))
   return $
 }
