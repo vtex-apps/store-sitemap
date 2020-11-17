@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Fixed
 - Handles correctly 429 error 
+- Disables automatic sitemap generation
 
 ## [2.13.0] - 2020-10-20
 ### Added
