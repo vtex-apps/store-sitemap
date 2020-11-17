@@ -10,7 +10,7 @@ export interface GetProductsAndSkuIdsReponse {
   }
 }
 
-const PAGE_SIZE = 200
+const PAGE_SIZE = 100
 
 export class Catalog extends ExternalClient {
   constructor(protected context: IOContext, options?: InstanceOptions) {

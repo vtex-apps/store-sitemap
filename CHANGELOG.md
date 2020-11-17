@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.13.2] - 2020-11-17
+### Fixed
+- Handles correctly 429 error 
+- Disables automatic sitemap generation
+- Handles cases where the bindings doesn't have associated sales channels
+
 ## [2.13.0] - 2020-10-20
 ### Added
 - Makes the sitemap root exensible via Graphql API

@@ -1,9 +1,9 @@
-import { LINKED, Logger, Tenant, VBase } from '@vtex/api'
+import { Binding, LINKED, Logger, Tenant, VBase } from '@vtex/api'
 import { uniqBy } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, getBucket, hashString, STORE_PRODUCT, TENANT_CACHE_TTL_S } from '../../utils'
+import { CONFIG_BUCKET, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
 
 export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 
@@ -62,15 +62,13 @@ export const initializeSitemap = async (ctx: EventContext, indexFile: string) =>
 }
 
 export const getAccountSalesChannels = (
-  tenantInfo: Tenant
+  bindings: Binding[]
 ): string[] | undefined => {
-  const salesChannels = tenantInfo.bindings.reduce((acc, binding) => {
-    if (binding.targetProduct === STORE_PRODUCT) {
-      const bindingSC: number | undefined =
-        binding.extraContext.portal?.salesChannel
-      if (bindingSC) {
-        acc.push(bindingSC.toString())
-      }
+  const salesChannels = bindings.reduce((acc, binding) => {
+    const bindingSC: number | undefined =
+      binding.extraContext.portal?.salesChannel
+    if (bindingSC) {
+      acc.push(bindingSC.toString())
     }
     return acc
   }, [] as string[])
@@ -78,7 +76,7 @@ export const getAccountSalesChannels = (
 }
 
 export const filterBindingsBySalesChannel = (
-  tenantInfo: Tenant,
+  storeBindings: Binding[],
   salesChannels: Product['salesChannel']
 ): Tenant['bindings'] => {
   const salesChannelsSet = salesChannels?.reduce((acc: Set<string>, sc: Maybe<SalesChannel>) => {
@@ -88,15 +86,13 @@ export const filterBindingsBySalesChannel = (
     return acc
   }, new Set<string>())
 
-  return tenantInfo.bindings.filter(binding => {
-    if (binding.targetProduct === STORE_PRODUCT) {
-      const bindingSC: number | undefined =
-        binding.extraContext.portal?.salesChannel
-      const productActiveInBindingSC =
-        bindingSC && salesChannelsSet?.has(bindingSC.toString())
-      if (productActiveInBindingSC || !salesChannelsSet) {
-        return true
-      }
+  return storeBindings.filter(binding => {
+    const bindingSC: number | undefined =
+      binding.extraContext.portal?.salesChannel
+    const productActiveInBindingSC =
+      bindingSC && salesChannelsSet?.has(bindingSC.toString())
+    if (productActiveInBindingSC || !salesChannelsSet) {
+      return true
     }
     return false
   })
@@ -136,7 +132,7 @@ export const isSitemapComplete = async (enabledIndexFiles: string[], vbase: VBas
   const indexFiles = await Promise.all(enabledIndexFiles.map(
     indexFile =>
       vbase.getJSON(CONFIG_BUCKET, indexFile, true)
-   ))
+  ))
   logger.debug({
     enabledIndexFiles,
     indexFiles,
@@ -150,7 +146,7 @@ export const completeRoutes = async (file: string, vbase: VBase) =>
 export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBase) =>
   Promise.all([
     ...enabledIndexFiles.map(
-    indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
+      indexFile => vbase.deleteFile(CONFIG_BUCKET, indexFile)),
   ])
 
 const allTruthy = <T>(array: T[]) => !array.some(e => !e)
