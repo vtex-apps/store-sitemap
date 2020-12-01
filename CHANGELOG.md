@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Checks if account has one binding and one SC
 - Optimizes XML creation
+- Enables automatic sitemap generation
 
 ## [2.13.3] - 2020-11-17
 
