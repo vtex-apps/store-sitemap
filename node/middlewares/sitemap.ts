@@ -80,17 +80,16 @@ const sitemapIndex = async (ctx: Context) => {
   const index = indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[])
   const lastUpdated = indexFiles[0].lastUpdated
 
-  index.forEach(entry =>
-    $('sitemapindex').append(
-      sitemapIndexEntry(
-        forwardedHost,
-        rootPath,
-        entry,
-        lastUpdated,
-        bindingAddress
-      )
+  const indexXML = index.map(entry =>
+    sitemapIndexEntry(
+      forwardedHost,
+      rootPath,
+      entry,
+      lastUpdated,
+      bindingAddress
     )
   )
+  $('sitemapindex').append(indexXML.join('\n'))
   return $
 }
 
@@ -111,15 +110,14 @@ const sitemapBindingIndex = async (ctx: Context) => {
   )
 
   const date = currentDate()
-  bindings.forEach(binding => {
-    $('sitemapindex').append(
-      sitemapBindingEntry(
-        production ? binding.canonicalBaseAddress : forwardedHost,
-        date,
-        production ? '' : binding.canonicalBaseAddress
-      )
+  const bindingsIndexXML = bindings.map(binding =>
+    sitemapBindingEntry(
+      production ? binding.canonicalBaseAddress : forwardedHost,
+      date,
+      production ? '' : binding.canonicalBaseAddress
     )
-  })
+  )
+  $('sitemapindex').append(bindingsIndexXML.join('\n'))
   return $
 }
 
