@@ -72,6 +72,10 @@ export const getAccountSalesChannels = (
     }
     return acc
   }, [] as string[])
+  // Has one binding with one sales channel
+  if (bindings.length === 1 && salesChannels.length === 1) {
+    return
+  }
   return uniqBy(i => i, salesChannels)
 }
 
