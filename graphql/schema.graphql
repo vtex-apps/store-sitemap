@@ -3,5 +3,5 @@ type Query {
 }
 
 type Mutation {
-  saveIndex(index: String!, binding: String): Boolean! @requiresAuth
+  saveIndex(index: String!, binding: String): Boolean!
 }

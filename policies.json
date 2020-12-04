@@ -7,7 +7,7 @@
         "actions": ["post", "get"],
         "effect": "allow",
         "resources": [
-          "vrn:vtex.rewriter:{{region}}:{{account}}:{{workspace}}:/_v/graphql"
+          "vrn:vtex.store-sitemap:{{region}}:{{account}}:{{workspace}}:/_v/graphql"
         ]
       }
     ]
