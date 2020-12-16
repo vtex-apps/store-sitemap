@@ -5,6 +5,7 @@ import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString,
 import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
 const ONE_DAY_S = 24 * 60 * 60
+const FORWARDED_HOST_HEADER = 'x-forwarded-host'
 
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
@@ -56,6 +57,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   if (production) {
     startSitemapGeneration(ctx)
   }
+  ctx.vary(FORWARDED_HOST_HEADER)
 
   return
 }
