@@ -13,7 +13,7 @@ const isTooManyRequestError = (error: any) => {
 
 export async function errors(_: EventContext, next: () => Promise<void>) {
   try {
-    next()
+    await next()
   } catch (error) {
     if (isTooManyRequestError(error)) {
       throw new TooManyRequestsError()
