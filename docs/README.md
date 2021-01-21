@@ -35,7 +35,17 @@ For more information about generating a sitemap, check the following sections.
 }
 ```
 
-The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
+The expected response is the following object:
+
+```
+{
+  bootstrap {
+    brands: true
+    categories: true
+  }
+}
+```
+It means that the brand,,department, category, and subcategory routes will be processed and availabe for the sitemap to fetch in some minutes.
 
 8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
 
