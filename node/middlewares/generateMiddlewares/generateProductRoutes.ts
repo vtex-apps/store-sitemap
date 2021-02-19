@@ -141,16 +141,23 @@ const saveRoutes = (
     const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
     index.push(entry)
     const lastUpdated = currentDate()
-    await Promise.all([
-      vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
-        index,
-        lastUpdated,
-    }),
-    vbase.saveJSON<SitemapEntry>(bucket, entry, {
+    await vbase.saveJSON<SitemapEntry>(bucket, entry, {
       lastUpdated,
       routes,
-    }),
-  ])
+    })
+    await vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
+      index,
+      lastUpdated,
+    })
+  }
+
+const pageWasProcessed = async (page: number, entry: string, bindingId: string, vbase: VBase) => {
+  const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
+  const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
+  if (index.includes(entry)) {
+    return true
+  }
+  return false
 }
 
 export async function generateProductRoutes(ctx: EventContext, next: () => Promise<void>) {
@@ -181,10 +188,16 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     invalidProducts,
   }: ProductRoutesGenerationEvent = body!
 
-
+  const entry = createFileName('product', page)
   const storeBindings = await getStoreBindings(tenant)
   const salesChannels = getAccountSalesChannels(storeBindings)
   const hasSalesChannels = !!salesChannels?.length
+
+  if (await pageWasProcessed(page, entry, storeBindings[0].id, vbase)) {
+    logger.error({ message: 'Page already processed', page })
+    return
+  }
+
   const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page, salesChannels)
 
   const getProductInfoFn = getProductInfo(storeBindings, hasSalesChannels, ctx)
@@ -206,7 +219,6 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
 
   const bindingsIds = Object.keys(messagesByBinding)
   const routesByBinding: Record<string, Route[]> = zipObj(bindingsIds, routesList)
-  const entry = createFileName('product', page)
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, pathsDictionary, bindingsIds, entry, vbase))
   )
@@ -225,8 +237,10 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
     logger.info({
       invalidProducts: payload.invalidProducts,
       message: `Product routes complete`,
+      page,
       processedProducts: payload.processedProducts,
       total,
+      totalPages,
       type: 'product-routes',
     })
     ctx.state.nextEvent = {
