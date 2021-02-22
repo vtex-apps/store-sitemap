@@ -151,7 +151,7 @@ const saveRoutes = (
     })
   }
 
-const pageWasProcessed = async (page: number, entry: string, bindingId: string, vbase: VBase) => {
+const pageWasProcessed = async (entry: string, bindingId: string, vbase: VBase) => {
   const bucket = getBucket(RAW_DATA_PREFIX, hashString(bindingId))
   const { index } = await vbase.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX)
   if (index.includes(entry)) {
@@ -193,7 +193,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   const salesChannels = getAccountSalesChannels(storeBindings)
   const hasSalesChannels = !!salesChannels?.length
 
-  if (await pageWasProcessed(page, entry, storeBindings[0].id, vbase)) {
+  if (await pageWasProcessed(entry, storeBindings[0].id, vbase)) {
     logger.error({ message: 'Page already processed', page })
     return
   }
