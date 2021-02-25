@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.13.8] - 2021-02-25
+
 ## [2.13.7] - 2020-12-21
 ### Fixes
 - Increases event client timeout
