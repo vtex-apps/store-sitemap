@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "2.13.8",
+  "version": "2.13.9-beta.0",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
