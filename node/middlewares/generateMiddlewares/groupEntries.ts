@@ -15,8 +15,8 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 750
-const FILE_LIMIT = 5000
+export const FILE_PROCESS_LIMIT = 750
+export const FILE_LIMIT = 5000
 
 const reduceByEntity = (array: string[]) => array.reduce((acc, file) => {
   const entity = splitFileName(file)[0]
@@ -74,7 +74,7 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     clients: {
       tenant,
       vbase,
-      vbaseWithCache
+      vbaseWithCache,
     },
     vtex: {
       logger,
@@ -103,7 +103,6 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     const slicedRawIndex = rawIndex.slice(from, from + FILE_PROCESS_LIMIT)
     const filesByEntity = reduceByEntity(slicedRawIndex)
     const indexByEntity = reduceByEntity(newIndex)
-
     const entries = await Promise.all(
       Object.keys(filesByEntity).map(async entity =>
         groupEntityEntries(

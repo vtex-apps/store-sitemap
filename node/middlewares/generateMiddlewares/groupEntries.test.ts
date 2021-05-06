@@ -9,7 +9,7 @@ import {
   hashString,
   STORE_PRODUCT
 } from './../../utils'
-import { groupEntries } from './groupEntries'
+import { FILE_LIMIT, FILE_PROCESS_LIMIT, groupEntries } from './groupEntries'
 import {
   DEFAULT_CONFIG,
   GROUP_ENTRIES_EVENT,
@@ -43,14 +43,15 @@ const APPLE_PRODUCT_ROUTE = {
   path: '/apple/p',
 }
 
+
 let next: any
 
 describe('Test group entries', () => {
   let context: EventContext
+  let jsonData: Record<string, any> = {}
 
   const vbase = class VBaseMock extends vbaseTypeMock.object {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private jsonData: Record<string, any> = {}
 
     constructor() {
       super(ioContext.object)
@@ -60,11 +61,11 @@ describe('Test group entries', () => {
       bucket: string,
       file: string,
       nullOrUndefined?: boolean | undefined
-    ): Promise<T> => {
-      if (!this.jsonData[bucket]?.[file] && nullOrUndefined) {
+    ): Promise<any> => {
+      if (!jsonData[bucket]?.[file] && nullOrUndefined) {
         return (null as unknown) as T
       }
-      return Promise.resolve(this.jsonData[bucket][file] as T)
+      return Promise.resolve(jsonData[bucket][file] as T)
     }
 
     public saveJSON = async <T>(
@@ -72,14 +73,14 @@ describe('Test group entries', () => {
       file: string,
       data: T
     ): Promise<void> => {
-      if (!this.jsonData[bucket]) {
-        this.jsonData[bucket] = {}
+      if (!jsonData[bucket]) {
+       jsonData[bucket] = {}
       }
-      this.jsonData[bucket][file] = data
+      jsonData[bucket][file] = data
     }
 
     public deleteFile = async (bucket: string, file: string, _: any, __: any): Promise<any> => {
-      this.jsonData[bucket][file] = undefined
+      jsonData[bucket][file] = undefined
       return
     }
   }
@@ -109,6 +110,10 @@ describe('Test group entries', () => {
         return this.getOrSet('vbase', vbase)
       }
 
+      get vbaseWithCache() {
+        return this.getOrSet('vbaseWithCache', vbase)
+      }
+
       get tenant() {
         return this.getOrSet('tenant', tenant)
       }
@@ -116,6 +121,7 @@ describe('Test group entries', () => {
 
     jest.clearAllMocks()
     next = jest.fn()
+    jsonData = {}
 
     context = {
       ...contextMock.object,
@@ -206,7 +212,7 @@ describe('Test group entries', () => {
     // Saves two product routes in different files
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const tooManyRoutes = []
-    for (let i = 0; i <= 5000; i++) {
+    for (let i = 0; i <= FILE_LIMIT; i++) {
       tooManyRoutes.push(
         {
           alternates: [
@@ -228,7 +234,7 @@ describe('Test group entries', () => {
     expect(index).toStrictEqual(expectedIndex)
 
     const { routes: routes0 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
-    expect(routes0.length).toEqual(5000)
+    expect(routes0.length).toEqual(FILE_LIMIT)
 
     const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[1])
     expect(routes1.length).toEqual(1)
@@ -240,7 +246,7 @@ describe('Test group entries', () => {
     // Saves a lot of routes
     const index = []
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    for (let i = 0; i <= 1501; i++) {
+    for (let i = 0; i <= FILE_PROCESS_LIMIT + 1; i++) {
       const file = `product-${i}`
       await vbaseClient.saveJSON(rawBucket, file, { routes: [BANANA_PRODUCT_ROUTE] })
       index.push(file)
@@ -252,7 +258,7 @@ describe('Test group entries', () => {
     expect(next).toBeCalledWith()
     const { event, payload } = context.state.nextEvent
     expect(event).toEqual(GROUP_ENTRIES_EVENT)
-    expect((payload as any)).toEqual({ from: 1500, indexFile: PRODUCT_ROUTES_INDEX })
+    expect((payload as any)).toEqual({ from: FILE_PROCESS_LIMIT, indexFile: PRODUCT_ROUTES_INDEX })
   })
 
   it('Groups correctly over mutiple events', async () => {
@@ -262,7 +268,7 @@ describe('Test group entries', () => {
     // Saves a lot of routes
     const index = []
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    for (let i = 0; i <= 1501; i++) {
+    for (let i = 0; i <= FILE_PROCESS_LIMIT + 1; i++) {
       const file = `product-${i}`
       await vbaseClient.saveJSON(rawBucket, file, { routes: [BANANA_PRODUCT_ROUTE] })
       index.push(file)
@@ -271,7 +277,7 @@ describe('Test group entries', () => {
 
     context.body = { from: 0, indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
-    context.body = { from: 1500, indexFile: PRODUCT_ROUTES_INDEX }
+    context.body = { from: FILE_PROCESS_LIMIT , indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
 
     const productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX)
