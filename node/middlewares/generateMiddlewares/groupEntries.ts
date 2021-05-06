@@ -15,7 +15,7 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 1500
+const FILE_PROCESS_LIMIT = 750
 const FILE_LIMIT = 5000
 
 const reduceByEntity = (array: string[]) => array.reduce((acc, file) => {
