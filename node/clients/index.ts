@@ -1,4 +1,4 @@
-import { IOClients, Sphinx } from '@vtex/api'
+import { IOClients, Sphinx, VBase } from '@vtex/api'
 
 import { Catalog } from './catalog'
 import { GraphQLServer } from './graphqlServer'
@@ -13,6 +13,11 @@ export class Clients extends IOClients {
   public get vbase() {
     return this.getOrSet('vbase', CVBase)
   }
+
+  public get vbaseWithCache() {
+    return this.getOrSet('vbaseWithCache', VBase)
+  }
+
   public get robots() {
     return this.getOrSet('robots', Robots)
   }

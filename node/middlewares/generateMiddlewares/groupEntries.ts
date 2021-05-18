@@ -15,8 +15,8 @@ import {
   uniq
 } from './utils'
 
-const FILE_PROCESS_LIMIT = 1500
-const FILE_LIMIT = 5000
+export const FILE_PROCESS_LIMIT = 750
+export const FILE_LIMIT = 5000
 
 const reduceByEntity = (array: string[]) => array.reduce((acc, file) => {
   const entity = splitFileName(file)[0]
@@ -28,9 +28,9 @@ const reduceByEntity = (array: string[]) => array.reduce((acc, file) => {
 }, {} as Record<string, string[]>)
 
 const groupEntityEntries = async (entity: string, files: string[], index: string[] | undefined, bucket: string, rawBucket: string, ctx: EventContext) => {
-  const { clients: { vbase }, vtex: { logger } } = ctx
+  const { clients: { vbase, vbaseWithCache }, vtex: { logger } } = ctx
   const lastFile = index && last(index)
-  const lastFileData = lastFile ? await vbase.getJSON<SitemapEntry>(bucket, lastFile) : { routes: [] as Route[] }
+  const lastFileData = lastFile ? await vbaseWithCache.getJSON<SitemapEntry>(bucket, lastFile) : { routes: [] as Route[] }
   let currentRoutes = lastFileData.routes
   let routesCount = currentRoutes.length
   let count = lastFile ? Number(splitFileName(lastFile)[1]) : 0
@@ -74,6 +74,7 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     clients: {
       tenant,
       vbase,
+      vbaseWithCache,
     },
     vtex: {
       logger,
@@ -84,7 +85,7 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
   } = ctx
   const { indexFile, generationId, from }: GroupEntriesEvent = body
 
-  const { generationPrefix, productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { generationPrefix, productionPrefix } = await vbaseWithCache.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
   const storeBindings = await getStoreBindings(tenant)
 
   const isBindingGroupingComplete = await Promise.all(storeBindings.map(async binding => {
@@ -102,7 +103,6 @@ export async function groupEntries(ctx: EventContext, next: () => Promise<void>)
     const slicedRawIndex = rawIndex.slice(from, from + FILE_PROCESS_LIMIT)
     const filesByEntity = reduceByEntity(slicedRawIndex)
     const indexByEntity = reduceByEntity(newIndex)
-
     const entries = await Promise.all(
       Object.keys(filesByEntity).map(async entity =>
         groupEntityEntries(
