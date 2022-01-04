@@ -2,7 +2,7 @@
 
 The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your store website. 
 
-An important SEO feature for cross-border stores is having a sitemap capable of handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding.
+An important SEO feature for cross-border stores is having a sitemap capable of handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding. Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
 
 For more information about generating a sitemap, check the following sections.
 
@@ -145,9 +145,3 @@ mutation {
 5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
 6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
-
-## Modus Operandi
-
-## Modus Operandis
-
-Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
