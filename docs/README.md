@@ -122,7 +122,7 @@ For implementation details, check the following step by step.
 
 1. Create or modify your app to respond to the following route `/sitemap/{index-name}.xml` and to return an XML file containing the data that you want the search engine (e.g., Google) to index. Remember to replace the values between the curly brackets according to your scenario.
 
-> ℹ️ info
+> ℹ️ **Info**
 >
 > We recommend that you use a pre-created XML file. Otherwise, for every request, the XML file will be built from scratch, consuming more time to complete the task.
 
