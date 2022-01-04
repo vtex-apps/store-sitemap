@@ -1,6 +1,6 @@
 # Store Sitemap
 
-The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your VTEX IO Store. 
+The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your store website. 
 
 One of our app’s important SEO features for cross-border stores is handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding.
 
