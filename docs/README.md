@@ -138,7 +138,7 @@ mutation {
 }
 ```
 
-> ℹ️ infor
+> ℹ️ **Info**
 >
 > **If your store is a cross-border one**, keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
 
