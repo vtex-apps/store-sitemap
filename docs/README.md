@@ -2,7 +2,7 @@
 
 The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your store website. 
 
-One of our app’s important SEO features for cross-border stores is handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding.
+An important SEO feature for cross-border stores is having a sitemap capable of handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding.
 
 For more information about generating a sitemap, check the following sections.
 
