@@ -18,7 +18,7 @@ Before generating your store's sitemap, you might want to adjust if products, na
 1. Using your terminal and the [VTEX IO CLI](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log into your account.
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/)  from scratch.
 
-> ⚠️ warning
+> ⚠️ **Warning**
 >
 > Remember to replace the values between the curly brackets according to your scenario.
 
