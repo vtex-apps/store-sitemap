@@ -5,7 +5,7 @@ import {
 } from './../middlewares/generateMiddlewares/utils'
 import { getDefaultStoreBinding } from './../resources/bindings'
 
-export const saveIndex = async (
+export const deleteIndex = async (
   _: {},
   { index, binding }: { index: string; binding?: string },
   ctx: Context
@@ -23,15 +23,18 @@ export const saveIndex = async (
     EXTENDED_INDEX_FILE,
     true
   )) || { index: [] }
-  // check if index is already in the extendedIndexes
-  if (extendedIndexes.includes(index)) {
+  // if index is not in the extendedIndexes, treat as success
+  if (!extendedIndexes.includes(index)) {
     success = true
     return success
   }
-  extendedIndexes.push(index)
+  // remove index from extendedIndexes and also eliminate duplicates
+  const newExtendedIndexes = [
+    ...new Set(extendedIndexes.filter(i => i !== index)),
+  ]
   await vbase
     .saveJSON(bucket, EXTENDED_INDEX_FILE, {
-      index: extendedIndexes,
+      index: newExtendedIndexes,
       lastUpdated: currentDate(),
     })
     .then(() => {

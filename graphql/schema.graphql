@@ -4,4 +4,5 @@ type Query {
 
 type Mutation {
   saveIndex(index: String!, binding: String): Boolean!
+  deleteIndex(index: String!, binding: String): Boolean!
 }

@@ -1,11 +1,14 @@
 import * as cheerio from 'cheerio'
 
 import { MultipleSitemapGenerationError } from '../errors'
-import { EXTENDED_INDEX_FILE, getBucket, hashString, SitemapNotFound, startSitemapGeneration } from '../utils'
 import {
-  currentDate,
-  SitemapIndex
-} from './generateMiddlewares/utils'
+  EXTENDED_INDEX_FILE,
+  getBucket,
+  hashString,
+  SitemapNotFound,
+  startSitemapGeneration,
+} from '../utils'
+import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -57,27 +60,30 @@ const sitemapIndex = async (ctx: Context) => {
     }
   )
 
-  const rawIndexFiles = await Promise.all(
-    [
-      ...enabledIndexFiles.map(indexFile =>
-      vbase.getJSON<SitemapIndex>(
-        bucket,
-        indexFile,
-        true
-      )),
-      vbase.getJSON<SitemapIndex>(
-        getBucket('', hashString(binding.id)),
-        EXTENDED_INDEX_FILE,
-        true
-      ),
-    ]
-  )
+  const rawIndexFiles = await Promise.all([
+    ...enabledIndexFiles.map(indexFile =>
+      vbase.getJSON<SitemapIndex>(bucket, indexFile, true)
+    ),
+    vbase.getJSON<SitemapIndex>(
+      getBucket('', hashString(binding.id)),
+      EXTENDED_INDEX_FILE,
+      true
+    ),
+  ])
+  console.log(rawIndexFiles)
   const indexFiles = rawIndexFiles.filter(Boolean)
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
   }
 
-  const index = indexFiles.reduce((acc, { index: fileIndex }) => acc.concat(fileIndex), [] as string[])
+  const index = [
+    ...new Set(
+      indexFiles.reduce(
+        (acc, { index: fileIndex }) => acc.concat(fileIndex),
+        [] as string[]
+      )
+    ),
+  ]
   const lastUpdated = indexFiles[0].lastUpdated
 
   const indexXML = index.map(entry =>
@@ -95,10 +101,7 @@ const sitemapIndex = async (ctx: Context) => {
 
 const sitemapBindingIndex = async (ctx: Context) => {
   const {
-    state: {
-      forwardedHost,
-      matchingBindings: bindings,
-    },
+    state: { forwardedHost, matchingBindings: bindings },
     vtex: { production },
   } = ctx
 
@@ -123,11 +126,7 @@ const sitemapBindingIndex = async (ctx: Context) => {
 
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
-    state: {
-      matchingBindings,
-      bindingAddress,
-      rootPath,
-    },
+    state: { matchingBindings, bindingAddress, rootPath },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
