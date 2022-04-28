@@ -70,7 +70,6 @@ const sitemapIndex = async (ctx: Context) => {
       true
     ),
   ])
-  console.log(rawIndexFiles)
   const indexFiles = rawIndexFiles.filter(Boolean)
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
