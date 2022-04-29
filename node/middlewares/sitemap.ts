@@ -83,6 +83,7 @@ const sitemapIndex = async (ctx: Context) => {
       )
     ),
   ]
+
   const lastUpdated = indexFiles[0].lastUpdated
 
   const indexXML = index.map(entry =>

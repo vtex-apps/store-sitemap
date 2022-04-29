@@ -28,7 +28,8 @@ export const deleteIndex = async (
     success = true
     return success
   }
-  // remove index from extendedIndexes and also eliminate duplicates
+  // remove index from extendedIndexes
+  // and use set to eliminate any duplicates that may have been added previously
   const newExtendedIndexes = [
     ...new Set(extendedIndexes.filter(i => i !== index)),
   ]

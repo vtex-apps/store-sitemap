@@ -24,14 +24,13 @@ export const saveIndex = async (
     true
   )) || { index: [] }
   // check if index is already in the extendedIndexes
-  if (extendedIndexes.includes(index)) {
-    success = true
-    return success
+  if (!extendedIndexes.includes(index)) {
+    extendedIndexes.push(index)
   }
-  extendedIndexes.push(index)
   await vbase
     .saveJSON(bucket, EXTENDED_INDEX_FILE, {
-      index: extendedIndexes,
+      // use set to remove any duplicates that may have been added previously
+      index: [...new Set(extendedIndexes)],
       lastUpdated: currentDate(),
     })
     .then(() => {
