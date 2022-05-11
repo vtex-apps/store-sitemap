@@ -146,9 +146,9 @@ mutation {
 
 6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
-> ℹ️ **Info**
->
-> If it's ever desired to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
+##### Removing a custom route
+
+If it's ever desired to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
 
 ```gql
 mutation {
