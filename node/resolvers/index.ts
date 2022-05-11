@@ -1,6 +1,5 @@
 import { startSitemapGeneration } from '../utils'
-import { saveIndex } from './saveIndex'
-import { deleteIndex } from './deleteIndex'
+import { saveIndex, deleteIndex } from './mutations'
 
 export const resolvers = {
   Mutation: {
