@@ -81,7 +81,7 @@ To make a force restart, add the `force` argument to the query, as in: `generate
 
 > ℹ️ **Info**
 >
-> Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.\*
+> Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.
 
 11. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
