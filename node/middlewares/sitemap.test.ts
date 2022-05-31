@@ -107,6 +107,7 @@ describe('Test sitemap middleware', () => {
             enableAppsRoutes: true,
             enableNavigationRoutes: true,
             enableProductRoutes: true,
+            disableDraftRoutes: false,
           },
         },
         vtex: {

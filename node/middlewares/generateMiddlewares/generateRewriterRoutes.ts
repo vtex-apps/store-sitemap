@@ -21,16 +21,19 @@ const LIST_LIMIT = 300
 
 type RoutesByBinding = Record<string, Record<string, Route[]>>
 
-const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[]) => {
+const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[], disableDraftRoutes:boolean) => {
   const storeBindingsIds = storeBindings.map(({ id }) => id)
   return routes.reduce(
     (acc, internal) => {
       report[internal.type] = (report[internal.type] || 0) + 1
-      const validRoute =
+      let validRoute =
         !startsWith('notFound', internal.type) &&
         internal.type !== 'product' &&
         !internal.disableSitemapEntry &&
         storeBindingsIds.includes(internal.binding)
+      if (disableDraftRoutes) {
+        validRoute = validRoute && !internal.from.startsWith("/_draft/")
+      }
       if (validRoute) {
         const { binding } = internal
         const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
@@ -96,6 +99,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const {
     count,
     generationId,
+    disableDraftRoutes,
     next,
     report,
   }: RewriterRoutesGenerationEvent = body!
@@ -106,7 +110,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
 
   const storeBindings = await getStoreBindings(tenant)
 
-  const routesByBinding = createRoutesByBinding(routes, report, storeBindings)
+  const routesByBinding = createRoutesByBinding(routes, report, storeBindings, disableDraftRoutes)
 
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, count, ctx.clients))
@@ -117,6 +121,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       count: count + 1,
       generationId,
       next: responseNext,
+      disableDraftRoutes,
       report,
     }
     ctx.state.nextEvent = {
@@ -134,6 +139,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       payload: {
         from: 0,
         generationId,
+        disableDraftRoutes,
         indexFile: REWRITER_ROUTES_INDEX,
       },
     }

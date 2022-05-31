@@ -76,6 +76,7 @@ declare global {
     next: Maybe<string>
     report: Record<string, number>
     count: number
+    disableDraftRoutes: boolean
   }
 
   interface ProductRoutesGenerationEvent extends DefaultEvent   {

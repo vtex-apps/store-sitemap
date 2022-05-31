@@ -69,6 +69,7 @@ describe('Test generate sitemap', () => {
           enableAppsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
+          disableDraftRoutes: false,
         },
       },
       vtex: {
@@ -90,6 +91,7 @@ describe('Test generate sitemap', () => {
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
+      disableDraftRoutes: false,
     }
 
     await generateSitemap(context)
@@ -102,6 +104,7 @@ describe('Test generate sitemap', () => {
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
+      disableDraftRoutes: false,
     }
 
     await generateSitemap(context)
