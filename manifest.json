@@ -123,6 +123,11 @@
         "description": "This will exclude the /_draft/ routes from the userRoutes sitemap. Useful for placing draft pages in that folder.",
         "type": "boolean",
         "default": false
+      },
+      "disableTestTest": {
+        "title": "Disable draft routes from userRoutes",
+        "default": "####",
+        "type": "string"
       }
     }
   }

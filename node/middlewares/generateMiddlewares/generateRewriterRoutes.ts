@@ -99,7 +99,6 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const {
     count,
     generationId,
-    disableDraftRoutes,
     next,
     report,
   }: RewriterRoutesGenerationEvent = body!
@@ -110,6 +109,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
 
   const storeBindings = await getStoreBindings(tenant)
 
+  const disableDraftRoutes = ctx.state.settings.disableDraftRoutes
   const routesByBinding = createRoutesByBinding(routes, report, storeBindings, disableDraftRoutes)
 
   await Promise.all(
@@ -121,7 +121,6 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       count: count + 1,
       generationId,
       next: responseNext,
-      disableDraftRoutes,
       report,
     }
     ctx.state.nextEvent = {
@@ -139,7 +138,6 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
       payload: {
         from: 0,
         generationId,
-        disableDraftRoutes,
         indexFile: REWRITER_ROUTES_INDEX,
       },
     }
