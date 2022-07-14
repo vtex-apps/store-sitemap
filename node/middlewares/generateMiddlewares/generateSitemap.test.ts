@@ -66,10 +66,11 @@ describe('Test generate sitemap', () => {
       state: {
         ...state.object,
         settings: {
+          disableDraftRoutes: false,
+          disableStringRoutes: '',
           enableAppsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
-          disableDraftRoutes: false,
         },
       },
       vtex: {
@@ -88,10 +89,11 @@ describe('Test generate sitemap', () => {
 
   it('Should send only enabled events', async () => {
     context.state.settings = {
+      disableDraftRoutes: false,
+      disableStringRoutes: '',
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
-      disableDraftRoutes: false,
     }
 
     await generateSitemap(context)
@@ -101,10 +103,11 @@ describe('Test generate sitemap', () => {
 
     jest.clearAllMocks()
     context.state.settings = {
+      disableDraftRoutes: false,
+      disableStringRoutes:'',
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
-      disableDraftRoutes: false,
     }
 
     await generateSitemap(context)

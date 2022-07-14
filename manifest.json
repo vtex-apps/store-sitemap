@@ -124,9 +124,10 @@
         "type": "boolean",
         "default": false
       },
-      "disableTestTest": {
-        "title": "Disable draft routes from userRoutes",
-        "default": "####",
+      "disableStringRoutes": {
+        "title": "Disable routes from userRoutes with then following string",
+        "description": "Routes that include with the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
+        "default": "",
         "type": "string"
       }
     }

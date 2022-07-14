@@ -6,23 +6,26 @@ export interface Settings {
   enableProductRoutes: boolean
   enableNavigationRoutes: boolean
   disableDraftRoutes: boolean
+  disableStringRoutes: string
 }
 
 const VTEX_APP_ID = process.env.VTEX_APP_ID!
 const VTEX_APP_AT_MAJOR = appIdToAppAtMajor(VTEX_APP_ID)
 
 const DEFAULT_SETTINGS = {
+  disableDraftRoutes: false,
+  disableStringRoutes: '',
   enableAppsRoutes: true,
   enableNavigationRoutes: true,
   enableProductRoutes: true,
-  disableDraftRoutes: false
 }
 
 const INDEX_MAP = {
+  disableDraftRoutes: '',
+  disableStringRoutes: '',
   enableAppsRoutes: APPS_ROUTES_INDEX,
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
-  disableDraftRoutes: ""
 }
 
 export async function settings(ctx: Context | EventContext, next: () => Promise<void>) {
