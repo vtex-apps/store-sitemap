@@ -5,7 +5,6 @@ export interface Settings {
   enableAppsRoutes: boolean
   enableProductRoutes: boolean
   enableNavigationRoutes: boolean
-  disableDraftRoutes: boolean
   disableStringRoutes: string
 }
 
@@ -13,7 +12,6 @@ const VTEX_APP_ID = process.env.VTEX_APP_ID!
 const VTEX_APP_AT_MAJOR = appIdToAppAtMajor(VTEX_APP_ID)
 
 const DEFAULT_SETTINGS = {
-  disableDraftRoutes: false,
   disableStringRoutes: '',
   enableAppsRoutes: true,
   enableNavigationRoutes: true,
@@ -21,7 +19,6 @@ const DEFAULT_SETTINGS = {
 }
 
 const INDEX_MAP = {
-  disableDraftRoutes: '',
   disableStringRoutes: '',
   enableAppsRoutes: APPS_ROUTES_INDEX,
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,

@@ -118,15 +118,9 @@
         "type": "boolean",
         "default": true
       },
-      "disableDraftRoutes": {
-        "title": "Disable draft routes from userRoutes",
-        "description": "This will exclude the /_draft/ routes from the userRoutes sitemap. Useful for placing draft pages in that folder.",
-        "type": "boolean",
-        "default": false
-      },
       "disableStringRoutes": {
-        "title": "Disable routes from userRoutes with then following string",
-        "description": "Routes that include with the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
+        "title": "Disable routes from userRoutes with the following string",
+        "description": "Routes that include the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
         "default": "",
         "type": "string"
       }

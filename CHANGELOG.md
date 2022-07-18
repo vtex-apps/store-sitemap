@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-- Support for excluding `/_draft/` routes from sitemap. New setting `disableDraftRoutes` added.
+- Support for excluding routes that contain the saved string from the sitemap. New setting `disableStringRoutes` added.
 
 ## [2.14.0] - 2022-05-11
 
