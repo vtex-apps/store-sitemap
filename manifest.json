@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "2.14.0-hkignore.europe.3",
+  "version": "2.14.0",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
@@ -118,7 +118,7 @@
         "type": "boolean",
         "default": true
       },
-      "disableStringRoutes": {
+      "disableRoutesTerm": {
         "title": "Disable routes from userRoutes with the following string",
         "description": "Routes that include the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
         "default": "",

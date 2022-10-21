@@ -104,7 +104,7 @@ describe('Test sitemap middleware', () => {
           ],
           rootPath: '',
           settings: {
-            disableStringRoutes: '',
+            disableRoutesTerm: '',
             enableAppsRoutes: true,
             enableNavigationRoutes: true,
             enableProductRoutes: true,

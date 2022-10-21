@@ -21,7 +21,7 @@ const LIST_LIMIT = 300
 
 type RoutesByBinding = Record<string, Record<string, Route[]>>
 
-const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[], disableStringRoutes: string) => {
+const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[], disableRoutesTerm: string) => {
   const storeBindingsIds = storeBindings.map(({ id }) => id)
   return routes.reduce(
     (acc, internal) => {
@@ -31,8 +31,8 @@ const createRoutesByBinding = (routes: Internal[], report: Record<string, number
         internal.type !== 'product' &&
         !internal.disableSitemapEntry &&
         storeBindingsIds.includes(internal.binding)
-      if (disableStringRoutes !== '') {
-        validRoute = validRoute && !internal.from.includes('/' + disableStringRoutes)
+      if (disableRoutesTerm) {
+        validRoute = validRoute && !internal.from.includes('/' + disableRoutesTerm)
       }
       if (validRoute) {
         const { binding } = internal
@@ -98,7 +98,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const { clients: { rewriter, tenant } , body } = ctx
   const {
     count,
-    disableStringRoutes,
+    disableRoutesTerm,
     generationId,
     next,
     report,
@@ -109,7 +109,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const responseNext = response.next
 
   const storeBindings = await getStoreBindings(tenant)
-  const routesByBinding = createRoutesByBinding(routes, report, storeBindings, disableStringRoutes)
+  const routesByBinding = createRoutesByBinding(routes, report, storeBindings, disableRoutesTerm)
 
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, count, ctx.clients))
@@ -118,7 +118,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (responseNext) {
     const payload: RewriterRoutesGenerationEvent = {
       count: count + 1,
-      disableStringRoutes,
+      disableRoutesTerm,
       generationId,
       next: responseNext,
       report,

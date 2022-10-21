@@ -66,7 +66,7 @@ describe('Test generate sitemap', () => {
       state: {
         ...state.object,
         settings: {
-          disableStringRoutes: '',
+          disableRoutesTerm: '',
           enableAppsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
@@ -88,7 +88,7 @@ describe('Test generate sitemap', () => {
 
   it('Should send only enabled events', async () => {
     context.state.settings = {
-      disableStringRoutes: '',
+      disableRoutesTerm: '',
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
@@ -101,7 +101,7 @@ describe('Test generate sitemap', () => {
 
     jest.clearAllMocks()
     context.state.settings = {
-      disableStringRoutes:'',
+      disableRoutesTerm:'',
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,

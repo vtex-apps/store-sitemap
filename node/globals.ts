@@ -76,7 +76,7 @@ declare global {
     next: Maybe<string>
     report: Record<string, number>
     count: number
-    disableStringRoutes: string
+    disableRoutesTerm: string
   }
 
   interface ProductRoutesGenerationEvent extends DefaultEvent   {
