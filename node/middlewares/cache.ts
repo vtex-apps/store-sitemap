@@ -35,10 +35,12 @@ export async function cache(ctx: Context, next: () => Promise<void>) {
       : THIRTY_SECONDS + from0To30()
 
     if (shouldCache) {
-      ctx.set(
-        'cache-control',
-        `public, max-age=${maxAge}, stale-while-revalidate=${TEN_SECONDS_S}, stale-if-error=${TEN_MINUTES_S}`
-      )
+      if (ctx.get('cache-control') === '') { // cache-control is not set
+        ctx.set(
+          'cache-control',
+          `public, max-age=${maxAge}, stale-while-revalidate=${TEN_SECONDS_S}, stale-if-error=${TEN_MINUTES_S}`
+        )
+      }
     } else {
       ctx.set('cache-control', 'no-store, no-cache')
     }
