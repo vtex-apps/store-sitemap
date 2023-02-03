@@ -6,6 +6,7 @@ import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
 const ONE_DAY_S = 24 * 60 * 60
 const FORWARDED_HOST_HEADER = 'x-forwarded-host'
+const VTEX_ROOT_PATH_HEADER = 'x-vtex-root-path'
 
 export async function prepare(ctx: Context, next: () => Promise<void>) {
   const {
@@ -58,6 +59,7 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
     startSitemapGeneration(ctx)
   }
   ctx.vary(FORWARDED_HOST_HEADER)
+  ctx.vary(VTEX_ROOT_PATH_HEADER)
 
   return
 }

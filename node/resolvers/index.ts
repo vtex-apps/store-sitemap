@@ -1,10 +1,10 @@
 import { startSitemapGeneration } from '../utils'
-import { saveIndex, deleteIndex } from './mutations'
+import { deleteIndex, saveIndex } from './mutations'
 
 export const resolvers = {
   Mutation: {
-    saveIndex,
     deleteIndex,
+    saveIndex,
   },
   Query: {
     generateSitemap: async (
