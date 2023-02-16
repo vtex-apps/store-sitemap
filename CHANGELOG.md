@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - Support for excluding routes that contain the saved string from the sitemap. New setting `disableRoutesTerm` added.
 
+## [2.14.1] - 2023-02-03
+
+### Fixed
+
+- Cache for multi-binding sites
+
 ## [2.14.0] - 2022-05-11
 
 ### Added
