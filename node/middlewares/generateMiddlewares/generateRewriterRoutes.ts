@@ -32,7 +32,7 @@ const createRoutesByBinding = (routes: Internal[], report: Record<string, number
         !internal.disableSitemapEntry &&
         storeBindingsIds.includes(internal.binding)
       if (disableRoutesTerm) {
-        validRoute = validRoute && !internal.from.includes('/' + disableRoutesTerm)
+        validRoute = validRoute && !internal.from.includes(disableRoutesTerm)
       }
       if (validRoute) {
         const { binding } = internal

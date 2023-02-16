@@ -91,11 +91,11 @@ Once you promoted your workspace, no further actions are needed on your part: yo
 
 #### Managing routes
 
-You can manage if you want to include product, navigation, apps and/or draft routes in your sitemap or not. To do that, check the following step by step.
+You can manage if you want to include product, navigation, apps and/or routes containing your specific term in your sitemap or not. To do that, check the following step by step.
 
 1. In your browser, access the the account's Admin in which you are working using the Production workspace used in the **step 2** of the [Configuration section](#configuration) (`{workspaceName}--{accountName}.myvtex.com/admin`).
 2. Go to **Account settings > Apps > My apps** and search for **Sitemap** app.
-3. Enable or disable product, navigation, app or draft routes according to your scenario.
+3. Enable or disable product, navigation, app or routes containing your specific term according to your scenario.
 
 ![sitemap-admin](https://user-images.githubusercontent.com/36925076/171218096-ceb6d01c-a5c0-4f07-ae19-adfa1938bea4.png)
 
