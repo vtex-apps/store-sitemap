@@ -21,16 +21,19 @@ const LIST_LIMIT = 300
 
 type RoutesByBinding = Record<string, Record<string, Route[]>>
 
-const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[]) => {
+const createRoutesByBinding = (routes: Internal[], report: Record<string, number>, storeBindings: Binding[], disableRoutesTerm: string) => {
   const storeBindingsIds = storeBindings.map(({ id }) => id)
   return routes.reduce(
     (acc, internal) => {
       report[internal.type] = (report[internal.type] || 0) + 1
-      const validRoute =
+      let validRoute =
         !startsWith('notFound', internal.type) &&
         internal.type !== 'product' &&
         !internal.disableSitemapEntry &&
         storeBindingsIds.includes(internal.binding)
+      if (disableRoutesTerm) {
+        validRoute = validRoute && !internal.from.includes(disableRoutesTerm)
+      }
       if (validRoute) {
         const { binding } = internal
         const bindingRoutes: Route[] = Rpath([binding, internal.type], acc) || []
@@ -95,6 +98,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const { clients: { rewriter, tenant } , body } = ctx
   const {
     count,
+    disableRoutesTerm,
     generationId,
     next,
     report,
@@ -105,8 +109,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   const responseNext = response.next
 
   const storeBindings = await getStoreBindings(tenant)
-
-  const routesByBinding = createRoutesByBinding(routes, report, storeBindings)
+  const routesByBinding = createRoutesByBinding(routes, report, storeBindings, disableRoutesTerm)
 
   await Promise.all(
     Object.keys(routesByBinding).map(saveRoutes(routesByBinding, count, ctx.clients))
@@ -115,6 +118,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
   if (responseNext) {
     const payload: RewriterRoutesGenerationEvent = {
       count: count + 1,
+      disableRoutesTerm,
       generationId,
       next: responseNext,
       report,

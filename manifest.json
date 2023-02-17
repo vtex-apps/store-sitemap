@@ -117,6 +117,12 @@
         "description": "This will enable the app routes source, adding to the final sitemap routes defined and exported by the routes.json files from apps built by the store@0.x builder.",
         "type": "boolean",
         "default": true
+      },
+      "disableRoutesTerm": {
+        "title": "Disable routes from userRoutes with the following string",
+        "description": "Routes that include the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
+        "default": "",
+        "type": "string"
       }
     }
   }
