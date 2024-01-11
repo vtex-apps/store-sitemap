@@ -6,15 +6,16 @@ An important SEO feature for cross-border stores is having a sitemap capable of 
 
 For more information about generating a sitemap, check the following sections.
 
-## Before you start
+## Before you begin
 
-This app is available to stores using `vtex.edition-store@3.x` [Edition App](https://vtex.io/docs/concepts/edition-app/). To check which Edition App is installed on your account, run `vtex edition get`. If it's a different Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) to VTEX Support asking for the installation of the `vtex.edition-store@3.x` Edition App.
+This app is available to stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app). To check which Edition App is installed on your account, run `vtex edition get`. If it is an older Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) to VTEX Support asking for the installation of the `vtex.edition-store@3.x` Edition App or a newer version.
 
-Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that's the case, check the [Advanced Configuration section](#advanced-configuration) for more information.
+Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that is the case, check the [Advanced Configuration section](#advanced-configuration) for more information.
 
 ## Step by step
 
 1. Using your terminal and the [VTEX IO CLI](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log into your account.
+   
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/) from scratch.
 
 > ⚠️ **Warning**
@@ -24,11 +25,13 @@ Before generating your store's sitemap, you might want to adjust if products, na
 3. Run `vtex install vtex.store-sitemap@2.x` to install the Sitemap app.
 
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+   
 5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
 
 ![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+
 7. If this is **not** the **first time** you're generating your store's sitemap or if your store's routes **did not suffer any changes** since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query:
 
 ```
@@ -94,7 +97,9 @@ Once you promoted your workspace, no further actions are needed on your part: yo
 You can manage if you want to include product, navigation, apps and/or routes containing your specific term in your sitemap or not. To do that, check the following step by step.
 
 1. In your browser, access the the account's Admin in which you are working using the Production workspace used in the **step 2** of the [Configuration section](#configuration) (`{workspaceName}--{accountName}.myvtex.com/admin`).
+   
 2. Go to **Account settings > Apps > My apps** and search for **Sitemap** app.
+
 3. Enable or disable product, navigation, app or routes containing your specific term according to your scenario.
 
 ![sitemap-admin](https://user-images.githubusercontent.com/36925076/171218096-ceb6d01c-a5c0-4f07-ae19-adfa1938bea4.png)
@@ -144,11 +149,11 @@ mutation {
 
 5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
-6. If you're happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+6. If you are happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
 ##### Removing a custom route
 
-If it's ever desired to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
+If it is ever desired to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
 
 ```gql
 mutation {
