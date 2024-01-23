@@ -18,15 +18,11 @@ Before generating your store's sitemap, you might want to adjust if products, na
    
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/) from scratch.
 
-> ℹ️ **Info**
->
-> Remember to replace the values between the curly brackets according to your scenario.
+> ℹ️ Remember to replace the values between the curly brackets according to your scenario.
 
 3. Run `vtex install vtex.store-sitemap@2.x` to install the Sitemap app.
 
-> ℹ️ **Info**
->
-> If you are using `vtex.edition-store@5.x`, skip step 3, as the `vtex.store-sitemap@2.x` app is installed by default in this version. Check out our [Edition App documentation](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app) to know more about its different versions.
+> ℹ️ If you are using `vtex.edition-store@5.x`, skip step 3, as the `vtex.store-sitemap@2.x` app is installed by default in this version. Check out our [Edition App documentation](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app) to know more about its different versions.
 
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
    
@@ -36,7 +32,7 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
-7. If this is **not** the **first time** you are generating your store's sitemap or if your store's routes **did not suffer any changes** since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query:
+7. If this is **not the first time** you are generating your store's sitemap or if your store's routes **did not suffer any changes** since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query:
 
 ```
 {
