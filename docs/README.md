@@ -43,11 +43,22 @@ Before generating your store's sitemap, you might want to adjust if products, na
    }
    ```
 
-   The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
+   The expected response is a `JSON` object, as follows:
 
-8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
+   ```json
+   {
+     "data":{
+       "bootstrap": {
+         "brands": true,
+         "categories": true
+       }
+     }
+   }
+   ```
 
-9. Run the following query:
+9. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
+
+10. Run the following query:
 
    ```gql
    {
@@ -78,11 +89,11 @@ Before generating your store's sitemap, you might want to adjust if products, na
    
    To make a force restart, add the `force` argument to the query, as in: `generateSitemap(force: true)`. But, be aware that this will cancel the previous process.
 
-10. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you will first see an index containing a website's sitemap for each locale.
+11. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you will first see an index containing a website's sitemap for each locale.
 
     >ℹ️ Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.
 
-11. If you are happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+12. If you are happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
 
     Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser.
 
