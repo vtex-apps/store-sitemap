@@ -146,7 +146,7 @@ For implementation details, check the following step by step.
    }
    ```
 
-   >ℹ️ For **cross-border stores**, having a sitemap capable of handling route internationalization is an important SEO feature. This guarantees that each route has its alternative link for the supported locale binding. Therefore, **if your store is a cross-border one**, keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
+   >ℹ️ For [cross-border stores](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores), having a sitemap capable of handling route internationalization is an important SEO feature. This guarantees that each route has its alternative link for the supported locale binding. Therefore, **if your store is a cross-border one**, keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
 
 5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
