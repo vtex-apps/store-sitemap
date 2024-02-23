@@ -123,6 +123,12 @@
         "description": "Routes that include the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",
         "default": "",
         "type": "string"
+      },
+      "ignoreBindings": {
+        "title": "Ignore bindings",
+        "description": "Generate a single sitemap even if store has multiple bindings - for example if bindings are in the process of being set up",
+        "type": "boolean",
+        "default": false
       }
     }
   }

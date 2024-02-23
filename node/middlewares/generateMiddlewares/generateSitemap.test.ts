@@ -1,4 +1,4 @@
-import { Events, IOContext, Logger} from '@vtex/api'
+import { Events, IOContext, Logger } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
@@ -6,7 +6,7 @@ import { generateSitemap } from './generateSitemap'
 import {
   GENERATE_APPS_ROUTES_EVENT,
   GENERATE_PRODUCT_ROUTES_EVENT,
-  GENERATE_REWRITER_ROUTES_EVENT
+  GENERATE_REWRITER_ROUTES_EVENT,
 } from './utils'
 
 const eventsTypeMock = TypeMoq.Mock.ofInstance(Events)
@@ -28,7 +28,7 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
   report: {},
 }
 
-const DEFAULT_PRODUCT_ROUTES_PAYLOAD: ProductRoutesGenerationEvent= {
+const DEFAULT_PRODUCT_ROUTES_PAYLOAD: ProductRoutesGenerationEvent = {
   generationId: '1',
   invalidProducts: 0,
   page: 1,
@@ -42,7 +42,12 @@ describe('Test generate sitemap', () => {
       super(ioContext.object)
     }
 
-    public sendEvent = async (_: any,route: string, message?: any, __?: any)=> {
+    public sendEvent = async (
+      _: any,
+      route: string,
+      message?: any,
+      __?: any
+    ) => {
       eventSent(_, route, message)
     }
   }
@@ -70,6 +75,7 @@ describe('Test generate sitemap', () => {
           enableAppsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
+          ignoreBindings: false,
         },
       },
       vtex: {
@@ -81,9 +87,21 @@ describe('Test generate sitemap', () => {
 
   it('Should send both events', async () => {
     await generateSitemap(context)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_PRODUCT_ROUTES_EVENT, DEFAULT_PRODUCT_ROUTES_PAYLOAD)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_APPS_ROUTES_EVENT, DEFAULT_APPS_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_REWRITER_ROUTES_EVENT,
+      DEFAULT_REWRITER_ROUTES_PAYLOAD
+    )
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_PRODUCT_ROUTES_EVENT,
+      DEFAULT_PRODUCT_ROUTES_PAYLOAD
+    )
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_APPS_ROUTES_EVENT,
+      DEFAULT_APPS_ROUTES_PAYLOAD
+    )
   })
 
   it('Should send only enabled events', async () => {
@@ -92,23 +110,37 @@ describe('Test generate sitemap', () => {
       enableAppsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
+      ignoreBindings: false,
     }
 
     await generateSitemap(context)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_REWRITER_ROUTES_EVENT, DEFAULT_REWRITER_ROUTES_PAYLOAD)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_APPS_ROUTES_EVENT, DEFAULT_APPS_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_REWRITER_ROUTES_EVENT,
+      DEFAULT_REWRITER_ROUTES_PAYLOAD
+    )
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_APPS_ROUTES_EVENT,
+      DEFAULT_APPS_ROUTES_PAYLOAD
+    )
     expect(eventSent).toHaveBeenCalledTimes(2)
 
     jest.clearAllMocks()
     context.state.settings = {
-      disableRoutesTerm:'',
+      disableRoutesTerm: '',
       enableAppsRoutes: false,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
+      ignoreBindings: false,
     }
 
     await generateSitemap(context)
-    expect(eventSent).toHaveBeenCalledWith('', GENERATE_PRODUCT_ROUTES_EVENT, DEFAULT_PRODUCT_ROUTES_PAYLOAD)
+    expect(eventSent).toHaveBeenCalledWith(
+      '',
+      GENERATE_PRODUCT_ROUTES_EVENT,
+      DEFAULT_PRODUCT_ROUTES_PAYLOAD
+    )
     expect(eventSent).toHaveBeenCalledTimes(1)
   })
 })
