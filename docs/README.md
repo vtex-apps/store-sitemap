@@ -2,7 +2,7 @@
 
 The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your store website.
 
-An important SEO feature for cross-border stores is having a sitemap capable of handling route internationalization. This guarantees that each route has its alternate link for the supported locale binding. Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google.
+Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google. 
 
 For more information about generating a sitemap, check the following sections.
 
@@ -27,7 +27,6 @@ Before generating your store's sitemap, you might want to adjust if products, na
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
    
 5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
-
    ![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
@@ -43,7 +42,18 @@ Before generating your store's sitemap, you might want to adjust if products, na
    }
    ```
 
-   The expected response is a `JSON` object containing the number of brand routes under the `brands` property; and the number of department, category, and subcategory routes under `categories`.
+   The expected response body is
+   
+   ```json
+   {
+     "data":{
+       "bootstrap": {
+         "brands": true,
+         "categories": true
+       }
+     }
+   }
+   ```
 
 8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
 
@@ -92,12 +102,11 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 You can manage if you want to include product, navigation, apps and/or routes containing your specific term in your sitemap or not. To do that, check the following step by step.
 
-1. In your browser, access the the account's Admin in which you are working using the Production workspace used in the **step 2** of the [Configuration section](#configuration) (`{workspaceName}--{accountName}.myvtex.com/admin`).
+1. In your browser, access the account's Admin in which you are working using the Production workspace used in the **step 2** of the [Configuration section](#configuration) (`{workspace}--{account}.myvtex.com/admin`).
    
 2. Go to **Account settings > Apps > My apps** and search for **Sitemap** app.
 
 3. Enable or disable product, navigation, app or routes containing your specific term according to your scenario.
-
    ![sitemap-admin](https://github.com/vtexdocs/dev-portal-content/assets/112641072/649f7dcf-583d-497f-a69c-4cfc3d8a805a)
 
 #### Enabling custom routes
@@ -137,7 +146,7 @@ For implementation details, check the following step by step.
    }
    ```
 
-   >ℹ️ **If your store is a cross-border one**, keep in mind that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that, by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
+   >ℹ️ If your store is a [cross-border](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores) one, note that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
 
 5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
