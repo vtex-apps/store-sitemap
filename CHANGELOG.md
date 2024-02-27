@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Support for ignoring bindings, for the scenario where an account has configured bindings but has not "gone live" with them yet
+
 ## [2.15.3] - 2024-02-26
 
 ## [2.15.2] - 2024-01-25

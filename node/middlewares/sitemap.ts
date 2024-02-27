@@ -70,7 +70,9 @@ const sitemapIndex = async (ctx: Context) => {
       true
     ),
   ])
+
   const indexFiles = rawIndexFiles.filter(Boolean)
+
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
   }
@@ -126,13 +128,13 @@ const sitemapBindingIndex = async (ctx: Context) => {
 
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
-    state: { matchingBindings, bindingAddress, rootPath },
+    state: { matchingBindings, bindingAddress, rootPath, settings },
   } = ctx
 
   const hasBindingIdentifier = rootPath || bindingAddress
   let $: any
   try {
-    if (hasBindingIdentifier) {
+    if (hasBindingIdentifier || settings.ignoreBindings) {
       $ = await sitemapIndex(ctx)
     } else {
       const hasMultipleMatchingBindings = matchingBindings.length > 1

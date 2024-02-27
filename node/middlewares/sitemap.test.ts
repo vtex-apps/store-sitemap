@@ -1,7 +1,11 @@
 import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
-import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import {
+  APPS_ROUTES_INDEX,
+  PRODUCT_ROUTES_INDEX,
+  REWRITER_ROUTES_INDEX,
+} from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
 import { EXTENDED_INDEX_FILE } from '../utils'
@@ -31,29 +35,29 @@ describe('Test sitemap middleware', () => {
     ): Promise<T> => {
       switch (file) {
         case APPS_ROUTES_INDEX:
-          return {
-            index: [ 'appsRoutes-0' ],
+          return ({
+            index: ['appsRoutes-0'],
             lastUpdated: '2019-12-04',
-          } as unknown as T
+          } as unknown) as T
         case REWRITER_ROUTES_INDEX:
-          return {
-            index: [ 'brand-0', 'department-0'],
+          return ({
+            index: ['brand-0', 'department-0'],
             lastUpdated: '2019-12-04',
-          } as unknown as T
+          } as unknown) as T
         case PRODUCT_ROUTES_INDEX:
-          return {
-            index: [ 'product-0'],
+          return ({
+            index: ['product-0'],
             lastUpdated: '2019-12-04',
-          } as unknown as T
+          } as unknown) as T
         case EXTENDED_INDEX_FILE:
-          return (hasExtendedFiles
+          return ((hasExtendedFiles
             ? {
-              index: ['extra-0'],
-              lastUpdated: '2019-12-04',
-            }
-            : null) as unknown as T
+                index: ['extra-0'],
+                lastUpdated: '2019-12-04',
+              }
+            : null) as unknown) as T
         default:
-          return null as unknown as T
+          return (null as unknown) as T
       }
     }
   }
@@ -78,94 +82,107 @@ describe('Test sitemap middleware', () => {
     },
   ] as Binding[]
 
-    beforeEach(() => {
-      // tslint:disable-next-line: max-classes-per-file
-      const ClientsImpl = class ClientsMock extends Clients {
-        get vbase() {
-          return this.getOrSet('vbase', vbase)
-        }
+  beforeEach(() => {
+    // tslint:disable-next-line: max-classes-per-file
+    const ClientsImpl = class ClientsMock extends Clients {
+      get vbase() {
+        return this.getOrSet('vbase', vbase)
       }
+    }
 
-      hasExtendedFiles = false
-      context = {
-        ...contextMock.object,
-        clients: new ClientsImpl({}, ioContext.object),
-        state: {
-          ...state.object,
-          binding: {
-            id: '1',
-          } as Binding,
-          bucket: 'bucket',
-          enabledIndexFiles: [APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX],
-          forwardedHost: 'www.host.com',
-          forwardedPath: '/sitemap/file1.xml',
-          matchingBindings: [
-            matchingBindings[0],
-          ],
-          rootPath: '',
-          settings: {
-            disableRoutesTerm: '',
-            enableAppsRoutes: true,
-            enableNavigationRoutes: true,
-            enableProductRoutes: true,
-          },
+    hasExtendedFiles = false
+    context = {
+      ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
+      state: {
+        ...state.object,
+        binding: {
+          id: '1',
+        } as Binding,
+        bucket: 'bucket',
+        enabledIndexFiles: [
+          APPS_ROUTES_INDEX,
+          REWRITER_ROUTES_INDEX,
+          PRODUCT_ROUTES_INDEX,
+        ],
+        forwardedHost: 'www.host.com',
+        forwardedPath: '/sitemap/file1.xml',
+        matchingBindings: [matchingBindings[0]],
+        rootPath: '',
+        settings: {
+          disableRoutesTerm: '',
+          enableAppsRoutes: true,
+          enableNavigationRoutes: true,
+          enableProductRoutes: true,
+          ignoreBindings: false,
         },
-        vtex: {
-          ...ioContext.object,
-          logger: loggerMock.object,
-        },
-      }
-    })
+      },
+      vtex: {
+        ...ioContext.object,
+        logger: loggerMock.object,
+      },
+    }
+  })
 
-   it('Should return binding index if it has multiple bindings', async () => {
-     const thisContext = {
-       ...context,
-       state: {
-         ...context.state,
-         matchingBindings,
-       },
-     }
-     await sitemap(thisContext, next)
-     expect(thisContext.body.includes(
-       '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com</loc>'
-     )).toBeTruthy()
-     expect(thisContext.body.includes(
-       '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com/br</loc>'
-     )).toBeTruthy()
-     expect(thisContext.body.includes(
-       '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com/de</loc>'
-     )).toBeTruthy()
-   })
-
-   it('Should return binding index with canonical if it has multiple bindings in production', async () => {
+  it('Should return binding index if it has multiple bindings', async () => {
     const thisContext = {
       ...context,
       state: {
         ...context.state,
         matchingBindings,
       },
-       vtex: {
-         ...context.vtex,
-         production: true,
-       },
+    }
+    await sitemap(thisContext, next)
+    expect(
+      thisContext.body.includes(
+        '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com</loc>'
+      )
+    ).toBeTruthy()
+    expect(
+      thisContext.body.includes(
+        '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com/br</loc>'
+      )
+    ).toBeTruthy()
+    expect(
+      thisContext.body.includes(
+        '<loc>https://www.host.com/sitemap.xml?__bindingAddress=www.host.com/de</loc>'
+      )
+    ).toBeTruthy()
+  })
+
+  it('Should return binding index with canonical if it has multiple bindings in production', async () => {
+    const thisContext = {
+      ...context,
+      state: {
+        ...context.state,
+        matchingBindings,
+      },
+      vtex: {
+        ...context.vtex,
+        production: true,
+      },
     }
 
     await sitemap(thisContext, next)
-    expect(thisContext.body.includes(
-      '<loc>https://www.host.com/sitemap.xml</loc>'
-    )).toBeTruthy()
-    expect(thisContext.body.includes(
-      '<loc>https://www.host.com/br/sitemap.xml</loc>'
-    )).toBeTruthy()
-    expect(thisContext.body.includes(
-      '<loc>https://www.host.com/de/sitemap.xml</loc>'
-    )).toBeTruthy()
+    expect(
+      thisContext.body.includes('<loc>https://www.host.com/sitemap.xml</loc>')
+    ).toBeTruthy()
+    expect(
+      thisContext.body.includes(
+        '<loc>https://www.host.com/br/sitemap.xml</loc>'
+      )
+    ).toBeTruthy()
+    expect(
+      thisContext.body.includes(
+        '<loc>https://www.host.com/de/sitemap.xml</loc>'
+      )
+    ).toBeTruthy()
   })
 
-
-    it('Should return index if it doesnt have multiple bindings', async () => {
-      await sitemap(context, next)
-      expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
+  it('Should return index if it doesnt have multiple bindings', async () => {
+    await sitemap(context, next)
+    expect(removeSpaces(context.body)).toStrictEqual(
+      removeSpaces(
         `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           <sitemap>
             <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
@@ -184,14 +201,16 @@ describe('Test sitemap middleware', () => {
             <lastmod>2019-12-04</lastmod>
           </sitemap>
         </sitemapindex>`
-      ))
+      )
+    )
   })
 
   it('Should return only enabled index', async () => {
     context.state.enabledIndexFiles = [APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX]
     await sitemap(context, next)
-    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
-      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    expect(removeSpaces(context.body)).toStrictEqual(
+      removeSpaces(
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           <sitemap>
             <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
             <lastmod>2019-12-04</lastmod>
@@ -201,12 +220,17 @@ describe('Test sitemap middleware', () => {
             <lastmod>2019-12-04</lastmod>
           </sitemap>
         </sitemapindex>`
-    ))
+      )
+    )
 
-   context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX, 'non-existant-index']
+    context.state.enabledIndexFiles = [
+      REWRITER_ROUTES_INDEX,
+      'non-existant-index',
+    ]
     await sitemap(context, next)
-    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
-      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    expect(removeSpaces(context.body)).toStrictEqual(
+      removeSpaces(
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
           <sitemap>
             <loc>https://www.host.com/sitemap/brand-0.xml</loc>
             <lastmod>2019-12-04</lastmod>
@@ -216,7 +240,8 @@ describe('Test sitemap middleware', () => {
             <lastmod>2019-12-04</lastmod>
           </sitemap>
         </sitemapindex>`
-    ))
+      )
+    )
   })
 
   it('Should return binding index with bindingAddress', async () => {
@@ -228,8 +253,9 @@ describe('Test sitemap middleware', () => {
       },
     }
     await sitemap(thisContext, next)
-    expect(removeSpaces(thisContext.body)).toStrictEqual(removeSpaces(
-      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    expect(removeSpaces(thisContext.body)).toStrictEqual(
+      removeSpaces(
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <sitemap>
           <loc>https://www.host.com/sitemap/appsRoutes-0.xml?__bindingAddress=www.host.com/en</loc>
           <lastmod>2019-12-04</lastmod>
@@ -247,7 +273,8 @@ describe('Test sitemap middleware', () => {
           <lastmod>2019-12-04</lastmod>
         </sitemap>
       </sitemapindex>`
-    ))
+      )
+    )
   })
 
   it('Should return bindinig index with rootPath', async () => {
@@ -259,8 +286,9 @@ describe('Test sitemap middleware', () => {
       },
     }
     await sitemap(thisContext, next)
-    expect(removeSpaces(thisContext.body)).toStrictEqual(removeSpaces(
-      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    expect(removeSpaces(thisContext.body)).toStrictEqual(
+      removeSpaces(
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <sitemap>
           <loc>https://www.host.com/en/sitemap/appsRoutes-0.xml</loc>
           <lastmod>2019-12-04</lastmod>
@@ -278,14 +306,16 @@ describe('Test sitemap middleware', () => {
           <lastmod>2019-12-04</lastmod>
         </sitemap>
       </sitemapindex>`
-    ))
+      )
+    )
   })
 
   it('Should return extra index if any', async () => {
     hasExtendedFiles = true
     await sitemap(context, next)
-    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
-      `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    expect(removeSpaces(context.body)).toStrictEqual(
+      removeSpaces(
+        `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
         <sitemap>
           <loc>https://www.host.com/sitemap/appsRoutes-0.xml</loc>
           <lastmod>2019-12-04</lastmod>
@@ -307,7 +337,7 @@ describe('Test sitemap middleware', () => {
           <lastmod>2019-12-04</lastmod>
         </sitemap>
       </sitemapindex>`
-    ))
-})
-
+      )
+    )
+  })
 })
