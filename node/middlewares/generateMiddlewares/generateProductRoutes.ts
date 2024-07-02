@@ -72,7 +72,7 @@ const getProductInfo = (storeBindings: Binding[], hasSalesChannels: boolean, ctx
     return bindings.map(binding => [binding, product] as [Binding, Product])
 }
 
-const getMessagesFromProductsInfo = (productsInfo: Array<ProductInfo | undefined>) =>
+const getMessagesFromProductsInfo = (productsInfo: Array<ProductInfo | undefined | void>) =>
   productsInfo.reduce((acc, productInfo) => {
     const { messagesByBinding } = acc
     if (!productInfo) {
@@ -201,7 +201,17 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
   const { items, paging: { pages: totalPages, total } } = await catalog.getProductsIds(page, salesChannels)
 
   const getProductInfoFn = getProductInfo(storeBindings, hasSalesChannels, ctx)
-  const productsInfo = await Promise.all(items.map(productId => getProductInfoFn(productId.toString())))
+  const productsInfo = await Promise.all(
+    items.map(productId =>
+      getProductInfoFn(productId.toString()).catch(error => {
+        logger.error({
+          error,
+          message: 'Error in product search',
+          productId,
+        })
+      })
+    )
+  )
 
   const {
     currentInvalidProducts,
