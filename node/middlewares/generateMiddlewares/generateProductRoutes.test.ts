@@ -6,7 +6,8 @@ import {
   RequestTracingConfig,
   Tenant,
   TenantClient,
-  VBase
+  VBase,
+  VBaseSaveResponse
 } from '@vtex/api'
 import { Product } from '@vtex/api/lib/clients/apps/catalogGraphQL/product'
 import * as TypeMoq from 'typemoq'
@@ -95,11 +96,12 @@ describe('Test product routes generation', () => {
       bucket: string,
       file: string,
       data: T
-    ): Promise<void> => {
+    ): Promise<VBaseSaveResponse> => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
       this.jsonData[bucket][file] = data
+      return Promise.resolve({}) as Promise<VBaseSaveResponse>
     }
   }
 
@@ -221,7 +223,7 @@ describe('Test product routes generation', () => {
     }
 
 
-
+    
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {

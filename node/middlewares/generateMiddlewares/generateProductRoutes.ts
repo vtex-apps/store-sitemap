@@ -72,7 +72,7 @@ const getProductInfo = (storeBindings: Binding[], hasSalesChannels: boolean, ctx
     return bindings.map(binding => [binding, product] as [Binding, Product])
 }
 
-const getMessagesFromProductsInfo = (productsInfo: Array<ProductInfo | undefined | void>) =>
+const getMessagesFromProductsInfo = (productsInfo: Array<ProductInfo | undefined>) =>
   productsInfo.reduce((acc, productInfo) => {
     const { messagesByBinding } = acc
     if (!productInfo) {
@@ -209,6 +209,7 @@ export async function generateProductRoutes(ctx: EventContext, next: () => Promi
           message: 'Error in product search',
           productId,
         })
+        return undefined
       })
     )
   )

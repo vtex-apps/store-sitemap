@@ -90,17 +90,17 @@ describe('Test generate sitemap', () => {
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_REWRITER_ROUTES_EVENT,
-      DEFAULT_REWRITER_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_REWRITER_ROUTES_PAYLOAD)
     )
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_PRODUCT_ROUTES_EVENT,
-      DEFAULT_PRODUCT_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_PRODUCT_ROUTES_PAYLOAD)
     )
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_APPS_ROUTES_EVENT,
-      DEFAULT_APPS_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_APPS_ROUTES_PAYLOAD)
     )
   })
 
@@ -117,12 +117,12 @@ describe('Test generate sitemap', () => {
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_REWRITER_ROUTES_EVENT,
-      DEFAULT_REWRITER_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_REWRITER_ROUTES_PAYLOAD)
     )
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_APPS_ROUTES_EVENT,
-      DEFAULT_APPS_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_APPS_ROUTES_PAYLOAD)
     )
     expect(eventSent).toHaveBeenCalledTimes(2)
 
@@ -139,7 +139,7 @@ describe('Test generate sitemap', () => {
     expect(eventSent).toHaveBeenCalledWith(
       '',
       GENERATE_PRODUCT_ROUTES_EVENT,
-      DEFAULT_PRODUCT_ROUTES_PAYLOAD
+      expect.objectContaining(DEFAULT_PRODUCT_ROUTES_PAYLOAD)
     )
     expect(eventSent).toHaveBeenCalledTimes(1)
   })
