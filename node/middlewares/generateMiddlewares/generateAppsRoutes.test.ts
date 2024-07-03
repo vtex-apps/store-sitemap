@@ -5,7 +5,8 @@ import {
   RequestConfig,
   Tenant,
   TenantClient,
-  VBase
+  VBase,
+  VBaseSaveResponse
 } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
@@ -50,11 +51,12 @@ describe('Test rewriter routes generation', () => {
       bucket: string,
       file: string,
       data: T
-    ): Promise<void> => {
+    ): Promise<VBaseSaveResponse> => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
       this.jsonData[bucket][file] = data
+      return ({ etag: 'etag' } as unknown) as VBaseSaveResponse
     }
   }
 

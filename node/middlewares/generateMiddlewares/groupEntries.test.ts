@@ -1,4 +1,4 @@
-import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase} from '@vtex/api'
+import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase, VBaseSaveResponse } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
@@ -72,11 +72,14 @@ describe('Test group entries', () => {
       bucket: string,
       file: string,
       data: T
-    ): Promise<void> => {
+    ): Promise<VBaseSaveResponse> => {
       if (!jsonData[bucket]) {
        jsonData[bucket] = {}
       }
       jsonData[bucket][file] = data
+      return Promise.resolve(({
+        updated: true,
+      } as unknown) as VBaseSaveResponse)
     }
 
     public deleteFile = async (bucket: string, file: string, _: any, __: any): Promise<any> => {

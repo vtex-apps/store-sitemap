@@ -1,4 +1,4 @@
-import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase } from '@vtex/api'
+import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase, VBaseSaveResponse } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { EntityLocator, Internal } from 'vtex.rewriter'
 
@@ -53,11 +53,14 @@ describe('Test rewriter routes generation', () => {
       bucket: string,
       file: string,
       data: T
-    ): Promise<void> => {
+    ): Promise<VBaseSaveResponse> => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
       this.jsonData[bucket][file] = data
+      return Promise.resolve(({
+        updated: true,
+      } as unknown) as VBaseSaveResponse)
     }
   }
 
