@@ -81,6 +81,7 @@ const clients: ClientsConfig<Clients> = {
     },
     vbase: {
       memoryCache: vbaseCacheStorage,
+      retries: 3,
     },
   },
 }
