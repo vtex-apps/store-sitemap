@@ -251,7 +251,16 @@ export async function generateProductRoutes(
 
   const getProductInfoFn = getProductInfo(storeBindings, hasSalesChannels, ctx)
   const productsInfo = await Promise.all(
-    items.map(productId => getProductInfoFn(productId.toString()))
+    items.map(productId =>
+      getProductInfoFn(productId.toString()).catch(error => {
+        logger.error({
+          error,
+          message: 'Error in product search',
+          productId,
+        })
+        return undefined
+      })
+    )
   )
 
   const {
