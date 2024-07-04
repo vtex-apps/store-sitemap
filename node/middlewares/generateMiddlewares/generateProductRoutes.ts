@@ -1,5 +1,5 @@
 import { Binding, Logger, VBase } from '@vtex/api'
-import { zipObj } from 'ramda'
+import { isEmpty, zipObj } from 'ramda'
 import { Product } from 'vtex.catalog-graphql'
 
 import {
@@ -249,19 +249,27 @@ export async function generateProductRoutes(
     paging: { pages: totalPages, total },
   } = await catalog.getProductsIds(page, salesChannels)
 
+  const productsWithError: Array<{
+    productId: string
+    error: unknown
+  }> = []
+
   const getProductInfoFn = getProductInfo(storeBindings, hasSalesChannels, ctx)
   const productsInfo = await Promise.all(
-    items.map(productId =>
+    items.map((productId: { toString: () => string }) =>
       getProductInfoFn(productId.toString()).catch(error => {
-        logger.error({
-          error,
-          message: 'Error in product search',
-          productId,
-        })
+        productsWithError.push({ productId: productId.toString(), error })
         return undefined
       })
     )
   )
+
+  if (!isEmpty(productsWithError)) {
+    logger.error({
+      message: `Error in product search, ${productsWithError.length} failed when adding into sitemap`,
+      productsWithError,
+    })
+  }
 
   const {
     currentInvalidProducts,
