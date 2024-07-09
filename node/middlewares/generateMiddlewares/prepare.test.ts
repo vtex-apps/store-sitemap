@@ -1,4 +1,4 @@
-import { IOContext, Logger, VBase } from '@vtex/api'
+import { IOContext, Logger, VBase, VBaseSaveResponse } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { Clients } from '../../clients'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE } from '../../utils'
@@ -38,11 +38,12 @@ describe('Test generation prepare', () => {
       bucket: string,
       file: string,
       data: T
-    ): Promise<void> => {
+    ): Promise<VBaseSaveResponse> => {
       if (!this.jsonData[bucket]) {
         this.jsonData[bucket] = {}
       }
       this.jsonData[bucket][file] = data
+      return Promise.resolve([{ path: file, hash: 'mocked-hash' }])
     }
   }
   beforeEach(() => {
