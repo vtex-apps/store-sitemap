@@ -154,3 +154,26 @@ export const cleanConfigBucket = async (enabledIndexFiles: string[], vbase: VBas
   ])
 
 const allTruthy = <T>(array: T[]) => !array.some(e => !e)
+
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
+
+export const retryOn429 = async (
+  fn: () => Promise<unknown>,
+  maxRetries = 3,
+  attempt = 0
+): Promise<void> => {
+  try {
+    await fn()
+  } catch (error) {
+    if (error.status === 429 && attempt < maxRetries) {
+      const waitTime = 2 ** (attempt + 1) * 1000
+      console.warn(
+        `HTTP 429 received, retrying in ${waitTime / 1000} seconds...`
+      )
+      await delay(waitTime)
+      return retryOn429(fn, maxRetries, attempt + 1)
+    }
+
+    throw error
+  }
+}

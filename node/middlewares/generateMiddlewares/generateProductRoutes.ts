@@ -21,6 +21,7 @@ import {
   Message,
   PRODUCT_ROUTES_INDEX,
   RAW_DATA_PREFIX,
+  retryOn429,
   SitemapEntry,
   SitemapIndex,
   slugify,
@@ -184,14 +185,24 @@ const saveRoutes = (
   )
   index.push(entry)
   const lastUpdated = currentDate()
-  await vbase.saveJSON<SitemapEntry>(bucket, entry, {
-    lastUpdated,
-    routes,
-  })
-  await vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
-    index,
-    lastUpdated,
-  })
+
+  try {
+    await retryOn429(() =>
+      vbase.saveJSON<SitemapEntry>(bucket, entry, {
+        lastUpdated,
+        routes,
+      })
+    )
+
+    await retryOn429(() =>
+      vbase.saveJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, {
+        index,
+        lastUpdated,
+      })
+    )
+  } catch (error) {
+    console.error(`Failed to save data after retries: ${error.message}`)
+  }
 }
 
 const pageWasProcessed = async (
