@@ -28,7 +28,7 @@ Before generating your store's sitemap, you might want to adjust if products, na
    
 5. In your browser, access theAdmin and go to **Store Settings > Storefront > GraphQL IDE**.
 
-   ![graphql-ide](https://cdn.jsdelivr.net/gh/vtex-apps/store-sitemap@fix/EDU-13037-store-sitemap/docs/graphql-ide.png)
+   ![graphql-ide](https://cdn.jsdelivr.net/gh/vtex-apps/store-sitemap@main/docs/graphql-ide.png)
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
