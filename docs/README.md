@@ -26,7 +26,7 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
    
-5. In your browser, access theAdmin and go to **Store Settings > Storefront > GraphQL IDE**.
+5. In your browser, access the VTEX Admin and go to **Store Settings > Storefront > GraphQL IDE**.
 
    ![graphql-ide](https://cdn.jsdelivr.net/gh/vtex-apps/store-sitemap@main/docs/graphql-ide.png)
 
