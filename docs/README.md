@@ -12,7 +12,7 @@ This app is available to stores using `vtex.edition-store@3.x` or a later versio
 
 Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that is the case, check the [Advanced Configuration section](#advanced-configuration) for more information.
 
-## Step by step
+## Instructions
 
 1. Using your terminal and the [VTEX IO CLI](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log into your account.
    
@@ -26,8 +26,9 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
    
-5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
-   ![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
+5. In your browser, access theAdmin and go to **Store Settings > Storefront > GraphQL IDE**.
+
+   ![graphql-ide](https://cdn.jsdelivr.net/gh/vtex-apps/store-sitemap@fix/EDU-13037-store-sitemap/docs/graphql-ide.png)
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
