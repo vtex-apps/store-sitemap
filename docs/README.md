@@ -153,7 +153,7 @@ For implementation details, check the following instructions.
 
 6. If you are happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
 
-##### Removing a custom route
+#### Removing a custom route
 
 If you ever want to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
 
