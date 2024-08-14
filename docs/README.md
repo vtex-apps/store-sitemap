@@ -1,6 +1,6 @@
 # Store Sitemap
 
-The Store Sitemap app is responsible for automatically generating a `sitemap.xml` file of your store website.
+The Store Sitemap app automatically generates a `sitemap.xml` file of your store website.
 
 Once the app is deployed and installed in your account, your store will benefit from having a sitemap, which can lead to increased visibility of your site in search tools, such as Google. 
 
@@ -8,11 +8,11 @@ For more information about generating a sitemap, check the following sections.
 
 ## Before you begin
 
-This app is available to stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app). To check which Edition App is installed on your account, run `vtex edition get`. If it is an older Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) to VTEX Support asking for the installation of the `vtex.edition-store@3.x` Edition App or a newer version.
+This app is available to stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app). To check which Edition App is installed on your account, run `vtex edition get`. If it is an older Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) with VTEX Support asking for the installation of the `vtex.edition-store@3.x` Edition App or a newer version.
 
 Before generating your store's sitemap, you might want to adjust if products, navigation, app and/or custom routes will be included in it or not. If that is the case, check the [Advanced Configuration section](#advanced-configuration) for more information.
 
-## Step by step
+## Instructions
 
 1. Using your terminal and the [VTEX IO CLI](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log into your account.
    
@@ -26,8 +26,9 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
    
-5. In your browser, access the account's administrative panel and select the **GraphQL IDE**.
-   ![adminsidebarmenu](https://user-images.githubusercontent.com/52087100/66516950-95d29a00-eab8-11e9-8cea-080fbdab84d5.png)
+5. In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
+
+   ![graphql-ide](https://cdn.jsdelivr.net/gh/vtex-apps/store-sitemap@main/docs/graphql-ide.png)
 
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
@@ -55,7 +56,7 @@ Before generating your store's sitemap, you might want to adjust if products, na
    }
    ```
 
-8. Now, from the GraphQL IDE dropdown list, choose the `vtex.store-sitemap@2.x` app.
+8. Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
 
 9. Run the following query:
 
@@ -86,13 +87,13 @@ Before generating your store's sitemap, you might want to adjust if products, na
    Next generation available: <End-date>
    ```
    
-   To make a force restart, add the `force` argument to the query, as in: `generateSitemap(force: true)`. But, be aware that this will cancel the previous process.
+   To force a restart, add the `force` argument to the query, as in: `generateSitemap(force: true)`. Be aware that this will cancel the previous process.
 
 10. Check the sitemap generated for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Notice that if your store is a cross-border one, you will first see an index containing a website's sitemap for each locale.
 
-    >ℹ️ Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand and department) and that each `.xml` file supports a maximum of 5k routes.
+    >ℹ️ Notice that different `.xml` files are generated according to their entity type (product, category, subcategory, user routes, brand, and department) and that each `.xml` file supports a maximum of 5k routes.
 
-11. If you are happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+11. If you are happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
 
     Once you promoted your workspace, no further actions are needed on your part: you are ready to check out your store's sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser.
 
@@ -100,13 +101,13 @@ Before generating your store's sitemap, you might want to adjust if products, na
 
 #### Managing routes
 
-You can manage if you want to include product, navigation, apps and/or routes containing your specific term in your sitemap or not. To do that, check the following step by step.
+You can manage if you want to include product, navigation, apps and/or routes containing your specific term in your sitemap or not. To do that, check the following instructions.
 
 1. In your browser, access the account's Admin in which you are working using the Production workspace used in the **step 2** of the [Configuration section](#configuration) (`{workspace}--{account}.myvtex.com/admin`).
    
 2. Go to **Account settings > Apps > My apps** and search for **Sitemap** app.
 
-3. Enable or disable product, navigation, app or routes containing your specific term according to your scenario.
+3. Enable or disable product, navigation, apps, or routes containing your specific term based on your scenario.
    ![sitemap-admin](https://github.com/vtexdocs/dev-portal-content/assets/112641072/649f7dcf-583d-497f-a69c-4cfc3d8a805a)
 
 #### Enabling custom routes
@@ -122,13 +123,13 @@ If you have [custom pages](https://developers.vtex.com/vtex-developer-docs/docs/
    }
    ```
 
-Once everything is set up, go back to the **step 4** of the [Configuration section](#configuration).
+Once everything is set up, go back to **step 4** of the [Configuration section](#configuration).
 
 #### Extending the sitemap
 
 To add custom routes created by an app (for example, the ones created by the [`store-locator`](https://github.com/vtex-apps/store-locator)) to your store's sitemap, the app must respond to an XML file containing a list of the routes created by that app. Lastly, you must include the path to the XML file that your app responds to as an index of your store's sitemap.
 
-For implementation details, check the following step by step.
+For implementation details, check the following instructions.
 
 1. Create or modify your app to respond to the following route `/sitemap/{index-name}.xml` and to return an XML file containing the data that you want the search engine (e.g., Google) to index. Remember to replace the values between the curly brackets according to your scenario.
 
@@ -146,15 +147,15 @@ For implementation details, check the following step by step.
    }
    ```
 
-   >ℹ️ If your store is a [cross-border](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores) one, note that the `saveIndex` mutation also accepts the `binding` id as an argument. That means that by specifying the `binding` id, you can add your new index to the sitemap of the desired binding. If the `binding` id is not specified, the mutation will consider the store's default binding.
+   >ℹ️ If your store is a [cross-border](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores) one, note that the `saveIndex` mutation also accepts the `binding` ID as an argument. That means that by specifying the `binding` ID, you can add your new index to the sitemap of the desired binding. If the `binding` ID is not specified, the mutation will consider the store's default binding.
 
 5. Check the updated sitemap for the current workspace you are working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
-6. If you are happy with the results, run `vtex promote` to promote your workspace and to have your sitemap in your master workspace.
+6. If you are happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
 
-##### Removing a custom route
+#### Removing a custom route
 
-If it is ever desired to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
+If you ever want to remove a custom route, you may execute the following mutation, which takes the same arguments as `saveIndex`:
 
    ```gql
    mutation {
