@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- VBase response to 'Invalid generation id' error
+
 ## [2.16.1] - 2024-07-09
 
 ## [2.16.0] - 2024-02-27
