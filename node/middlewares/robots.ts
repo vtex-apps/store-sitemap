@@ -1,5 +1,7 @@
 import { Apps } from '@vtex/api'
 
+import { notFound } from '../utils'
+
 const TEN_MINUTES_S = 10 * 60
 
 interface RobotsFile {
@@ -18,7 +20,7 @@ const getRobotForBinding = async (
   try {
     await apps.getApp(appId)
   } catch (err) {
-    return
+    notFound(undefined)(err)
   }
 
   const buildFile = await apps.getAppJSON<Partial<RobotsFile> | null>(
