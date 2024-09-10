@@ -8,15 +8,32 @@ interface RobotsFile {
 
 const SITEMAP_BUILD_FILE = 'dist/vtex.store-sitemap/build.json'
 
-const getRobotForBinding = async (bindingId: string, account: string, apps: Apps) => {
-  const buildFile = await apps.getAppJSON<Partial<RobotsFile> | null>(`${account}.robots@0.x`, SITEMAP_BUILD_FILE, true)
+const getRobotForBinding = async (
+  bindingId: string,
+  account: string,
+  apps: Apps
+) => {
+  const appId = `${account}.robots@0.x`
+
+  try {
+    await apps.getApp(appId)
+  } catch (err) {
+    return
+  }
+
+  const buildFile = await apps.getAppJSON<Partial<RobotsFile> | null>(
+    appId,
+    SITEMAP_BUILD_FILE,
+    true
+  )
+
   return buildFile?.robots?.[bindingId]
 }
 
-
 export async function robots(ctx: Context) {
   const {
-    vtex: { account, production, platform }, state: { binding },
+    vtex: { account, production, platform },
+    state: { binding },
   } = ctx
 
   let data: string | undefined
