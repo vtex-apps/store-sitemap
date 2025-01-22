@@ -26,6 +26,10 @@ const validBinding = (path: string) => (binding: Binding) => {
   return matchesPath && isStoreBinding
 }
 
+export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) => {
+  return xml.slice(0, limit).join('\n')
+}
+
 export const notFound = <T>(fallback: T) => (error: any): T => {
   if (error.response && error.response.status === 404) {
     return fallback
