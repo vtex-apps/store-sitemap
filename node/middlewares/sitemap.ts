@@ -97,7 +97,7 @@ const sitemapIndex = async (ctx: Context) => {
       lastUpdated,
       bindingAddress
     )
-  )  
+  )
   $('sitemapindex').append(indexXML.slice(0, MAX_CALL_STACK_SIZE).join('\n'))
   return $
 }
