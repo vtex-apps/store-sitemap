@@ -8,6 +8,7 @@ export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
 export const EXTENDED_INDEX_FILE = 'extendedIndex.json'
+export const MAX_CALL_STACK_SIZE =  1000
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
