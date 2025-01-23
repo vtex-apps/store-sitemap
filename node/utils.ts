@@ -8,6 +8,7 @@ export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
 export const EXTENDED_INDEX_FILE = 'extendedIndex.json'
+export const MAX_CALL_STACK_SIZE =  1000
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
@@ -24,6 +25,9 @@ const validBinding = (path: string) => (binding: Binding) => {
 
   return matchesPath && isStoreBinding
 }
+
+export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) => 
+  xml.slice(0, limit).join('\n')
 
 export const notFound = <T>(fallback: T) => (error: any): T => {
   if (error.response && error.response.status === 404) {

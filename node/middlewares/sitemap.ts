@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio'
 import { MultipleSitemapGenerationError } from '../errors'
 import {
   EXTENDED_INDEX_FILE,
+  xmlTruncateNodes,
   getBucket,
   hashString,
   SitemapNotFound,
@@ -97,7 +98,7 @@ const sitemapIndex = async (ctx: Context) => {
       bindingAddress
     )
   )
-  $('sitemapindex').append(indexXML.join('\n'))
+  $('sitemapindex').append(xmlTruncateNodes(indexXML))
   return $
 }
 
@@ -122,7 +123,7 @@ const sitemapBindingIndex = async (ctx: Context) => {
       production ? '' : binding.canonicalBaseAddress
     )
   )
-  $('sitemapindex').append(bindingsIndexXML.join('\n'))
+  $('sitemapindex').append(xmlTruncateNodes(bindingsIndexXML))
   return $
 }
 
