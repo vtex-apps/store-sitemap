@@ -71,7 +71,8 @@ export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
     throw new MultipleSitemapGenerationError(config.endDate)
   }
   const generationId = (Math.random() * 10000).toString()
-  logger.info({ message: 'New generation starting', generationId })
+  const caller = ctx.request.header['x-vtex-caller']
+  logger.info({ message: `New generation started by ${caller}`, generationId })
   await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
     endDate: fiveDaysFromNowMS(),
     generationId,
