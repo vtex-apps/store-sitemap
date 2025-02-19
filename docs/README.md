@@ -27,8 +27,6 @@ To learn how to generate a sitemap, follow the instructions below.
    
 5. In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
 
-   ![graphql-ide](https://github.com/user-attachments/assets/5f28d91d-662d-485c-a071-aabc3a65cb71)
-
 6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
 7. If this is not the first time you're generating your store's sitemap or if your store's routes didn't suffer any changes since the last time you generated your store's sitemap, go to step 8. Otherwise, run the following query:
