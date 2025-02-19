@@ -7,7 +7,7 @@ To learn how to generate a sitemap, follow the instructions below.
 ## Before you begin
 
 - This app is available to stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app).
-   To check which Edition App is installed on your account, run `vtex edition get`. If it's an older Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) with VTEX Support asking for the installation of the `vtex.edition-store@5.x` Edition App or a newer version.
+   To check which Edition App is installed on your account, run `vtex edition get`. If it's an older Edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) with VTEX Support asking for the installation of the `vtex.edition-store@5.x` Edition App.
 
 - Adjust which products, navigation, and custom routes will be included in the sitemap. Check the [Advanced Configuration section](#advanced-configuration) for more information.
 
