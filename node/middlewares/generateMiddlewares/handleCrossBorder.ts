@@ -1,4 +1,4 @@
-export async function handleCrossBorder(ctx: EventContext) {
+export async function handleCrossBorder(ctx: Context | EventContext, next: () => Promise<void>) {
   const {
     clients: { tenant },
     state,
@@ -8,4 +8,6 @@ export async function handleCrossBorder(ctx: EventContext) {
   const storefrontsBindings = bindings.filter(({targetProduct}) => targetProduct !== 'vtex-admin')
 
   state.isCrossBorder = storefrontsBindings?.length > 1
+
+  await next();
 }
