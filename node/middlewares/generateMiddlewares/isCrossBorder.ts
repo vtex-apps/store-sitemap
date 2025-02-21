@@ -1,4 +1,4 @@
-export async function handleCrossBorder(ctx: Context | EventContext, next: () => Promise<void>) {
+export async function isCrossBorder(ctx: Context | EventContext, next: () => Promise<void>) {
   const {
     clients: { tenant },
     state,
