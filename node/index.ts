@@ -22,6 +22,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
 import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
+import { handleCrossBorder } from './middlewares/generateMiddlewares/handleCrossBorder'
 import { prepare as generationPrepare } from './middlewares/generateMiddlewares/prepare'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
@@ -94,7 +95,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
     generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
-    generateSitemap: [settings, generationPrepare, generateSitemap],
+    generateSitemap: [settings, handleCrossBorder, generationPrepare, generateSitemap],
     groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
   },
   graphql: {
