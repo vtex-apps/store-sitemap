@@ -22,6 +22,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
 import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
+import { isCrossBorder } from './middlewares/generateMiddlewares/isCrossBorder'
 import { prepare as generationPrepare } from './middlewares/generateMiddlewares/prepare'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
@@ -85,7 +86,7 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [settings, prepare, sitemap]
+const sitemapPipeline = [settings, isCrossBorder, prepare, sitemap]
 const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
@@ -94,7 +95,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
     generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
     generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
-    generateSitemap: [settings, generationPrepare, generateSitemap],
+    generateSitemap: [settings, isCrossBorder, generationPrepare, generateSitemap],
     groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
   },
   graphql: {
