@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Fetches sitemap.xml file from Catalog in Single Tenant Stores
+
 ## [2.16.6] - 2025-01-30
 
 ## [2.16.5] - 2025-01-23
