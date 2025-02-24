@@ -132,10 +132,10 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
     state: { isCrossBorder },
   } = ctx
 
-  if(isCrossBorder) {
-    await legacySitemap(ctx);
+  if (isCrossBorder) {
+    await legacySitemap(ctx)
   } else {
-    await catalogSitemap(ctx);
+    await catalogSitemap(ctx)
   }
   next()
 }
