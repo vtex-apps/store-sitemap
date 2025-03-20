@@ -162,3 +162,39 @@ If you ever want to remove a custom route, you may execute the following mutatio
       deleteIndex(index: "{index-name}")
    }
    ```
+
+### Using Sitemap API Endpoints
+
+Beyond generating a complete sitemap, this app exposes specific API endpoints that can be used to get route information for external sitemap generation or other needs.
+
+#### Available Endpoints
+
+The following endpoints provide route information in JSON format:
+
+1. **User-defined Routes** 
+   - Endpoint: `/sitemap/user-routes`
+   - Description: Returns routes defined via CMS and internal pages (excluding product routes)
+   - Example response:
+   ```json
+   {
+     "routes": ["/about-us", "/contact", "/faq"],
+     "count": 3
+   }
+   ```
+
+2. **App-defined Routes**
+   - Endpoint: `/sitemap/apps-routes`
+   - Description: Returns routes defined by installed apps in their `build.json` files
+   - Example response:
+   ```json
+   {
+     "routes": ["/store-locator/ny", "/store-locator/ca"],
+     "count": 2
+   }
+   ```
+
+#### Using the Endpoints
+
+These endpoints can be accessed via HTTP GET requests to:
+- `https://{workspace}--{account}.myvtex.com/sitemap/user-routes`
+- `https://{workspace}--{account}.myvtex.com/sitemap/apps-routes`
