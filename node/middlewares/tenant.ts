@@ -1,4 +1,4 @@
-import { TENANT_CACHE_TTL_S } from './../utils'
+import { TENANT_CACHE_TTL_S } from '../utils'
 
 export async function tenant(ctx: EventContext, next: () => Promise<void>) {
   const {

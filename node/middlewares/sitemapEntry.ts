@@ -13,34 +13,38 @@ export const URLEntry = (
   route: Route,
   lastUpdated: string
 ): string => {
-  const { state: {
-    binding,
-    bindingAddress,
-    forwardedHost,
-    rootPath,
-    matchingBindings,
-  },
+  const {
+    state: {
+      binding,
+      bindingAddress,
+      forwardedHost,
+      rootPath,
+      matchingBindings,
+    },
   } = ctx
   const querystring = bindingAddress
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
-  const localization = route.alternates && route.alternates.length > 1
-    ? route.alternates.map(
-      ({ bindingId, path }) => {
-        const alternateBinding = getBinding(bindingId, matchingBindings)
-        if (bindingId === binding.id || !alternateBinding) {
-            return ''
-          }
-          const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
-          const href = querystring
-            ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
-            : `https://${canonicalBaseAddress}${path}`
-          return `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
-        }
-       )
-      .join('\n')
-    : ''
+  const localization =
+    route.alternates && route.alternates.length > 1
+      ? route.alternates
+          .map(({ bindingId, path }) => {
+            const alternateBinding = getBinding(bindingId, matchingBindings)
+            if (bindingId === binding.id || !alternateBinding) {
+              return ''
+            }
+            const {
+              canonicalBaseAddress,
+              defaultLocale: locale,
+            } = alternateBinding
+            const href = querystring
+              ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
+              : `https://${canonicalBaseAddress}${path}`
+            return `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
+          })
+          .join('\n')
+      : ''
   let entry = `
       <loc>${loc}</loc>
       ${localization}
@@ -60,10 +64,7 @@ export const URLEntry = (
 
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
-    state: {
-      forwardedPath,
-      bucket,
-    },
+    state: { forwardedPath, bucket },
     clients: { vbase },
   } = ctx
 
@@ -95,7 +96,9 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
     return
   }
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-  const entryXML = routes.map((route: Route) => URLEntry(ctx, route, lastUpdated))
+  const entryXML = routes.map((route: Route) =>
+    URLEntry(ctx, route, lastUpdated)
+  )
 
   $('urlset').append(entryXML.join('\n'))
 

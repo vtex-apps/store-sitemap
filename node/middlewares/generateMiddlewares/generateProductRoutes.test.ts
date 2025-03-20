@@ -7,7 +7,7 @@ import {
   Tenant,
   TenantClient,
   VBase,
-  VBaseSaveResponse
+  VBaseSaveResponse,
 } from '@vtex/api'
 import { Product } from '@vtex/api/lib/clients/apps/catalogGraphQL/product'
 import * as TypeMoq from 'typemoq'
@@ -15,10 +15,9 @@ import { TranslateArgs } from 'vtex.messages'
 
 import { Clients } from '../../clients'
 import { Messages } from '../../clients/messages'
-import { getBucket, hashString } from '../../utils'
-import { Catalog, GetProductsAndSkuIdsReponse } from './../../clients/catalog'
-import { GraphQLServer, ProductNotFound } from './../../clients/graphqlServer'
-import { STORE_PRODUCT } from './../../utils'
+import { getBucket, hashString, STORE_PRODUCT } from '../../utils'
+import { Catalog, GetProductsAndSkuIdsReponse } from '../../clients/catalog'
+import { GraphQLServer, ProductNotFound } from '../../clients/graphqlServer'
 import { generateProductRoutes } from './generateProductRoutes'
 import {
   GENERATE_PRODUCT_ROUTES_EVENT,
@@ -29,7 +28,6 @@ import {
   SitemapEntry,
   SitemapIndex,
 } from './utils'
-
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const messagesTypeMock = TypeMoq.Mock.ofInstance(Messages)
@@ -42,21 +40,20 @@ const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
-
 let next: any
 let tenantInfo = {
   bindings: [
-  {
-    defaultLocale: 'en-US',
-    extraContext: {
-      portal: {
-        salesChannel: '1',
+    {
+      defaultLocale: 'en-US',
+      extraContext: {
+        portal: {
+          salesChannel: '1',
+        },
       },
+      id: '1',
+      targetProduct: STORE_PRODUCT,
     },
-    id: '1',
-    targetProduct: STORE_PRODUCT,
-  },
-  {
+    {
       defaultLocale: 'pt-BR',
       extraContext: {
         portal: {
@@ -125,15 +122,15 @@ describe('Test product routes generation', () => {
     public getProductsIds = async (page: number) => {
       switch (page) {
         case 2:
-          return {
+          return ({
             items: [4, 5, 6],
             paging: { pages: 2, total: 51 },
-          } as unknown as GetProductsAndSkuIdsReponse
+          } as unknown) as GetProductsAndSkuIdsReponse
         default:
-          return {
+          return ({
             items: [1, 2, 3],
             paging: { pages: 2, total: 51 },
-          } as unknown as GetProductsAndSkuIdsReponse
+          } as unknown) as GetProductsAndSkuIdsReponse
       }
     }
   }
@@ -192,7 +189,7 @@ describe('Test product routes generation', () => {
           break
       }
       return {
-        product: product as unknown as Product,
+        product: (product as unknown) as Product,
       }
     }
   }
@@ -203,7 +200,7 @@ describe('Test product routes generation', () => {
       super(ioContext.object)
     }
 
-    public query =  async (_: string, variables: any, __: any) => {
+    public query = async (_: string, variables: any, __: any) => {
       if (variables.identifier.value === '3') {
         throw new ProductNotFound([])
       }
@@ -213,41 +210,39 @@ describe('Test product routes generation', () => {
 
   // tslint:disable-next-line:max-classes-per-file
   const messages = class MessagesMock extends messagesTypeMock.object {
-      constructor() {
-        super(ioContext.object)
-      }
-
-      public translateNoCache = async (args: TranslateArgs) => {
-        return args.indexedByFrom[0].messages.map(({ content }: any) => content)
-      }
+    constructor() {
+      super(ioContext.object)
     }
 
-
+    public translateNoCache = async (args: TranslateArgs) => {
+      return args.indexedByFrom[0].messages.map(({ content }: any) => content)
+    }
+  }
 
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
 
-      get catalog() {
+      public get catalog() {
         return this.getOrSet('catalog', catalog)
       }
 
-      get catalogGraphQL() {
+      public get catalogGraphQL() {
         return this.getOrSet('catalogGraphQL', catalogGraphQL)
       }
 
-      get messages() {
+      public get messages() {
         return this.getOrSet('messages', messages)
       }
 
-      get graphqlServer() {
+      public get graphqlServer() {
         return this.getOrSet('graphqlServer', graphqlServer)
       }
 
-      get tenant() {
+      public get tenant() {
         return this.getOrSet('tenant', tenant)
       }
     }
@@ -271,13 +266,13 @@ describe('Test product routes generation', () => {
     next = jest.fn()
   })
 
-   it('Next event is sent', async () => {
-     await generateProductRoutes(context, next)
-     expect(next).toBeCalled()
-     const { event, payload } = context.state.nextEvent
-     expect(event).toEqual(GENERATE_PRODUCT_ROUTES_EVENT)
-     expect((payload as any).page).toEqual(2)
-   })
+  it('Next event is sent', async () => {
+    await generateProductRoutes(context, next)
+    expect(next).toBeCalled()
+    const { event, payload } = context.state.nextEvent
+    expect(event).toEqual(GENERATE_PRODUCT_ROUTES_EVENT)
+    expect((payload as any).page).toEqual(2)
+  })
 
   it('Complete event is sent', async () => {
     const thisContext = {
@@ -292,7 +287,11 @@ describe('Test product routes generation', () => {
     expect(next).toBeCalled()
     expect(context.state.nextEvent).toStrictEqual({
       event: GROUP_ENTRIES_EVENT,
-      payload: { from: 0, generationId: '1', indexFile: 'productRoutesIndex.json' },
+      payload: {
+        from: 0,
+        generationId: '1',
+        indexFile: 'productRoutesIndex.json',
+      },
     })
   })
 
@@ -300,10 +299,17 @@ describe('Test product routes generation', () => {
     await generateProductRoutes(context, next)
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-1']
     expect(index).toStrictEqual(expectedIndex)
-    const { routes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
     expect(routes).toStrictEqual([
       {
         alternates: [
@@ -331,15 +337,20 @@ describe('Test product routes generation', () => {
     await generateProductRoutes(context, next)
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-1']
     expect(index).toStrictEqual(expectedIndex)
-    const { routes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
     expect(routes).toStrictEqual([
       {
-        alternates: [
-          { bindingId: '1', path: '/banana/p' },
-        ],
+        alternates: [{ bindingId: '1', path: '/banana/p' }],
         id: '1',
         path: '/banana/p',
       },

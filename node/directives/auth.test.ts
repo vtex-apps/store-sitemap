@@ -53,15 +53,15 @@ describe('Test auth directive code', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vtexID() {
+      public get vtexID() {
         return this.getOrSet('vtexID', vtexID)
       }
 
-      get sphinx() {
+      public get sphinx() {
         return this.getOrSet('sphinx', sphinx)
       }
     }
-    const cookies: Record<string, string> = { 'VtexIdclientAutCookie': '1' }
+    const cookies: Record<string, string> = { VtexIdclientAutCookie: '1' }
 
     context = {
       ...contextMock.object,
@@ -78,7 +78,6 @@ describe('Test auth directive code', () => {
         logger: loggerMock.object,
       },
     }
-
   })
 
   it('Should authorize vtex email', async () => {

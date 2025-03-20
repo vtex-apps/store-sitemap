@@ -1,4 +1,5 @@
 import { Binding, PUBLIC_DOMAINS, Tenant } from '@vtex/api'
+
 import { TENANT_CACHE_TTL_S } from '../utils'
 
 export interface BindingDiscoveryResult {
@@ -28,7 +29,6 @@ const getStoreBinding = (bindings: Binding[]) => {
   return storeBinding
 }
 
-
 export const getDefaultStoreBinding = async (ctx: Context) => {
   const {
     clients: { tenant },
@@ -50,14 +50,13 @@ export class BindingResolver {
       vtex: { account },
     } = ctx
 
-    const tenantInfo = await tenantClient
-      .info({
-        forceMaxAge: this.options.tenantCacheTTL,
-        nullIfNotFound: true,
-        params: {
-          q: account,
-        },
-      })
+    const tenantInfo = await tenantClient.info({
+      forceMaxAge: this.options.tenantCacheTTL,
+      nullIfNotFound: true,
+      params: {
+        q: account,
+      },
+    })
 
     const matchingBinding = this.resolve(ctx, tenantInfo.bindings)
 

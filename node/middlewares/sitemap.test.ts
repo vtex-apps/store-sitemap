@@ -6,7 +6,6 @@ import {
   PRODUCT_ROUTES_INDEX,
   REWRITER_ROUTES_INDEX,
 } from './generateMiddlewares/utils'
-
 import { Clients } from '../clients'
 import { EXTENDED_INDEX_FILE } from '../utils'
 import { sitemap } from './sitemap'
@@ -85,7 +84,7 @@ describe('Test sitemap middleware', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
     }

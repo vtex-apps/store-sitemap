@@ -1,10 +1,18 @@
-import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase, VBaseSaveResponse } from '@vtex/api'
+import {
+  IOContext,
+  Logger,
+  RequestConfig,
+  Tenant,
+  TenantClient,
+  VBase,
+  VBaseSaveResponse,
+} from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 import { EntityLocator, Internal } from 'vtex.rewriter'
 
 import { Clients } from '../../clients'
 import { getBucket, hashString } from '../../utils'
-import { Rewriter } from './../../clients/rewriter'
+import { Rewriter } from '../../clients/rewriter'
 import { generateRewriterRoutes } from './generateRewriterRoutes'
 import {
   GENERATE_REWRITER_ROUTES_EVENT,
@@ -23,7 +31,6 @@ const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
-
 
 let next: any
 
@@ -73,15 +80,15 @@ describe('Test rewriter routes generation', () => {
     public info = async (_?: RequestConfig) => {
       return {
         bindings: [
-        {
-          id: '1',
-          targetProduct: 'vtex-storefront',
-        },
-        {
-          id: '2',
-        },
-      ],
-    } as Tenant
+          {
+            id: '1',
+            targetProduct: 'vtex-storefront',
+          },
+          {
+            id: '2',
+          },
+        ],
+      } as Tenant
     }
   }
 
@@ -96,7 +103,7 @@ describe('Test rewriter routes generation', () => {
     }
 
     public listInternals = async (_: number, cursor: Maybe<string>) => {
-      switch(cursor) {
+      switch (cursor) {
         case 'NEXT':
           return {
             next: null,
@@ -122,7 +129,7 @@ describe('Test rewriter routes generation', () => {
             ] as Internal[],
           }
         default:
-          return  {
+          return {
             next: 'NEXT',
             routes: [
               {
@@ -153,15 +160,15 @@ describe('Test rewriter routes generation', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
 
-      get rewriter() {
+      public get rewriter() {
         return this.getOrSet('rewriter', rewriter)
       }
 
-      get tenant() {
+      public get tenant() {
         return this.getOrSet('tenant', tenant)
       }
     }
@@ -185,19 +192,19 @@ describe('Test rewriter routes generation', () => {
     next = jest.fn()
   })
 
-   it('Next event is sent', async () => {
-     await generateRewriterRoutes(context, next)
-     expect(next).toBeCalled()
-     expect(context.state.nextEvent).toStrictEqual({
-        event: GENERATE_REWRITER_ROUTES_EVENT,
-        payload: {
-          count: 1,
-          generationId: '1',
-          next: 'NEXT',
-          report: { category: 1, 'user-canonical': 1, userRoute: 1 },
-        },
-     })
-   })
+  it('Next event is sent', async () => {
+    await generateRewriterRoutes(context, next)
+    expect(next).toBeCalled()
+    expect(context.state.nextEvent).toStrictEqual({
+      event: GENERATE_REWRITER_ROUTES_EVENT,
+      payload: {
+        count: 1,
+        generationId: '1',
+        next: 'NEXT',
+        report: { category: 1, 'user-canonical': 1, userRoute: 1 },
+      },
+    })
+  })
 
   it('Complete event is sent', async () => {
     const thisContext = {
@@ -214,19 +221,29 @@ describe('Test rewriter routes generation', () => {
     expect(next).toBeCalled()
     expect(context.state.nextEvent).toStrictEqual({
       event: GROUP_ENTRIES_EVENT,
-      payload: { from: 0, generationId: '1', indexFile: 'rewriterRoutesIndex.json' },
-    }
-    )
+      payload: {
+        from: 0,
+        generationId: '1',
+        indexFile: 'rewriterRoutesIndex.json',
+      },
+    })
   })
 
   it('Routes were saved', async () => {
     await generateRewriterRoutes(context, next)
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, REWRITER_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      REWRITER_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['category-0', 'userRoute-0']
     expect(index).toStrictEqual(expectedIndex)
-    const { routes: categoryRoutes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes: categoryRoutes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
     expect(categoryRoutes).toStrictEqual([
       {
         alternates: [],
@@ -236,8 +253,11 @@ describe('Test rewriter routes generation', () => {
         path: '/fruits/citrics',
       },
     ])
-    const { routes: userRoutes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[1])
-    expect(userRoutes).toStrictEqual( [
+    const { routes: userRoutes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[1]
+    )
+    expect(userRoutes).toStrictEqual([
       {
         alternates: [],
         id: '4',

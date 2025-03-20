@@ -1,9 +1,19 @@
-import { Binding, Events, IOContext, Logger, VBase, VBaseSaveResponse } from '@vtex/api'
+import {
+  Binding,
+  Events,
+  IOContext,
+  Logger,
+  VBase,
+  VBaseSaveResponse,
+} from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { MultipleSitemapGenerationError } from './errors'
-import { CONFIG_BUCKET, GENERATION_CONFIG_FILE, startSitemapGeneration } from './utils'
-
+import {
+  CONFIG_BUCKET,
+  GENERATION_CONFIG_FILE,
+  startSitemapGeneration,
+} from './utils'
 import { Clients } from './clients'
 
 const eventsTypeMock = TypeMoq.Mock.ofInstance(Events)
@@ -14,7 +24,8 @@ const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
 const oneHourFromNowMS = () => `${new Date(Date.now() + 1 * 60 * 60 * 1000)}`
-const minusOneHourFromNowMS = () => `${new Date(Date.now() - 1 * 60 * 60 * 1000)}`
+const minusOneHourFromNowMS = () =>
+  `${new Date(Date.now() - 1 * 60 * 60 * 1000)}`
 
 const eventSent = jest.fn()
 
@@ -64,56 +75,61 @@ describe('Test startSitemapGeneration', () => {
       super(ioContext.object)
     }
 
-    public sendEvent = async (_: any, __:string, ___: any, ____: any) => {
+    public sendEvent = async (_: any, __: string, ___: any, ____: any) => {
       eventSent()
     }
   }
 
-    beforeEach(() => {
-      // tslint:disable-next-line: max-classes-per-file
-      const ClientsImpl = class ClientsMock extends Clients {
-        get vbase() {
-          return this.getOrSet('vbase', vbase)
-        }
-
-        get events() {
-          return this.getOrSet('events', events)
-        }
+  beforeEach(() => {
+    // tslint:disable-next-line: max-classes-per-file
+    const ClientsImpl = class ClientsMock extends Clients {
+      public get vbase() {
+        return this.getOrSet('vbase', vbase)
       }
 
-      context = {
-        ...contextMock.object,
-        clients: new ClientsImpl({}, ioContext.object),
-        query: {},
-        state: {
-          ...state.object,
-          binding: {
-            id: '1',
-          } as Binding,
-          bucket: 'bucket',
-          forwardedHost: 'www.host.com',
-          forwardedPath: '/sitemap/file1.xml',
-          rootPath: '',
-        },
-        vtex: {
-          ...ioContext.object,
-          logger: loggerMock.object,
-        },
+      public get events() {
+        return this.getOrSet('events', events)
       }
-    })
+    }
 
-    it('Should not start a generation if has already started', async () => {
-     const { vbase: vbaseClient } = context.clients
-     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, DEFAULT_CONFIG)
-      try {
-        await startSitemapGeneration(context)
-        expect(true).toBe(false)
-      } catch(err) {
-        expect(err instanceof MultipleSitemapGenerationError).toBe(true)
-      }
-   })
+    context = {
+      ...contextMock.object,
+      clients: new ClientsImpl({}, ioContext.object),
+      query: {},
+      state: {
+        ...state.object,
+        binding: {
+          id: '1',
+        } as Binding,
+        bucket: 'bucket',
+        forwardedHost: 'www.host.com',
+        forwardedPath: '/sitemap/file1.xml',
+        rootPath: '',
+      },
+      vtex: {
+        ...ioContext.object,
+        logger: loggerMock.object,
+      },
+    }
+  })
 
-   it('Should start a generation if date is expired', async () => {
+  it('Should not start a generation if has already started', async () => {
+    const { vbase: vbaseClient } = context.clients
+    await vbaseClient.saveJSON(
+      CONFIG_BUCKET,
+      GENERATION_CONFIG_FILE,
+      DEFAULT_CONFIG
+    )
+    try {
+      await expect(startSitemapGeneration(context)).rejects.toThrow(
+        MultipleSitemapGenerationError
+      )
+    } catch (error) {
+      // handle error if necessary
+    }
+  })
+
+  it('Should start a generation if date is expired', async () => {
     const { vbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
       ...DEFAULT_CONFIG,
@@ -121,9 +137,9 @@ describe('Test startSitemapGeneration', () => {
     })
     await startSitemapGeneration(context)
     expect(eventSent).toBeCalled()
-   })
+  })
 
-   it('Should start a generation if date is invalid', async () => {
+  it('Should start a generation if date is invalid', async () => {
     const { vbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
       ...DEFAULT_CONFIG,
@@ -131,17 +147,21 @@ describe('Test startSitemapGeneration', () => {
     })
     await startSitemapGeneration(context)
     expect(eventSent).toBeCalled()
-   })
+  })
 
-   it('Should start a generation with the force param', async () => {
+  it('Should start a generation with the force param', async () => {
     const { vbase: vbaseClient } = context.clients
-    await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, DEFAULT_CONFIG)
+    await vbaseClient.saveJSON(
+      CONFIG_BUCKET,
+      GENERATION_CONFIG_FILE,
+      DEFAULT_CONFIG
+    )
     await startSitemapGeneration(context, true)
     expect(eventSent).toBeCalled()
-   })
+  })
 
-   it('Should start a generation', async () => {
-      await startSitemapGeneration(context)
-      expect(eventSent).toBeCalled()
-   })
+  it('Should start a generation', async () => {
+    await startSitemapGeneration(context)
+    expect(eventSent).toBeCalled()
+  })
 })

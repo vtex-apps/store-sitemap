@@ -4,8 +4,8 @@ import {
   RecorderState,
   ServiceContext,
 } from '@vtex/api'
-import { Settings } from './middlewares/settings'
 
+import { Settings } from './middlewares/settings'
 import { Clients } from './clients'
 
 declare global {
@@ -20,8 +20,8 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
-    nextEvent:  {
-      event: string,
+    nextEvent: {
+      event: string
       payload: Events
     }
   }
@@ -40,7 +40,7 @@ declare global {
 
   interface Route {
     id: string
-    path: string,
+    path: string
     alternates?: AlternateRoute[]
     imagePath?: string
     imageTitle?: string
@@ -61,7 +61,10 @@ declare global {
     endDate: string
   }
 
-  type Events = RewriterRoutesGenerationEvent | ProductRoutesGenerationEvent | GroupEntriesEvent
+  type Events =
+    | RewriterRoutesGenerationEvent
+    | ProductRoutesGenerationEvent
+    | GroupEntriesEvent
 
   interface DefaultEvent {
     generationId: string
@@ -72,14 +75,14 @@ declare global {
     from: number
   }
 
-  interface RewriterRoutesGenerationEvent extends DefaultEvent  {
+  interface RewriterRoutesGenerationEvent extends DefaultEvent {
     next: Maybe<string>
     report: Record<string, number>
     count: number
     disableRoutesTerm: string
   }
 
-  interface ProductRoutesGenerationEvent extends DefaultEvent   {
+  interface ProductRoutesGenerationEvent extends DefaultEvent {
     page: number
     processedProducts: number
     invalidProducts: number

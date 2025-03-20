@@ -1,5 +1,6 @@
 import { IOContext, Logger, VBase, VBaseSaveResponse } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
+
 import { Clients } from '../../clients'
 import { CONFIG_BUCKET, GENERATION_CONFIG_FILE } from '../../utils'
 import { prepare } from './prepare'
@@ -49,7 +50,7 @@ describe('Test generation prepare', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
     }
@@ -69,18 +70,18 @@ describe('Test generation prepare', () => {
     }
   })
 
-   it('Shouldnt continue if genereationId isnt found', async () => {
-     const thisContext = {
-       ...context,
-       body: {
-         generationId: undefined,
-       },
-     }
-     await prepare(thisContext, next)
-     expect(next).toHaveBeenCalledTimes(0)
-   })
+  it('Shouldnt continue if genereationId isnt found', async () => {
+    const thisContext = {
+      ...context,
+      body: {
+        generationId: undefined,
+      },
+    }
+    await prepare(thisContext, next)
+    expect(next).toHaveBeenCalledTimes(0)
+  })
 
-   it('Shouldnt continue if generationId is not the one in VBae', async () => {
+  it('Shouldnt continue if generationId is not the one in VBae', async () => {
     const { vbase: vbaseClient } = context.clients
     await vbaseClient.saveJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
       generationId: '2',
@@ -102,5 +103,4 @@ describe('Test generation prepare', () => {
     await prepare(context, next)
     expect(next).toBeCalled()
   })
-
 })

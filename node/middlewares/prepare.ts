@@ -1,7 +1,14 @@
 import { parse } from 'query-string'
 
 import { BindingResolver } from '../resources/bindings'
-import { CONFIG_BUCKET, CONFIG_FILE, getBucket, getMatchingBindings, hashString, startSitemapGeneration } from '../utils'
+import {
+  CONFIG_BUCKET,
+  CONFIG_FILE,
+  getBucket,
+  getMatchingBindings,
+  hashString,
+  startSitemapGeneration,
+} from '../utils'
 import { DEFAULT_CONFIG } from './generateMiddlewares/utils'
 
 const ONE_DAY_S = 24 * 60 * 60
@@ -32,7 +39,9 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
 
   const query = parse(queryString)
 
-  const { productionPrefix } = await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true) || DEFAULT_CONFIG
+  const { productionPrefix } =
+    (await vbase.getJSON<Config>(CONFIG_BUCKET, CONFIG_FILE, true)) ||
+    DEFAULT_CONFIG
 
   const bucket = getBucket(productionPrefix, hashString(binding.id))
 
@@ -60,6 +69,4 @@ export async function prepare(ctx: Context, next: () => Promise<void>) {
   }
   ctx.vary(FORWARDED_HOST_HEADER)
   ctx.vary(VTEX_ROOT_PATH_HEADER)
-
-  return
 }

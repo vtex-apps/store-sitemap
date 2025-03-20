@@ -1,4 +1,13 @@
-import { IOContext, Logger, RequestConfig, Tenant, TenantClient, VBase, VBaseSaveResponse } from '@vtex/api'
+/* eslint-disable no-await-in-loop */
+import {
+  IOContext,
+  Logger,
+  RequestConfig,
+  Tenant,
+  TenantClient,
+  VBase,
+  VBaseSaveResponse,
+} from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
@@ -7,8 +16,8 @@ import {
   GENERATION_CONFIG_FILE,
   getBucket,
   hashString,
-  STORE_PRODUCT
-} from './../../utils'
+  STORE_PRODUCT,
+} from '../../utils'
 import { FILE_LIMIT, FILE_PROCESS_LIMIT, groupEntries } from './groupEntries'
 import {
   DEFAULT_CONFIG,
@@ -17,7 +26,7 @@ import {
   RAW_DATA_PREFIX,
   REWRITER_ROUTES_INDEX,
   SitemapEntry,
-  SitemapIndex
+  SitemapIndex,
 } from './utils'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
@@ -28,21 +37,16 @@ const loggerMock = TypeMoq.Mock.ofType<Logger>()
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 
 const BANANA_PRODUCT_ROUTE = {
-  alternates: [
-    { bindingId: '1', path: '/banana/p' },
-  ],
+  alternates: [{ bindingId: '1', path: '/banana/p' }],
   id: '1',
   path: '/banana/p',
 }
 
 const APPLE_PRODUCT_ROUTE = {
-  alternates: [
-    { bindingId: '1', path: '/apple/p' },
-  ],
+  alternates: [{ bindingId: '1', path: '/apple/p' }],
   id: '2',
   path: '/apple/p',
 }
-
 
 let next: any
 
@@ -74,7 +78,7 @@ describe('Test group entries', () => {
       data: T
     ): Promise<VBaseSaveResponse> => {
       if (!jsonData[bucket]) {
-       jsonData[bucket] = {}
+        jsonData[bucket] = {}
       }
       jsonData[bucket][file] = data
       return Promise.resolve(({
@@ -82,9 +86,13 @@ describe('Test group entries', () => {
       } as unknown) as VBaseSaveResponse)
     }
 
-    public deleteFile = async (bucket: string, file: string, _: any, __: any): Promise<any> => {
+    public deleteFile = async (
+      bucket: string,
+      file: string,
+      _: any,
+      __: any
+    ): Promise<any> => {
       jsonData[bucket][file] = undefined
-      return
     }
   }
 
@@ -109,15 +117,15 @@ describe('Test group entries', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
 
-      get vbaseWithCache() {
+      public get vbaseWithCache() {
         return this.getOrSet('vbaseWithCache', vbase)
       }
 
-      get tenant() {
+      public get tenant() {
         return this.getOrSet('tenant', tenant)
       }
     }
@@ -150,15 +158,30 @@ describe('Test group entries', () => {
     context.body = { from: 0, indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
 
-    let productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX)
+    let productCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      PRODUCT_ROUTES_INDEX
+    )
     expect(productCompleteFile).toBe('OK')
 
     context.body = { from: 0, indexFile: REWRITER_ROUTES_INDEX }
     await groupEntries(context, next)
 
-    productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true)
-    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
-    const configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+    productCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
+    const rewriterCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      REWRITER_ROUTES_INDEX,
+      true
+    )
+    const configCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      GENERATION_CONFIG_FILE,
+      true
+    )
     expect(productCompleteFile).toBeNull()
     expect(rewriterCompleteFile).toBeNull()
     expect(configCompleteFile).toBeNull()
@@ -168,42 +191,70 @@ describe('Test group entries', () => {
     const { vbase: vbaseClient } = context.clients
     context.state.enabledIndexFiles = [PRODUCT_ROUTES_INDEX]
 
-    context.body = {  from: 0, indexFile: PRODUCT_ROUTES_INDEX }
+    context.body = { from: 0, indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
 
-    const productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX, true)
-    let configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+    const productCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
+    let configCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      GENERATION_CONFIG_FILE,
+      true
+    )
     expect(productCompleteFile).toBeNull()
     expect(configCompleteFile).toBeNull()
-
 
     context.body = { from: 0, indexFile: REWRITER_ROUTES_INDEX }
     context.state.enabledIndexFiles = [REWRITER_ROUTES_INDEX]
     await groupEntries(context, next)
 
-    const rewriterCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, REWRITER_ROUTES_INDEX, true)
-    configCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
+    const rewriterCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      REWRITER_ROUTES_INDEX,
+      true
+    )
+    configCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      GENERATION_CONFIG_FILE,
+      true
+    )
     expect(rewriterCompleteFile).toBeNull()
     expect(configCompleteFile).toBeNull()
   })
 
   it('Should group data', async () => {
     const { vbase: vbaseClient } = context.clients
-    context.body = {  from: 0, indexFile: PRODUCT_ROUTES_INDEX }
+    context.body = { from: 0, indexFile: PRODUCT_ROUTES_INDEX }
     const { generationPrefix } = DEFAULT_CONFIG
 
     // Saves two product routes in different files
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    await vbaseClient.saveJSON(rawBucket, 'product-0', { routes: [BANANA_PRODUCT_ROUTE] })
-    await vbaseClient.saveJSON(rawBucket, 'product-1', { routes: [APPLE_PRODUCT_ROUTE] })
-    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: ['product-0', 'product-1'] })
+    await vbaseClient.saveJSON(rawBucket, 'product-0', {
+      routes: [BANANA_PRODUCT_ROUTE],
+    })
+    await vbaseClient.saveJSON(rawBucket, 'product-1', {
+      routes: [APPLE_PRODUCT_ROUTE],
+    })
+    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, {
+      index: ['product-0', 'product-1'],
+    })
 
     await groupEntries(context, next)
     const bucket = getBucket(generationPrefix, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-0']
     expect(index).toStrictEqual(expectedIndex)
-    const { routes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
     expect(routes).toStrictEqual([BANANA_PRODUCT_ROUTE, APPLE_PRODUCT_ROUTE])
   })
 
@@ -216,31 +267,41 @@ describe('Test group entries', () => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     const tooManyRoutes = []
     for (let i = 0; i <= FILE_LIMIT; i++) {
-      tooManyRoutes.push(
-        {
-          alternates: [
-            { bindingId: '1', path: `/banana-${i}/p` },
-          ],
-          id: i,
-          path: `/banana-${i}/p`,
-        }
-      )
+      tooManyRoutes.push({
+        alternates: [{ bindingId: '1', path: `/banana-${i}/p` }],
+        id: i,
+        path: `/banana-${i}/p`,
+      })
     }
-    await vbaseClient.saveJSON(rawBucket, 'product-0', { routes: tooManyRoutes })
-    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: ['product-0'] })
+    await vbaseClient.saveJSON(rawBucket, 'product-0', {
+      routes: tooManyRoutes,
+    })
+    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, {
+      index: ['product-0'],
+    })
 
     await groupEntries(context, next)
 
     const bucket = getBucket(generationPrefix, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-0', 'product-1']
     expect(index).toStrictEqual(expectedIndex)
 
-    const { routes: routes0 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
-    expect(routes0.length).toEqual(FILE_LIMIT)
+    const { routes: routes0 } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
+    expect(routes0).toHaveLength(FILE_LIMIT)
 
-    const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[1])
-    expect(routes1.length).toEqual(1)
+    const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[1]
+    )
+    expect(routes1).toHaveLength(1)
   })
 
   it('Next event is sent', async () => {
@@ -251,7 +312,9 @@ describe('Test group entries', () => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     for (let i = 0; i <= FILE_PROCESS_LIMIT + 1; i++) {
       const file = `product-${i}`
-      await vbaseClient.saveJSON(rawBucket, file, { routes: [BANANA_PRODUCT_ROUTE] })
+      await vbaseClient.saveJSON(rawBucket, file, {
+        routes: [BANANA_PRODUCT_ROUTE],
+      })
       index.push(file)
     }
     await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index })
@@ -261,7 +324,10 @@ describe('Test group entries', () => {
     expect(next).toBeCalledWith()
     const { event, payload } = context.state.nextEvent
     expect(event).toEqual(GROUP_ENTRIES_EVENT)
-    expect((payload as any)).toEqual({ from: FILE_PROCESS_LIMIT, indexFile: PRODUCT_ROUTES_INDEX })
+    expect(payload as any).toEqual({
+      from: FILE_PROCESS_LIMIT,
+      indexFile: PRODUCT_ROUTES_INDEX,
+    })
   })
 
   it('Groups correctly over mutiple events', async () => {
@@ -273,21 +339,30 @@ describe('Test group entries', () => {
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
     for (let i = 0; i <= FILE_PROCESS_LIMIT + 1; i++) {
       const file = `product-${i}`
-      await vbaseClient.saveJSON(rawBucket, file, { routes: [BANANA_PRODUCT_ROUTE] })
+      await vbaseClient.saveJSON(rawBucket, file, {
+        routes: [BANANA_PRODUCT_ROUTE],
+      })
       index.push(file)
     }
     await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index })
 
     context.body = { from: 0, indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
-    context.body = { from: FILE_PROCESS_LIMIT , indexFile: PRODUCT_ROUTES_INDEX }
+    context.body = { from: FILE_PROCESS_LIMIT, indexFile: PRODUCT_ROUTES_INDEX }
     await groupEntries(context, next)
 
-    const productCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, PRODUCT_ROUTES_INDEX)
+    const productCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      PRODUCT_ROUTES_INDEX
+    )
     expect(productCompleteFile).toBe('OK')
 
     const bucket = getBucket(generationPrefix, hashString('1'))
-    const { index: finalIndex } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index: finalIndex } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-0']
     expect(finalIndex).toStrictEqual(expectedIndex)
   })
@@ -298,17 +373,29 @@ describe('Test group entries', () => {
     const { generationPrefix } = DEFAULT_CONFIG
 
     const bucket = getBucket(generationPrefix, hashString('1'))
-    await vbaseClient.saveJSON(bucket, PRODUCT_ROUTES_INDEX, { index: ['product-0', 'product-1'] })
+    await vbaseClient.saveJSON(bucket, PRODUCT_ROUTES_INDEX, {
+      index: ['product-0', 'product-1'],
+    })
 
     // Saves two product routes in different files
     const rawBucket = getBucket(RAW_DATA_PREFIX, hashString('1'))
-    await vbaseClient.saveJSON(rawBucket, 'product-0', { routes: [BANANA_PRODUCT_ROUTE] })
-    await vbaseClient.saveJSON(rawBucket, 'product-1', { routes: [APPLE_PRODUCT_ROUTE] })
-    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, { index: ['product-0', 'product-1'] })
+    await vbaseClient.saveJSON(rawBucket, 'product-0', {
+      routes: [BANANA_PRODUCT_ROUTE],
+    })
+    await vbaseClient.saveJSON(rawBucket, 'product-1', {
+      routes: [APPLE_PRODUCT_ROUTE],
+    })
+    await vbaseClient.saveJSON(rawBucket, PRODUCT_ROUTES_INDEX, {
+      index: ['product-0', 'product-1'],
+    })
 
     await groupEntries(context, next)
 
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, PRODUCT_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      PRODUCT_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['product-0']
     expect(index).toStrictEqual(expectedIndex)
   })

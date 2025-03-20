@@ -15,7 +15,6 @@ const removeSpaces = (str: string) => str.replace(/(\r\n|\n|\r|\s)/gm, '')
 describe('Test sitemap entry', () => {
   let context: Context
 
-
   const vbase = class VBaseMock extends vbaseTypeMock.object {
     constructor() {
       super(ioContext.object)
@@ -28,30 +27,29 @@ describe('Test sitemap entry', () => {
     ): Promise<T> => {
       switch (file) {
         case 'file1':
-          return {
+          return ({
             lastUpdated: '2019-12-04',
             routes: [
-            {
-              id: 1,
-              path: '/banana',
-            },
-            {
-              id: 1,
-              imagePath: 'image',
-              imageTitle: 'title',
-              path: '/watermelon',
-            },
-          ],
-        } as unknown as T
+              {
+                id: 1,
+                path: '/banana',
+              },
+              {
+                id: 1,
+                imagePath: 'image',
+                imageTitle: 'title',
+                path: '/watermelon',
+              },
+            ],
+          } as unknown) as T
         default:
-          return null as unknown as T
+          return (null as unknown) as T
       }
     }
   }
 
   // tslint:disable-next-line:no-empty
-  const next = async (): Promise<void> => {
-  }
+  const next = async (): Promise<void> => {}
 
   const defaultRoute: Route = {
     id: '2',
@@ -63,7 +61,7 @@ describe('Test sitemap entry', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
     }
@@ -131,8 +129,9 @@ describe('Test sitemap entry', () => {
 
   it('Should create corrects sitemap entries', async () => {
     await sitemapEntry(context, next)
-    expect(removeSpaces(context.body)).toStrictEqual(removeSpaces(
-      `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    expect(removeSpaces(context.body)).toStrictEqual(
+      removeSpaces(
+        `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
         <url>
           <loc>https://host.com/banana</loc>
           <lastmod>2019-12-04</lastmod>
@@ -146,7 +145,8 @@ describe('Test sitemap entry', () => {
           <lastmod>2019-12-04</lastmod>
         </url>
       </urlset>`
-    ))
+      )
+    )
   })
 
   it('Should create a correct sitemap entry with localization', async () => {
@@ -169,14 +169,16 @@ describe('Test sitemap entry', () => {
       alternates,
     }
     const entry = URLEntry(context, route, defaultLastUpdated)
-    expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
-    `<url>
+    expect(removeSpaces(entry)).toStrictEqual(
+      removeSpaces(
+        `<url>
       <loc>https://host.com/pear</loc>
       <xhtml:link rel="alternate" hreflang="pt-BR" href="https://www.host.com/br/pera"/>
       <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.host.com/de/brine"/>
       <lastmod>2019-12-04</lastmod>
      </url>`
-    ))
+      )
+    )
   })
 
   it('Should create a correct sitemap entry with localization with binding address querystring', async () => {
@@ -206,14 +208,16 @@ describe('Test sitemap entry', () => {
       },
     }
     const entry = URLEntry(thisContext, route, defaultLastUpdated)
-    expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
-    `<url>
+    expect(removeSpaces(entry)).toStrictEqual(
+      removeSpaces(
+        `<url>
       <loc>https://host.com/pear?__bindingAddress=www.host.com/es</loc>
       <xhtml:link rel="alternate" hreflang="pt-BR" href="https://host.com/pera?__bindingAddress=www.host.com/br"/>
       <xhtml:link rel="alternate" hreflang="de-DE" href="https://host.com/brine?__bindingAddress=www.host.com/de"/>
       <lastmod>2019-12-04</lastmod>
      </url>`
-    ))
+      )
+    )
   })
 
   it('Should create a correct sitemap entry with root path', async () => {
@@ -225,12 +229,14 @@ describe('Test sitemap entry', () => {
       },
     }
     const entry = URLEntry(thisContext, defaultRoute, defaultLastUpdated)
-    expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
-    `<url>
+    expect(removeSpaces(entry)).toStrictEqual(
+      removeSpaces(
+        `<url>
       <loc>https://host.com/es/pear</loc>
       <lastmod>2019-12-04</lastmod>
      </url>`
-    ))
+      )
+    )
   })
 
   it('Should create a correct sitemap entry with binding adress querystring', async () => {
@@ -242,12 +248,14 @@ describe('Test sitemap entry', () => {
       },
     }
     const entry = URLEntry(thisContext, defaultRoute, defaultLastUpdated)
-    expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
-    `<url>
+    expect(removeSpaces(entry)).toStrictEqual(
+      removeSpaces(
+        `<url>
       <loc>https://host.com/pear?__bindingAddress=www.host.com/es</loc>
       <lastmod>2019-12-04</lastmod>
      </url>`
-    ))
+      )
+    )
   })
 
   it('Should create a correct sitemap entry with image path and title', async () => {
@@ -257,8 +265,9 @@ describe('Test sitemap entry', () => {
       imageTitle: 'title',
     }
     const entry = URLEntry(context, route, defaultLastUpdated)
-    expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
-    `<url>
+    expect(removeSpaces(entry)).toStrictEqual(
+      removeSpaces(
+        `<url>
       <image:image>
         <image:loc>image</image:loc>
         <image:title>title</image:title>
@@ -266,6 +275,7 @@ describe('Test sitemap entry', () => {
       <loc>https://host.com/pear</loc>
       <lastmod>2019-12-04</lastmod>
      </url>`
-    ))
+      )
+    )
   })
 })

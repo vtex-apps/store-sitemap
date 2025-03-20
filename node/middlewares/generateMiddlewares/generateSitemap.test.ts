@@ -55,7 +55,7 @@ describe('Test generate sitemap', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get events() {
+      public get events() {
         return this.getOrSet('events', events)
       }
     }

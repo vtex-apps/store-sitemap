@@ -6,15 +6,20 @@ import {
   Tenant,
   TenantClient,
   VBase,
-  VBaseSaveResponse
+  VBaseSaveResponse,
 } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../../clients'
 import { CONFIG_BUCKET, getBucket, hashString } from '../../utils'
-import { } from './../../clients/rewriter'
+import {} from '../../clients/rewriter'
 import { generateAppsRoutes } from './generateAppsRoutes'
-import { APPS_ROUTES_INDEX, DEFAULT_CONFIG, SitemapEntry, SitemapIndex } from './utils'
+import {
+  APPS_ROUTES_INDEX,
+  DEFAULT_CONFIG,
+  SitemapEntry,
+  SitemapIndex,
+} from './utils'
 
 const tenantTypeMock = TypeMoq.Mock.ofInstance(TenantClient)
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
@@ -23,7 +28,6 @@ const contextMock = TypeMoq.Mock.ofType<EventContext>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
-
 
 describe('Test rewriter routes generation', () => {
   let context: EventContext
@@ -69,29 +73,29 @@ describe('Test rewriter routes generation', () => {
     public info = async (_?: RequestConfig) => {
       return {
         bindings: [
-        {
-          id: '1',
-        },
-        {
-          id: '2',
-        },
-      ],
-    } as Tenant
+          {
+            id: '1',
+          },
+          {
+            id: '2',
+          },
+        ],
+      } as Tenant
     }
   }
 
   // tslint:disable-next-line:max-classes-per-file
   const apps = class AppsMock extends appsTypeMock.object {
     private builds: Record<string, any> = {
-      ['vtex.app1@1.0.0']: {
+      'vtex.app1@1.0.0': {
         entries: ['/entry-1', '/entry-2'],
       },
-      ['vtex.app2@1.0.0']: {
+      'vtex.app2@1.0.0': {
         entries: ['/entry-3'],
       },
-      ['vtex.app3@1.0.0']: {
-      },
+      'vtex.app3@1.0.0': {},
     }
+
     constructor() {
       super(ioContext.object)
     }
@@ -116,16 +120,15 @@ describe('Test rewriter routes generation', () => {
   beforeEach(() => {
     // tslint:disable-next-line:max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get vbase() {
+      public get vbase() {
         return this.getOrSet('vbase', vbase)
       }
 
-      get apps() {
+      public get apps() {
         return this.getOrSet('apps', apps)
-
       }
 
-      get tenant() {
+      public get tenant() {
         return this.getOrSet('tenant', tenant)
       }
     }
@@ -149,22 +152,32 @@ describe('Test rewriter routes generation', () => {
     await generateAppsRoutes(context)
     const { vbase: vbaseClient } = context.clients
     const bucket = getBucket(DEFAULT_CONFIG.generationPrefix, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, APPS_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      APPS_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['appsRoutes-0']
     expect(index).toStrictEqual(expectedIndex)
-    const { routes: appsRoutes } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
+    const { routes: appsRoutes } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
     expect(appsRoutes).toStrictEqual([
       { id: '/entry-1', path: '/entry-1' },
       { id: '/entry-2', path: '/entry-2' },
       { id: '/entry-3', path: '/entry-3' },
     ])
 
-    const appsCompleteFile = await vbaseClient.getJSON(CONFIG_BUCKET, APPS_ROUTES_INDEX)
+    const appsCompleteFile = await vbaseClient.getJSON(
+      CONFIG_BUCKET,
+      APPS_ROUTES_INDEX
+    )
     expect(appsCompleteFile).toBe('OK')
   })
 
   it('Splits routes if too many saved', async () => {
-    const { vbase: vbaseClient, } = context.clients
+    const { vbase: vbaseClient } = context.clients
     const appsClient = context.clients.apps as any
 
     const tooManyRoutes = new Array(5000).fill('/entry-1')
@@ -173,14 +186,24 @@ describe('Test rewriter routes generation', () => {
 
     await generateAppsRoutes(context)
     const bucket = getBucket(DEFAULT_CONFIG.generationPrefix, hashString('1'))
-    const { index } = await vbaseClient.getJSON<SitemapIndex>(bucket, APPS_ROUTES_INDEX, true)
+    const { index } = await vbaseClient.getJSON<SitemapIndex>(
+      bucket,
+      APPS_ROUTES_INDEX,
+      true
+    )
     const expectedIndex = ['appsRoutes-0', 'appsRoutes-1']
     expect(index).toStrictEqual(expectedIndex)
 
-    const { routes: routes0} = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[0])
-    expect(routes0.length).toEqual(5000)
+    const { routes: routes0 } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[0]
+    )
+    expect(routes0).toHaveLength(5000)
 
-    const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(bucket, expectedIndex[1])
-    expect(routes1.length).toEqual(1)
+    const { routes: routes1 } = await vbaseClient.getJSON<SitemapEntry>(
+      bucket,
+      expectedIndex[1]
+    )
+    expect(routes1).toHaveLength(1)
   })
 })

@@ -87,7 +87,7 @@ const sitemapIndex = async (ctx: Context) => {
     ),
   ]
 
-  const lastUpdated = indexFiles[0].lastUpdated
+  const { lastUpdated } = indexFiles[0]
 
   const indexXML = index.map(entry =>
     sitemapIndexEntry(
@@ -148,9 +148,9 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
       ctx.status = 404
       ctx.body = 'Generating sitemap...'
       ctx.vtex.logger.error(err.message)
-      await startSitemapGeneration(ctx).catch(err => {
-        if (!(err instanceof MultipleSitemapGenerationError)) {
-          throw err
+      await startSitemapGeneration(ctx).catch(innerErr => {
+        if (!(innerErr instanceof MultipleSitemapGenerationError)) {
+          throw innerErr
         }
       })
     }

@@ -91,11 +91,36 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
+    generateAppsRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateAppsRoutes,
+    ],
+    generateProductRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      tenant,
+      generateProductRoutes,
+      sendNextEvent,
+    ],
+    generateRewriterRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateRewriterRoutes,
+      sendNextEvent,
+    ],
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
+    groupEntries: [
+      throttle,
+      errors,
+      settings,
+      generationPrepare,
+      groupEntries,
+      sendNextEvent,
+    ],
   },
   graphql: {
     resolvers,

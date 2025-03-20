@@ -1,6 +1,5 @@
 import { startSitemapGeneration } from '../../utils'
-import { MultipleSitemapGenerationError } from './../../errors'
-
+import { MultipleSitemapGenerationError } from '../../errors'
 import {
   GENERATE_APPS_ROUTES_EVENT,
   GENERATE_PRODUCT_ROUTES_EVENT,
@@ -28,8 +27,12 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
 }
 
 export async function generateSitemap(ctx: EventContext) {
-  const { clients: { events }, body: { generationId }, state: { settings } }  = ctx
-  const disableRoutesTerm = settings.disableRoutesTerm
+  const {
+    clients: { events },
+    body: { generationId },
+    state: { settings },
+  } = ctx
+  const { disableRoutesTerm } = settings
   if (settings.enableNavigationRoutes) {
     events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
       ...DEFAULT_REWRITER_ROUTES_PAYLOAD,

@@ -3,7 +3,7 @@ import { ExternalClient, InstanceOptions, IOContext } from '@vtex/api'
 const userAgent = process.env.VTEX_APP_ID!
 
 export class VtexID extends ExternalClient {
-  public constructor(context: IOContext, options?: InstanceOptions) {
+  constructor(context: IOContext, options?: InstanceOptions) {
     super('http://vtexid.vtex.com.br/api/vtexid', context, options)
   }
 

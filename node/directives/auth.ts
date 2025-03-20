@@ -16,8 +16,9 @@ export const authFromCookie = async (ctx: Context) => {
     return 'VtexIdclientAutCookie not found.'
   }
 
-  const { user: email } =
-    (await vtexID.getIdUser(vtexIdToken, authToken)) ||  { user: '' }
+  const { user: email } = (await vtexID.getIdUser(vtexIdToken, authToken)) || {
+    user: '',
+  }
   if (!email) {
     return 'Could not find user specified by token.'
   }

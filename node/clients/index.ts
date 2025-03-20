@@ -30,11 +30,11 @@ export class Clients extends IOClients {
     return this.getOrSet('rewriter', Rewriter)
   }
 
-  get catalog() {
+  public get catalog() {
     return this.getOrSet('catalog', Catalog)
   }
 
-  get messages() {
+  public get messages() {
     return this.getOrSet('messages', Messages)
   }
 
@@ -49,5 +49,4 @@ export class Clients extends IOClients {
   public get sphinx() {
     return this.getOrSet('sphinx', Sphinx)
   }
-
 }

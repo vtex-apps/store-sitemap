@@ -3,8 +3,8 @@ import { EXTENDED_INDEX_FILE, getBucket, hashString } from '../utils'
 import {
   currentDate,
   SitemapIndex,
-} from './../middlewares/generateMiddlewares/utils'
-import { getDefaultStoreBinding } from './../resources/bindings'
+} from '../middlewares/generateMiddlewares/utils'
+import { getDefaultStoreBinding } from '../resources/bindings'
 
 const getBucketName = async (ctx: Context, binding?: string) => {
   if (!binding) {

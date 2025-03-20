@@ -1,4 +1,5 @@
 import { appIdToAppAtMajor } from '@vtex/api'
+
 import {
   APPS_ROUTES_INDEX,
   PRODUCT_ROUTES_INDEX,

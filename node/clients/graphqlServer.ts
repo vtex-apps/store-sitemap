@@ -1,11 +1,5 @@
-import {
-  AppClient,
-  GraphQLClient,
-  InstanceOptions,
-  IOContext,
-} from '@vtex/api'
+import { AppClient, GraphQLClient, InstanceOptions, IOContext } from '@vtex/api'
 import { any } from 'ramda'
-
 
 export class ProductNotFound extends Error {
   public graphQLErrors: any
@@ -18,7 +12,10 @@ export class ProductNotFound extends Error {
 
 const handleNotFoundErrror = (error: any) => {
   if (error.graphQLErrors && error.graphQLErrors.length === 1) {
-    const hasNotFounError = any((err: any )=> err.message.startsWith('No product was found'), error.graphQLErrors)
+    const hasNotFounError = any(
+      (err: any) => err.message.startsWith('No product was found'),
+      error.graphQLErrors
+    )
     if (hasNotFounError) {
       throw new ProductNotFound(error.graphQLErrors)
     }
@@ -37,18 +34,20 @@ export class GraphQLServer extends AppClient {
   }
 
   public query = async (query: string, variables: any, extensions: any) => {
-    return this.graphql.query(
-      {
-        extensions,
-        query,
-        variables,
-      },
-      {
-        params: {
-          locale: this.context.locale,
+    return this.graphql
+      .query(
+        {
+          extensions,
+          query,
+          variables,
         },
-        url: '/graphql',
-      }
-    ).catch(err => handleNotFoundErrror(err))
+        {
+          params: {
+            locale: this.context.locale,
+          },
+          url: '/graphql',
+        }
+      )
+      .catch(err => handleNotFoundErrror(err))
   }
 }

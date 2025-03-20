@@ -2,7 +2,11 @@ import { Apps, IOContext, Logger, RequestTracingConfig } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
-import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import {
+  APPS_ROUTES_INDEX,
+  PRODUCT_ROUTES_INDEX,
+  REWRITER_ROUTES_INDEX,
+} from './generateMiddlewares/utils'
 import { settings } from './settings'
 
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
@@ -25,7 +29,8 @@ describe('Test settings middleware', () => {
       super(ioContext.object)
     }
 
-    public getAppSettings = async (_: string, __?: RequestTracingConfig) => this.settings
+    public getAppSettings = async (_: string, __?: RequestTracingConfig) =>
+      this.settings
   }
 
   const next = jest.fn()
@@ -33,7 +38,7 @@ describe('Test settings middleware', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      get apps() {
+      public get apps() {
         return this.getOrSet('apps', apps)
       }
     }
@@ -53,7 +58,11 @@ describe('Test settings middleware', () => {
 
   it('Should get correct apps index files', async () => {
     await settings(context, next)
-    expect(context.state.enabledIndexFiles).toStrictEqual([APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX])
+    expect(context.state.enabledIndexFiles).toStrictEqual([
+      APPS_ROUTES_INDEX,
+      REWRITER_ROUTES_INDEX,
+      PRODUCT_ROUTES_INDEX,
+    ])
 
     let appClient = context.clients.apps as any
     appClient.settings = {
@@ -62,7 +71,10 @@ describe('Test settings middleware', () => {
       enableProductRoutes: false,
     }
     await settings(context, next)
-    expect(context.state.enabledIndexFiles).toStrictEqual([APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX])
+    expect(context.state.enabledIndexFiles).toStrictEqual([
+      APPS_ROUTES_INDEX,
+      REWRITER_ROUTES_INDEX,
+    ])
 
     appClient = context.clients.apps as any
     appClient.settings = {
@@ -71,7 +83,9 @@ describe('Test settings middleware', () => {
       enableProductRoutes: true,
     }
     await settings(context, next)
-    expect(context.state.enabledIndexFiles).toStrictEqual([PRODUCT_ROUTES_INDEX])
+    expect(context.state.enabledIndexFiles).toStrictEqual([
+      PRODUCT_ROUTES_INDEX,
+    ])
 
     appClient = context.clients.apps as any
     appClient.settings = {
