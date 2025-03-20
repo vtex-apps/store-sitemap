@@ -6,6 +6,16 @@
   "maxReplicas": 10,
   "workers": 4,
   "routes": {
+    "appsRoutes": {
+      "path": "/sitemap/apps-routes",
+      "public": true,
+      "smartcache": true
+    },
+    "userRoutes": {
+      "path": "/sitemap/user-routes",
+      "public": true,
+      "smartcache": true
+    },
     "sitemap": {
       "path": "/sitemap.xml",
       "public": true
