@@ -93,8 +93,14 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
+    /**
+     * @deprecated This event is being deprecated in favor of the new `/sitemap/apps-routes` endpoint.
+     */
     generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
     generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
+    /**
+     * @deprecated This event is being deprecated in favor of the new `/sitemap/user-routes` endpoint.
+     */
     generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
     generateSitemap: [settings, generationPrepare, generateSitemap],
     groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
