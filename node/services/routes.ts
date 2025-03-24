@@ -6,75 +6,48 @@ const STORE_SITEMAP_BUILD_FILE = '/dist/vtex.store-sitemap/build.json'
 export async function getUserRoutes(ctx: Context) {
   const {
     clients: { rewriter },
-    vtex: { logger },
   } = ctx
 
-  try {
-    const LIST_LIMIT = 300
-    const internalRoutes = []
-    let nextCursor
+  const LIST_LIMIT = 300
+  const internalRoutes = []
+  let nextCursor
 
-    do {
-      // eslint-disable-next-line no-await-in-loop
-      const response: ListInternalsResponse = await rewriter.listInternals(
-        LIST_LIMIT,
-        nextCursor
-      )
-      internalRoutes.push(...(response.routes || []))
-      nextCursor = response.next
-    } while (nextCursor)
-
-    const validRoutes = internalRoutes.filter(
-      route =>
-        !route.disableSitemapEntry &&
-        !route.type.startsWith('notFound') &&
-        route.type !== 'product'
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    const response: ListInternalsResponse = await rewriter.listInternals(
+      LIST_LIMIT,
+      nextCursor
     )
+    internalRoutes.push(...(response.routes ?? []))
+    nextCursor = response.next
+  } while (nextCursor)
 
-    const routes = validRoutes.map(route => route.from)
+  const routes = internalRoutes.filter(
+    route =>
+      !route.disableSitemapEntry &&
+      !route.type.startsWith('notFound') &&
+      route.type !== 'product'
+  )
 
-    return {
-      routes,
-      count: validRoutes.length,
-    }
-  } catch (err) {
-    logger.error({
-      error: err,
-      message: 'Failed to get user routes',
-    })
-    throw err
-  }
+  return routes.map(route => route.from)
 }
 
 export async function getAppsRoutes(ctx: Context) {
   const {
     clients: { apps },
-    vtex: { logger },
   } = ctx
 
-  try {
-    const deps = await apps.getAppsMetaInfos()
-    const routesByApp = await Promise.all(
-      deps.map(async dep => {
-        const build = await apps.getAppJSON<{ entries: string[] }>(
-          dep.id,
-          STORE_SITEMAP_BUILD_FILE,
-          true
-        )
-        return build?.entries || []
-      })
-    )
-    const routes = flatten(routesByApp)
-
-    return {
-      routes,
-      count: routes.length,
-    }
-  } catch (err) {
-    logger.error({
-      error: err,
-      message: 'Failed to get apps routes',
+  const deps = await apps.getAppsMetaInfos()
+  const routes = await Promise.all(
+    deps.map(async dep => {
+      const build = await apps.getAppJSON<{ entries: string[] }>(
+        dep.id,
+        STORE_SITEMAP_BUILD_FILE,
+        true
+      )
+      return build?.entries || []
     })
-    throw err
-  }
+  )
+
+  return flatten<string>(routes)
 }

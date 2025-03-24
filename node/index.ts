@@ -5,6 +5,7 @@ import {
   ClientsConfig,
   LRUCache,
   method,
+  MetricsAccumulator,
   ParamsContext,
   Service,
 } from '@vtex/api'
@@ -45,6 +46,10 @@ const tenantCacheStorage = new LRUCache<string, Cached>({
 const vbaseCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
+
+if (!global.metrics) {
+  global.metrics = new MetricsAccumulator()
+}
 
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('vbase', vbaseCacheStorage)
