@@ -1,6 +1,9 @@
 import { ListInternalsResponse } from 'vtex.rewriter'
+import { flatten } from 'ramda'
 
-export async function userRoutes(ctx: Context, next: () => Promise<void>) {
+const STORE_SITEMAP_BUILD_FILE = '/dist/vtex.store-sitemap/build.json'
+
+export async function getUserRoutes(ctx: Context) {
   const {
     clients: { rewriter },
     vtex: { logger },
@@ -30,22 +33,48 @@ export async function userRoutes(ctx: Context, next: () => Promise<void>) {
 
     const routes = validRoutes.map(route => route.from)
 
-    ctx.body = {
+    return {
       routes,
       count: validRoutes.length,
     }
-    ctx.status = 200
   } catch (err) {
     logger.error({
       error: err,
       message: 'Failed to get user routes',
     })
-    ctx.body = {
-      success: false,
-      error: err.message,
-    }
-    ctx.status = 500
+    throw err
   }
+}
 
-  await next()
+export async function getAppsRoutes(ctx: Context) {
+  const {
+    clients: { apps },
+    vtex: { logger },
+  } = ctx
+
+  try {
+    const deps = await apps.getAppsMetaInfos()
+    const routesByApp = await Promise.all(
+      deps.map(async dep => {
+        const build = await apps.getAppJSON<{ entries: string[] }>(
+          dep.id,
+          STORE_SITEMAP_BUILD_FILE,
+          true
+        )
+        return build?.entries || []
+      })
+    )
+    const routes = flatten(routesByApp)
+
+    return {
+      routes,
+      count: routes.length,
+    }
+  } catch (err) {
+    logger.error({
+      error: err,
+      message: 'Failed to get apps routes',
+    })
+    throw err
+  }
 }

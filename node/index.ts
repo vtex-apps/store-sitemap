@@ -33,8 +33,7 @@ import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
 import { resolvers } from './resolvers'
-import { appsRoutes } from './middlewares/appsRoutes'
-import { userRoutes } from './middlewares/userRoutes'
+import { customRoutes } from './middlewares/customRoutes'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -119,11 +118,8 @@ export default new Service<Clients, State, ParamsContext>({
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
-    appsRoutes: method({
-      GET: [cache, binding, appsRoutes],
-    }),
-    userRoutes: method({
-      GET: [cache, binding, userRoutes],
+    customRoutes: method({
+      GET: [cache, binding, customRoutes],
     }),
   },
 })
