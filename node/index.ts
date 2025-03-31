@@ -98,16 +98,55 @@ export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
     /**
-     * @deprecated This event is being deprecated in favor of the new `/sitemap/apps-routes` endpoint.
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/apps-routes` endpoint instead.
      */
-    generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
+    generateAppsRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateAppsRoutes,
+    ],
     /**
-     * @deprecated This event is being deprecated in favor of the new `/sitemap/user-routes` endpoint.
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
      */
-    generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
+    generateProductRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      tenant,
+      generateProductRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/user-routes` endpoint instead.
+     */
+    generateRewriterRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateRewriterRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    groupEntries: [
+      throttle,
+      errors,
+      settings,
+      generationPrepare,
+      groupEntries,
+      sendNextEvent,
+    ],
   },
   graphql: {
     resolvers,
