@@ -5,6 +5,7 @@ import {
   ClientsConfig,
   LRUCache,
   method,
+  MetricsAccumulator,
   ParamsContext,
   Service,
 } from '@vtex/api'
@@ -33,6 +34,7 @@ import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
 import { resolvers } from './resolvers'
+import { customRoutes } from './middlewares/customRoutes'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -44,6 +46,10 @@ const tenantCacheStorage = new LRUCache<string, Cached>({
 const vbaseCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
+
+if (!global.metrics) {
+  global.metrics = new MetricsAccumulator()
+}
 
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('vbase', vbaseCacheStorage)
@@ -91,11 +97,56 @@ const sitemapEntryPipeline = [prepare, sitemapEntry]
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/apps-routes` endpoint instead.
+     */
+    generateAppsRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateAppsRoutes,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    generateProductRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      tenant,
+      generateProductRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/user-routes` endpoint instead.
+     */
+    generateRewriterRoutes: [
+      throttle,
+      errors,
+      generationPrepare,
+      generateRewriterRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
     generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    groupEntries: [
+      throttle,
+      errors,
+      settings,
+      generationPrepare,
+      groupEntries,
+      sendNextEvent,
+    ],
   },
   graphql: {
     resolvers,
@@ -111,5 +162,8 @@ export default new Service<Clients, State, ParamsContext>({
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
+    customRoutes: method({
+      GET: [cache, binding, customRoutes],
+    }),
   },
 })

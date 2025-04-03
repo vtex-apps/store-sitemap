@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Public API endpoint for sitemap generation:
+  - `customRoutes`: Exposes a combination of user-defined routes from Rewriter and app-defined routes from store dependencies.
+- Long cache control option for sitemap route endpoints
+
 ## [2.16.6] - 2025-01-30
 
 ## [2.16.5] - 2025-01-23
