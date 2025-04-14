@@ -39,4 +39,8 @@ export class Catalog extends ExternalClient {
       },
     })
   }
+
+  public getSitemap () {
+    return this.http.get('/sitemap.xml');
+  }
 }

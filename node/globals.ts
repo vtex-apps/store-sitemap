@@ -20,10 +20,12 @@ declare global {
     rootPath: string
     matchingBindings: Binding[]
     bindingAddress?: string
+    isCrossBorder: boolean
     nextEvent:  {
       event: string,
       payload: Events
     }
+    useLongCacheControl?: boolean
   }
 
   type Context = ServiceContext<Clients, State>

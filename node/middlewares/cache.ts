@@ -5,6 +5,8 @@ const TEN_MINUTES_S = 10 * 60
 const FIVE_MINUTES_S = 5 * 60
 const THIRTY_SECONDS = 30
 const TEN_SECONDS = 10
+const TWENTY_HOURS = 20 * 60 * 60
+const ONE_DAY = 24 * 60 * 60
 
 const publicEndpoint = `.${process.env.VTEX_PUBLIC_ENDPOINT ?? 'myvtex.com'}`
 
@@ -30,15 +32,22 @@ export async function cache(ctx: Context, next: () => Promise<void>) {
     ctx.status = 500
   } finally {
     const shouldCache = 200 <= ctx.status && ctx.status < 300 && production
-    const maxAge = isPrivateHost(originalHost)
+    const maxAge = isPrivateHost(originalHost ?? '')
       ? TEN_SECONDS
       : THIRTY_SECONDS + from0To30()
 
     if (shouldCache) {
-      ctx.set(
-        'cache-control',
-        `public, max-age=${maxAge}, stale-while-revalidate=${TEN_SECONDS_S}, stale-if-error=${TEN_MINUTES_S}`
-      )
+      if (ctx.state.useLongCacheControl) {
+        ctx.set(
+          'cache-control',
+          `public, max-age=${TWENTY_HOURS}, stale-while-revalidate=${ONE_DAY}`
+        )
+      } else {
+        ctx.set(
+          'cache-control',
+          `public, max-age=${maxAge}, stale-while-revalidate=${TEN_SECONDS_S}, stale-if-error=${TEN_MINUTES_S}`
+        )
+      }
     } else {
       ctx.set('cache-control', 'no-store, no-cache')
     }
