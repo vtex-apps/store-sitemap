@@ -25,6 +25,7 @@ declare global {
       event: string,
       payload: Events
     }
+    useLongCacheControl?: boolean
   }
 
   type Context = ServiceContext<Clients, State>
