@@ -145,7 +145,7 @@ For implementation details, check the following instructions:
    }
    ```
 
-   >ℹ️ If you have  a store [cross-border](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores) store, the `saveIndex` mutation also accepts the `binding` ID as an argument, which meanst that by specifying the `binding` ID, you can add your new index to the sitemap of the desired binding. If the `binding` ID is not specified, the mutation will consider the  default binding of the store.
+   >ℹ️ If you have a [cross-border](https://developers.vtex.com/docs/guides/vtex-io-cross-border-stores) store, the `saveIndex` mutation also accepts the `binding` ID as an argument, which means that by specifying the `binding` ID, you can add your new index to the sitemap of the desired binding. If the `binding` ID is not specified, the mutation will consider the default binding of the store.
 
 5. Check the updated sitemap for the current workspace you're working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` in your browser.
 
