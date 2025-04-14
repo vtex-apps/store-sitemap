@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Fetches sitemap.xml file from Catalog in Single Tenant Stores
+
 ### Added
 
 - Public API endpoint for sitemap generation:

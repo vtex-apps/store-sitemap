@@ -129,6 +129,19 @@ const sitemapBindingIndex = async (ctx: Context) => {
 
 export async function sitemap(ctx: Context, next: () => Promise<void>) {
   const {
+    state: { isCrossBorder },
+  } = ctx
+
+  if (isCrossBorder) {
+    await legacySitemap(ctx)
+  } else {
+    await catalogSitemap(ctx)
+  }
+  next()
+}
+
+async function legacySitemap(ctx: Context) {
+  const {
     state: { matchingBindings, bindingAddress, rootPath, settings },
   } = ctx
 
@@ -158,5 +171,13 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
   }
 
   ctx.body = $.xml()
-  next()
+}
+
+async function catalogSitemap(ctx: Context) {
+  const {
+    clients: { catalog },
+  } = ctx
+
+  const sitemap = await catalog.getSitemap()
+  ctx.body = sitemap
 }

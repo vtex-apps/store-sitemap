@@ -23,6 +23,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
 import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
+import { isCrossBorder } from './middlewares/generateMiddlewares/isCrossBorder'
 import { prepare as generationPrepare } from './middlewares/generateMiddlewares/prepare'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
@@ -91,7 +92,7 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [settings, prepare, sitemap]
+const sitemapPipeline = [settings, isCrossBorder, prepare, sitemap]
 const sitemapEntryPipeline = [prepare, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
@@ -134,7 +135,12 @@ export default new Service<Clients, State, ParamsContext>({
      * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
      * Use the REST API endpoints instead.
      */
-    generateSitemap: [settings, generationPrepare, generateSitemap],
+    generateSitemap: [
+      settings,
+      isCrossBorder,
+      generationPrepare,
+      generateSitemap
+    ],
     /**
      * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
      * Use the REST API endpoints instead.
