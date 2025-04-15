@@ -57,5 +57,5 @@
     "lint": "tsc --noEmit --pretty && tslint -c tslint.json --fix './**/*.ts'",
     "test": "jest"
   },
-  "version": "2.16.6"
+  "version": "2.16.7"
 }
