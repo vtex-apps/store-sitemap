@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   - `customRoutes`: Exposes a combination of user-defined routes from Rewriter and app-defined routes from store dependencies.
 - Long cache control option for sitemap route endpoints
 
+## [2.16.7] - 2025-04-15
+
+### Fixed
+- Updated README.md file
+
 ## [2.16.6] - 2025-01-30
 
 ## [2.16.5] - 2025-01-23
