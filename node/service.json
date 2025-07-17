@@ -21,6 +21,11 @@
     "robots": {
       "path": "/robots.txt",
       "public": true
+    },
+    "customRoutes": {
+      "path": "/_v/public/sitemap/custom-routes",
+      "public": true,
+      "smartcache": true
     }
   },
   "events": {

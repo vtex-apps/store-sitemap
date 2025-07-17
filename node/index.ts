@@ -5,6 +5,7 @@ import {
   ClientsConfig,
   LRUCache,
   method,
+  MetricsAccumulator,
   ParamsContext,
   Service,
 } from '@vtex/api'
@@ -22,6 +23,7 @@ import {
   generateSitemapFromREST,
 } from './middlewares/generateMiddlewares/generateSitemap'
 import { groupEntries } from './middlewares/generateMiddlewares/groupEntries'
+import { isCrossBorder } from './middlewares/generateMiddlewares/isCrossBorder'
 import { prepare as generationPrepare } from './middlewares/generateMiddlewares/prepare'
 import { sendNextEvent } from './middlewares/generateMiddlewares/sendNextEvent'
 import { methodNotAllowed } from './middlewares/methods'
@@ -33,6 +35,7 @@ import { sitemapEntry } from './middlewares/sitemapEntry'
 import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
 import { resolvers } from './resolvers'
+import { customRoutes } from './middlewares/customRoutes'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -44,6 +47,10 @@ const tenantCacheStorage = new LRUCache<string, Cached>({
 const vbaseCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
 })
+
+if (!global.metrics) {
+  global.metrics = new MetricsAccumulator()
+}
 
 metrics.trackCache('tenant', tenantCacheStorage)
 metrics.trackCache('vbase', vbaseCacheStorage)
@@ -85,17 +92,72 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
-const sitemapPipeline = [settings, prepare, sitemap]
-const sitemapEntryPipeline = [prepare, sitemapEntry]
+
+const sitemapPipeline = [settings, isCrossBorder, prepare, sitemap]
+const sitemapEntryPipeline = [prepare, isCrossBorder, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
   events: {
-    generateAppsRoutes: [throttle, errors, generationPrepare, generateAppsRoutes],
-    generateProductRoutes: [throttle, errors, generationPrepare, tenant, generateProductRoutes, sendNextEvent],
-    generateRewriterRoutes: [throttle, errors, generationPrepare, generateRewriterRoutes, sendNextEvent],
-    generateSitemap: [settings, generationPrepare, generateSitemap],
-    groupEntries: [throttle, errors, settings, generationPrepare, groupEntries, sendNextEvent],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/apps-routes` endpoint instead.
+     */
+    generateAppsRoutes: [
+      throttle,
+      errors,
+      isCrossBorder,
+      generationPrepare,
+      generateAppsRoutes,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    generateProductRoutes: [
+      throttle,
+      errors,
+      isCrossBorder,
+      generationPrepare,
+      tenant,
+      generateProductRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the `/sitemap/user-routes` endpoint instead.
+     */
+    generateRewriterRoutes: [
+      throttle,
+      errors,
+      isCrossBorder,
+      generationPrepare,
+      generateRewriterRoutes,
+      sendNextEvent,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    generateSitemap: [
+      settings,
+      isCrossBorder,
+      generationPrepare,
+      generateSitemap,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    groupEntries: [
+      throttle,
+      errors,
+      settings,
+      isCrossBorder,
+      generationPrepare,
+      groupEntries,
+      sendNextEvent,
+    ],
   },
   graphql: {
     resolvers,
@@ -111,5 +173,8 @@ export default new Service<Clients, State, ParamsContext>({
     }),
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
+    customRoutes: method({
+      GET: [cache, binding, customRoutes],
+    }),
   },
 })

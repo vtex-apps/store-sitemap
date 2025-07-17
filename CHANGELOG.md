@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Fetches sitemap.xml file from Catalog in Single Tenant Stores
+
+### Added
+
+- Public API endpoint for sitemap generation:
+  - `customRoutes`: Exposes a combination of user-defined routes from Rewriter and app-defined routes from store dependencies.
+- Long cache control option for sitemap route endpoints
+
 ## [2.16.7] - 2025-04-15
 
 ### Fixed

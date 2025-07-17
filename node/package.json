@@ -44,11 +44,13 @@
     "tslint-config-vtex": "^2.1.0",
     "typemoq": "^2.1.0",
     "typescript": "3.9.7",
-    "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.9.0/public/_types/react",
-    "vtex.catalog-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.80.1/public/@types/vtex.catalog-graphql",
-    "vtex.graphql-server": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.graphql-server@1.62.3/public/_types/react",
-    "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.60.2/public/@types/vtex.messages",
-    "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.47.0/public/@types/vtex.rewriter"
+    "vtex.catalog-api-proxy": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-api-proxy@0.10.4/public/_types/react",
+    "vtex.catalog-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.catalog-graphql@1.103.1/public/@types/vtex.catalog-graphql",
+    "vtex.graphql-server": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.graphql-server@1.69.0/public/_types/react",
+    "vtex.messages": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.messages@1.69.0/public/@types/vtex.messages",
+    "vtex.rewriter": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.rewriter@1.65.1/public/@types/vtex.rewriter",
+    "vtex.routes-bootstrap": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.routes-bootstrap@0.5.1/public/@types/vtex.routes-bootstrap",
+    "vtex.store-sitemap": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.store-sitemap@2.16.6/public/@types/vtex.store-sitemap"
   },
   "resolutions": {
     "**/lodash": "^4.17.11"
