@@ -137,13 +137,32 @@ export async function sitemap(ctx: Context, next: () => Promise<void>) {
   } else {
     await catalogSitemap(ctx)
   }
+
   next()
 }
 
 async function legacySitemap(ctx: Context) {
   const {
-    state: { matchingBindings, bindingAddress, rootPath, settings },
+    state: {
+      isCrossBorder,
+      matchingBindings,
+      bindingAddress,
+      rootPath,
+      settings,
+    },
+    vtex: { logger },
   } = ctx
+
+  logger.info({
+    message: 'Fetching legacy sitemap',
+    payload: {
+      isCrossBorder,
+      matchingBindings,
+      bindingAddress,
+      rootPath,
+      ignoreBindings: settings.ignoreBindings,
+    },
+  })
 
   const hasBindingIdentifier = rootPath || bindingAddress
   let $: any
@@ -176,8 +195,27 @@ async function legacySitemap(ctx: Context) {
 async function catalogSitemap(ctx: Context) {
   const {
     clients: { catalog },
+    headers: { 'x-forwarded-host': forwardedHost },
+    state: { isCrossBorder, forwardedPath },
+    vtex: { logger },
   } = ctx
 
-  const sitemap = await catalog.getSitemap()
-  ctx.body = sitemap
+  try {
+    logger.info({
+      message: 'Fetching catalog sitemap',
+      payload: {
+        forwardedHost,
+        forwardedPath,
+        isCrossBorder,
+      },
+    })
+
+    const sitemapData = await catalog.getSitemap(forwardedHost, forwardedPath)
+
+    ctx.body = sitemapData
+  } catch (error) {
+    logger.error(`Error fetching catalog sitemap: ${error}`)
+    ctx.status = 500
+    ctx.body = 'Internal Server Error'
+  }
 }
