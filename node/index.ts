@@ -92,8 +92,9 @@ const clients: ClientsConfig<Clients> = {
     },
   },
 }
+
 const sitemapPipeline = [settings, isCrossBorder, prepare, sitemap]
-const sitemapEntryPipeline = [prepare, sitemapEntry]
+const sitemapEntryPipeline = [prepare, isCrossBorder, sitemapEntry]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
@@ -105,6 +106,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateAppsRoutes: [
       throttle,
       errors,
+      isCrossBorder,
       generationPrepare,
       generateAppsRoutes,
     ],
@@ -115,6 +117,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateProductRoutes: [
       throttle,
       errors,
+      isCrossBorder,
       generationPrepare,
       tenant,
       generateProductRoutes,
@@ -127,6 +130,7 @@ export default new Service<Clients, State, ParamsContext>({
     generateRewriterRoutes: [
       throttle,
       errors,
+      isCrossBorder,
       generationPrepare,
       generateRewriterRoutes,
       sendNextEvent,
@@ -139,7 +143,7 @@ export default new Service<Clients, State, ParamsContext>({
       settings,
       isCrossBorder,
       generationPrepare,
-      generateSitemap
+      generateSitemap,
     ],
     /**
      * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
@@ -149,6 +153,7 @@ export default new Service<Clients, State, ParamsContext>({
       throttle,
       errors,
       settings,
+      isCrossBorder,
       generationPrepare,
       groupEntries,
       sendNextEvent,
