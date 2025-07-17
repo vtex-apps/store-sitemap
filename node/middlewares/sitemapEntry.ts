@@ -60,20 +60,41 @@ export const URLEntry = (
 
 export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
   const {
-    state: {
-      forwardedPath,
-      bucket,
-    },
+    state: { isCrossBorder },
+  } = ctx
+
+  if (!isCrossBorder) {
+    await catalogSitemapEntry(ctx)
+  } else {
+    await legacySitemapEntry(ctx)
+    next()
+  }
+}
+
+async function legacySitemapEntry(ctx: Context) {
+  const {
     clients: { vbase },
+    state: { forwardedPath, bucket },
+    vtex: { logger },
   } = ctx
 
   const sitemapRoute = new RouteParser(SITEMAP_URL)
   const sitemapParams = sitemapRoute.match(forwardedPath)
+
+  logger.info({
+    message: 'Fetching legacy sitemap entry',
+    payload: {
+      forwardedPath,
+      bucket,
+    },
+  })
+
   if (!sitemapParams) {
     ctx.status = 404
     ctx.body = `Sitemap not found the URL must be: ${SITEMAP_URL}`
     throw new Error(`URL differs from the expected, ${forwardedPath}`)
   }
+
   const { path } = sitemapParams
 
   const $: any = cheerio.load(
@@ -82,23 +103,52 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
       xmlMode: true,
     }
   )
+
   const fileName = path.split('.')[0]
   const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
     bucket,
     fileName,
     true
   )
+
   if (!maybeRoutesInfo) {
     ctx.status = 404
     ctx.body = 'Sitemap entry not found'
-    ctx.vtex.logger.error('Sitemap entry not found')
+    ctx.vtex.logger.error({
+      message: 'Sitemap entry not found',
+      payload: {
+        bucket,
+        fileName,
+      },
+    })
+
     return
   }
+
   const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-  const entryXML = routes.map((route: Route) => URLEntry(ctx, route, lastUpdated))
+  const entryXML = routes.map((route: Route) =>
+    URLEntry(ctx, route, lastUpdated)
+  )
 
   $('urlset').append(entryXML.join('\n'))
 
   ctx.body = $.xml()
-  next()
+}
+
+async function catalogSitemapEntry(ctx: Context) {
+  const {
+    clients: { catalog },
+    headers: { 'x-forwarded-host': forwardedHost },
+    state: { forwardedPath },
+    vtex: { logger },
+  } = ctx
+
+  try {
+    ctx.body = await catalog.getSitemap(forwardedHost, forwardedPath)
+    ctx.status = 200
+  } catch (error) {
+    logger.error(`Error fetching catalog sitemap: ${error}`)
+    ctx.status = 500
+    ctx.body = 'Internal Server Error'
+  }
 }
