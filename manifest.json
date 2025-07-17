@@ -38,6 +38,20 @@
     {
       "name": "outbound-access",
       "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/sitemap.xml"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/sitemap/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
         "host": "janus-edge.vtex.com.br",
         "path": "/robots.txt"
       }
