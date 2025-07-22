@@ -1,7 +1,9 @@
 import { Internal, ListInternalsResponse } from 'vtex.rewriter'
 import { flatten } from 'ramda'
 
+import { SitemapIndex } from '../middlewares/generateMiddlewares/utils'
 import { Rewriter } from '../clients/rewriter'
+import { EXTENDED_INDEX_FILE, getBucket, hashString } from '../utils'
 
 const STORE_SITEMAP_BUILD_FILE = '/dist/vtex.store-sitemap/build.json'
 
@@ -29,14 +31,44 @@ async function fetchInternalRoutes(rewriter: Rewriter, limit: number) {
   return internalRoutes
 }
 
+async function fetchExtendedRoutes(ctx: Context) {
+  const {
+    state: { binding },
+    clients: { vbase },
+  } = ctx
+
+  const extendedIndex = await vbase.getJSON<SitemapIndex>(
+    getBucket('', hashString(binding.id)),
+    EXTENDED_INDEX_FILE,
+    true
+  )
+
+  const extendedEntries = extendedIndex?.index.map(entry =>
+    entry.startsWith('/') ? entry : `/${entry}`
+  )
+
+  return extendedEntries || []
+}
+
 export async function getUserRoutes(ctx: Context) {
   const {
     clients: { rewriter },
   } = ctx
 
-  const internalRoutes = await fetchInternalRoutes(rewriter, LIST_LIMIT)
-  const filteredRoutes = internalRoutes.filter(isValidRoute)
-  return filteredRoutes.map(route => route.from)
+  const [internalRoutes, extendedRoutes] = await Promise.all([
+    fetchInternalRoutes(rewriter, LIST_LIMIT),
+    fetchExtendedRoutes(ctx),
+  ])
+
+  console.log('extendedRoutes:', extendedRoutes)
+
+  const validInternalRoutes = internalRoutes
+    .filter(isValidRoute)
+    .map(route => route.from)
+
+  const userRoutes = [...validInternalRoutes, ...extendedRoutes]
+
+  return userRoutes
 }
 
 export async function getAppsRoutes(ctx: Context) {
@@ -52,6 +84,7 @@ export async function getAppsRoutes(ctx: Context) {
         STORE_SITEMAP_BUILD_FILE,
         true
       )
+
       return build?.entries || []
     })
   )
