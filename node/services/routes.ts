@@ -44,7 +44,7 @@ async function fetchExtendedRoutes(ctx: Context) {
   )
 
   const extendedEntries = extendedIndex?.index.map(entry =>
-    entry.startsWith('/') ? entry : `/${entry}`
+    entry.startsWith('/') ? `${entry}.xml` : `/${entry}.xml`
   )
 
   return extendedEntries || []
