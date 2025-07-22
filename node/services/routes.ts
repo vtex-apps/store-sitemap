@@ -60,8 +60,6 @@ export async function getUserRoutes(ctx: Context) {
     fetchExtendedRoutes(ctx),
   ])
 
-  console.log('extendedRoutes:', extendedRoutes)
-
   const validInternalRoutes = internalRoutes
     .filter(isValidRoute)
     .map(route => route.from)
