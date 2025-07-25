@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- Custom routes now have support for routes added/removed via saveIndex or deleteIndex mutations
+
 ## [2.17.0] - 2025-07-17
 
 ### Changed

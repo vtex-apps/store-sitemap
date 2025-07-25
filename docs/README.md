@@ -31,7 +31,7 @@ To learn how to generate a sitemap, follow the instructions below.
 
 7. If this isn't the first time you're generating the store sitemap or if no changes have been made to the store routes since the last time you generated the store sitemap, go to step 8. Otherwise, run the following query:
 
-   ```gql
+   ```gql  
    {
      bootstrap {
        brands
@@ -56,6 +56,9 @@ To learn how to generate a sitemap, follow the instructions below.
 8. Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
 
 9. Run the following query:
+
+  > ℹ️ If your store is **not** cross-border, the sitemap will be automatically updated daily.  
+  > In this case, running this GraphQL query is not necessary and will have no effect on the sitemap generation.
 
    ```gql
    {
