@@ -43,8 +43,8 @@ async function fetchExtendedRoutes(ctx: Context) {
     true
   )
 
-  const extendedEntries = extendedIndex?.index.map(entry =>
-    `/sitemap${entry.replace(/^\//, '')}.xml`
+  const extendedEntries = extendedIndex?.index.map(
+    entry => `/sitemap/${entry.replace(/^\//, '')}.xml`
   )
 
   return extendedEntries || []

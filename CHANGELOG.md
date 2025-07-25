@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix missing `/` for extended routes in custom-routes
+
 ## [2.18.0] - 2025-07-25
 
 ### Changed
