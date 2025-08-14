@@ -1,0 +1,23 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: store-sitemap
+  description: The Sitemap app allows you to fetch or generate a sitemap.xml file
+    for your store website.\nAfter deploying and installing the app on your
+    account, you can create a sitemap to improve store visibility on search
+    engines such as Google."
+  tags:
+    - typescript
+  annotations:
+    vtex.com/janus-acronym: ""
+    vtex.com/o11y-os-index: ""
+    grafana/dashboard-selector: ""
+    github.com/project-slug: vtex-apps/store-sitemap
+    vtex.com/platform-flow-id: ""
+    backstage.io/techdocs-ref: dir:../
+    vtex.com/application-id: XBR61V1L
+spec:
+  lifecycle: stable
+  owner: te-0013
+  type: backend-api
+  dependsOn: []
