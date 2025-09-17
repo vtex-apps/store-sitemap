@@ -5,6 +5,8 @@ import {
   IOContext,
 } from '@vtex/api'
 
+import { CatalogSitemapError } from '../errors/CatalogSitemapError'
+
 export interface GetProductsAndSkuIdsReponse {
   items: number[]
   paging: {
@@ -44,11 +46,18 @@ export class Catalog extends ExternalClient {
     })
   }
 
-  public getSitemap(host: string, path = 'sitemap.xml') {
-    return this.http.get(path, {
-      headers: {
-        [FORWARDED_HOST_HEADER]: host,
-      },
-    })
+  public async getSitemap(host: string, path = 'sitemap.xml') {
+    try {
+      return await this.http.get(path, {
+        headers: {
+          [FORWARDED_HOST_HEADER]: host,
+        },
+      })
+    } catch (error) {
+      throw new CatalogSitemapError(
+        `Failed to fetch catalog sitemap: ${error.message}`,
+        error
+      )
+    }
   }
 }

@@ -36,6 +36,7 @@ import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
 import { resolvers } from './resolvers'
 import { customRoutes } from './middlewares/customRoutes'
+import { sitemapErrors } from './middlewares/sitemapErrors'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -93,8 +94,19 @@ const clients: ClientsConfig<Clients> = {
   },
 }
 
-const sitemapPipeline = [settings, isCrossBorder, prepare, sitemap]
-const sitemapEntryPipeline = [prepare, isCrossBorder, sitemapEntry]
+const sitemapPipeline = [
+  sitemapErrors,
+  settings,
+  isCrossBorder,
+  prepare,
+  sitemap,
+]
+const sitemapEntryPipeline = [
+  sitemapErrors,
+  prepare,
+  isCrossBorder,
+  sitemapEntry,
+]
 
 export default new Service<Clients, State, ParamsContext>({
   clients,
