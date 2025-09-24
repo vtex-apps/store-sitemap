@@ -35,7 +35,7 @@ describe('sitemapErrors middleware', () => {
     expect(context.body).toBeUndefined()
   })
 
-  it('should handle CatalogSitemapError with 500 status', async () => {
+  it('should handle CatalogSitemapError with default 500 status', async () => {
     const originalError = new Error('Catalog API error')
     const error = new CatalogSitemapError(
       'Failed to fetch catalog sitemap',
@@ -53,8 +53,68 @@ describe('sitemapErrors middleware', () => {
       payload: {
         error: error.message,
         method: 'GET',
+        originalError: originalError.message,
         path: '/sitemap.xml',
         stack: error.stack,
+        statusCode: 500,
+      },
+    })
+  })
+
+  it('should handle CatalogSitemapError with custom HTTP status code', async () => {
+    const originalError = {
+      message: 'Not Found',
+      response: { status: 404 },
+    }
+    const error = new CatalogSitemapError(
+      'Failed to fetch catalog sitemap',
+      (originalError as unknown) as Error
+    )
+    next.mockRejectedValue(error)
+
+    await sitemapErrors(context, next)
+
+    expect(context.status).toBe(404)
+    expect(context.type).toBe('text/plain; charset=utf-8')
+    expect(context.body).toBe('Error fetching sitemap data')
+    expect(context.vtex.logger.error).toHaveBeenCalledWith({
+      message: 'Sitemap pipeline error',
+      payload: {
+        error: error.message,
+        method: 'GET',
+        originalError: originalError.message,
+        path: '/sitemap.xml',
+        stack: error.stack,
+        statusCode: 404,
+      },
+    })
+  })
+
+  it('should extract status code from error response object', async () => {
+    const originalError = {
+      message: 'Bad Request',
+      response: { status: 400 },
+    }
+    const error = new CatalogSitemapError(
+      'Failed to fetch catalog sitemap',
+      (originalError as unknown) as Error
+    )
+    next.mockRejectedValue(error)
+
+    await sitemapErrors(context, next)
+
+    expect(context.status).toBe(400)
+    expect(context.type).toBe('text/plain; charset=utf-8')
+    expect(context.body).toBe('Error fetching sitemap data')
+    expect(context.vtex.logger.error).toHaveBeenCalledWith({
+      message: 'Sitemap pipeline error',
+      payload: {
+        error: error.message,
+        method: 'GET',
+        originalError: originalError.message,
+        path: '/sitemap.xml',
+        stack: error.stack,
+        statusCode: 400,
       },
     })
   })

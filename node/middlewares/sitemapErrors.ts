@@ -21,6 +21,10 @@ export async function sitemapErrors(ctx: Context, next: () => Promise<void>) {
         method: ctx.method,
         path: ctx.path,
         stack: error.stack,
+        ...(error instanceof CatalogSitemapError && {
+          statusCode: error.statusCode,
+          originalError: error.originalError?.message,
+        }),
       },
     })
 
@@ -28,7 +32,8 @@ export async function sitemapErrors(ctx: Context, next: () => Promise<void>) {
     ctx.type = 'text/plain; charset=utf-8'
 
     if (error instanceof CatalogSitemapError) {
-      ctx.status = 500
+      // Use the actual HTTP status code from the catalog API response
+      ctx.status = error.statusCode
       ctx.body = 'Error fetching sitemap data'
       return
     }
