@@ -33,13 +33,29 @@ export class CatalogSitemapError extends Error {
     }
 
     const errorObj = error as Record<string, unknown>
+    const hasResponseProperty = 'response' in errorObj
+    if (!hasResponseProperty) {
+      return false
+    }
 
-    return (
-      'response' in errorObj &&
-      errorObj.response !== null &&
-      typeof errorObj.response === 'object' &&
-      'status' in (errorObj.response as Record<string, unknown>) &&
-      typeof (errorObj.response as Record<string, unknown>).status === 'number'
-    )
+    const responseValue = (errorObj as { response?: unknown }).response
+    const responseIsNonNullObject =
+      typeof responseValue === 'object' && responseValue !== null
+
+    if (!responseIsNonNullObject) {
+      return false
+    }
+
+    const hasStatusProperty =
+      'status' in (responseValue as Record<string, unknown>)
+
+    if (!hasStatusProperty) {
+      return false
+    }
+
+    const statusValue = (responseValue as { status?: unknown }).status
+    const statusIsNumber = typeof statusValue === 'number'
+
+    return statusIsNumber
   }
 }
