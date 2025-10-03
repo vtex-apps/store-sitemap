@@ -1,20 +1,30 @@
-import { Binding, LINKED, TenantClient } from '@vtex/api'
+import { Binding, LINKED, TenantClient, VBase } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 
-import { MultipleSitemapGenerationError } from './errors'
+import {
+  MultipleCustomRoutesGenerationError,
+  MultipleSitemapGenerationError,
+} from './errors'
 import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
+export const CUSTOM_ROUTES_GENERATION_FILE = 'customRoutesGeneration.json'
 export const EXTENDED_INDEX_FILE = 'extendedIndex.json'
 export const MAX_CALL_STACK_SIZE =  1000
+
+export const CUSTOM_ROUTES_BUCKET = 'custom-routes'
+export const CUSTOM_ROUTES_FILENAME = 'custom-routes.json'
+export const CUSTOM_ROUTES_GENERATION_LOCK_FILENAME = 'generation-lock.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'
 
 const fiveDaysFromNowMS = () => `${new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)}`
+const twentyThreeHoursFromNowMS = () =>
+  `${new Date(Date.now() + 23 * 60 * 60 * 1000)}`
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT
@@ -26,7 +36,7 @@ const validBinding = (path: string) => (binding: Binding) => {
   return matchesPath && isStoreBinding
 }
 
-export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) => 
+export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) =>
   xml.slice(0, limit).join('\n')
 
 export const notFound = <T>(fallback: T) => (error: any): T => {
@@ -82,7 +92,7 @@ export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
 
 export const validDate = (endDate: string) => {
   const date = new Date(endDate)
-  if (date  && date <= new Date() || date.toString() === 'Invalid Date') {
+  if ((date && date <= new Date()) || date.toString() === 'Invalid Date') {
     return false
   }
   return true
@@ -94,4 +104,161 @@ export const getStoreBindings = async (tenant: TenantClient) => {
   })
   const storeBindings = bindings.filter(binding => binding.targetProduct === STORE_PRODUCT)
   return storeBindings
+}
+
+export const startCustomRoutesGeneration = async (
+  ctx: Context,
+  force?: boolean
+) => {
+  const {
+    clients: { vbase, events },
+    vtex: { logger, account },
+  } = ctx
+
+  console.log('Checking for existing custom routes generation lock', CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME)
+  logger.info({
+    message: 'Checking for existing custom routes generation lock',
+    type: 'custom-routes-lock-check',
+    account,
+    lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    bucket: CONFIG_BUCKET,
+    force,
+  })
+
+  const lockFile = await vbase.getJSON<GenerationConfig>(
+    CONFIG_BUCKET,
+    CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    true
+  )
+
+  if (lockFile) {
+    console.log('Existing lock found:', lockFile)
+    if (validDate(lockFile.endDate)) {
+      console.log('Lock is valid')
+    } else {
+      console.log('Lock is expired')
+    }
+  } else {
+    console.log('No existing lock found')
+  }
+
+  console.log('Force flag is', force ? 'set' : 'not set')
+  if (lockFile && validDate(lockFile.endDate) && !force) {
+    logger.warn({
+      message: 'Custom routes generation lock found - generation skipped',
+      type: 'custom-routes-lock-found',
+      account,
+      existingGenerationId: lockFile.generationId,
+      lockExpiresAt: lockFile.endDate,
+      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    })
+    throw new MultipleCustomRoutesGenerationError(lockFile.endDate, account)
+  }
+
+  if (lockFile) {
+    console.log('Lock found but expired or force flag set - proceeding with generation')
+    logger.info({
+      message:
+        'Lock found but expired or force flag set - proceeding with generation',
+      type: 'custom-routes-lock-expired',
+      account,
+      expiredLock: lockFile,
+      force,
+    })
+  } else {
+    console.log('No lock found - proceeding with generation')
+    logger.info({
+      message: 'No lock found - proceeding with generation',
+      type: 'custom-routes-no-lock',
+      account,
+      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    })
+  }
+
+  const generationId = (Math.random() * 10000).toString()
+  const caller = ctx.request?.header?.['x-vtex-caller'] || 'unknown'
+  const endDate = twentyThreeHoursFromNowMS()
+
+  console.log(`Custom routes generation started by ${caller}`)
+  logger.info({
+    message: `Custom routes generation started by ${caller}`,
+    type: 'custom-routes-generation-started',
+    account,
+    generationId,
+    caller,
+    lockExpiresAt: endDate,
+  })
+
+  try {
+    console.log('Saving generation lock file...')
+    await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME, {
+      endDate,
+      generationId,
+    })
+    console.log('Generation lock file created')
+  } catch (error) {
+    console.error('Error creating generation lock file:', error)
+    throw error
+  }
+
+  console.log('Generation lock file created')
+  logger.info({
+    message: 'Generation lock file created',
+    type: 'custom-routes-lock-created',
+    account,
+    lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    generationId,
+    expiresAt: endDate,
+  })
+
+  console.log('Dispatching custom routes generation event...')
+  events.sendEvent('', 'sitemap.generate:custom-routes', { generationId })
+
+  console.log('Custom routes generation event dispatched')
+  logger.info({
+    message: 'Custom routes generation event dispatched',
+    type: 'custom-routes-event-dispatched',
+    account,
+    generationId,
+    eventKey: 'sitemap.generate:custom-routes',
+  })
+}
+
+export const clearCustomRoutesGenerationLock = async (
+  vbase: VBase,
+  account: string,
+  logger?: any
+) => {
+  if (logger) {
+    logger.info({
+      message: 'Attempting to clear custom routes generation lock',
+      type: 'custom-routes-lock-clear-attempt',
+      account,
+      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+      bucket: CONFIG_BUCKET,
+    })
+  }
+
+  try {
+    await vbase.deleteFile(CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME)
+    if (logger) {
+      logger.info({
+        message: 'Custom routes generation lock cleared successfully',
+        type: 'custom-routes-lock-cleared',
+        account,
+        lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+      })
+    }
+  } catch (error) {
+    // File might not exist, ignore error but log it
+    if (logger) {
+      logger.info({
+        message: 'Lock file not found or already cleared',
+        type: 'custom-routes-lock-clear-skipped',
+        account,
+        lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+        error: error.message || error,
+      })
+    }
+  }
 }

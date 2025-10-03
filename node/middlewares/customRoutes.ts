@@ -1,80 +1,175 @@
-import { getAppsRoutes, getUserRoutes } from '../services/routes'
+import { MultipleCustomRoutesGenerationError } from '../errors'
+import {
+  CUSTOM_ROUTES_BUCKET,
+  CUSTOM_ROUTES_FILENAME,
+  startCustomRoutesGeneration,
+} from '../utils'
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 const metricsConfig = {
-  appRoutes: {
-    failed: 'customRoutes-getAppsRoutes-failed',
-    success: 'customRoutes-getAppsRoutes-success',
-  },
-  userRoutes: {
-    failed: 'customRoutes-getUserRoutes-failed',
-    success: 'customRoutes-getUserRoutes-success',
-  },
   customRoutes: {
     failed: 'customRoutes-failed',
     success: 'customRoutes-success',
+    cached: 'customRoutes-cached',
+    notFound: 'customRoutes-notFound',
+    generating: 'customRoutes-generating',
   },
+}
+
+async function triggerCustomRoutesGeneration(ctx: Context) {
+  const {
+    vtex: { logger, account },
+  } = ctx
+
+  try {
+    console.log('Starting custom routes generation')
+    await startCustomRoutesGeneration(ctx)
+    console.log('Custom routes generation event triggered')
+    logger.info({
+      message: 'Custom routes generation event triggered',
+      type: 'custom-routes-trigger',
+      account,
+    })
+  } catch (error) {
+    console.error('Error triggering custom routes generation:', error)
+    if (error instanceof MultipleCustomRoutesGenerationError) {
+      logger.info({
+        message: 'Custom routes generation already in progress',
+        type: 'custom-routes-already-generating',
+        account,
+      })
+      throw error
+    }
+    console.error('Failed to trigger custom routes generation')
+    logger.error({
+      message: 'Failed to trigger custom routes generation',
+      error,
+      type: 'custom-routes-trigger-error',
+      account,
+    })
+    throw error
+  }
 }
 
 export async function customRoutes(ctx: Context, next: () => Promise<void>) {
   const startTime = process.hrtime()
 
   const {
-    vtex: { logger },
+    vtex: { logger, account },
+    clients: { vbase },
   } = ctx
 
-  const fetchRoutes = async (
-    fetchFunction: (ctx: Context) => Promise<string[]>,
-    metricConfig: { failed: string; success: string }
-  ) => {
-    try {
-      const routes = await fetchFunction(ctx)
+  try {
+    console.log('Attempting to retrieve cached custom routes')
+    // Get pre-compiled custom routes from VBase
+    const cachedData = await vbase.getJSON<CustomRoutesData>(
+      CUSTOM_ROUTES_BUCKET,
+      CUSTOM_ROUTES_FILENAME,
+      true
+    )
+    console.log(
+      'Cached custom routes retrieval complete',
+      `File: ${JSON.stringify(cachedData)}`
+    )
 
-      const timeDiff = process.hrtime(startTime)
-      metrics.batch(metricConfig.success, timeDiff)
-      logger.info({ type: metricConfig.success })
+    if (!cachedData) {
+      console.log('No cached custom routes found, triggering generation')
 
-      return routes
-    } catch (error) {
-      const timeDiff = process.hrtime(startTime)
-      metrics.batch(metricConfig.failed, timeDiff)
-      logger.error({ error, type: metricConfig.failed })
+      // No cached data exists - trigger generation and return 404
+      logger.info({
+        message: 'No cached custom routes found, triggering generation',
+        type: 'custom-routes-not-found',
+        account,
+        fileName: CUSTOM_ROUTES_FILENAME,
+      })
 
-      return null
+      try {
+        await triggerCustomRoutesGeneration(ctx)
+
+        ctx.status = 404
+        ctx.body = {
+          message: 'Custom routes not available. Generation has been triggered.',
+        }
+
+        const diffTime = process.hrtime(startTime)
+        metrics.batch(metricsConfig.customRoutes.notFound, diffTime)
+        logger.info({
+          type: metricsConfig.customRoutes.notFound,
+          account,
+        })
+      } catch (error) {
+        if (error instanceof MultipleCustomRoutesGenerationError) {
+          // Generation already in progress - return 404
+          ctx.status = 404
+          ctx.body = {
+            message: error.message,
+          }
+
+          const diffTime = process.hrtime(startTime)
+          metrics.batch(metricsConfig.customRoutes.generating, diffTime)
+          logger.info({
+            type: metricsConfig.customRoutes.generating,
+            account,
+          })
+        } else {
+          throw error
+        }
+      }
+
+      await next()
+      return
     }
-  }
 
-  const [appsRoutes, userRoutes] = await Promise.all([
-    fetchRoutes(getAppsRoutes, metricsConfig.appRoutes),
-    fetchRoutes(getUserRoutes, metricsConfig.userRoutes),
-  ])
+    console.log('Found cached custom routes!')
 
-  const hasCustomRoutes = appsRoutes && userRoutes
+    // Check if data is older than 1 day
+    const dataAge = Date.now() - cachedData.timestamp
+    const isOld = dataAge >= ONE_DAY_MS
 
-  if (hasCustomRoutes) {
+    if (isOld) {
+      console.log('Cached custom routes are old, triggering regeneration')
+      // Data exists but is old - trigger regeneration in background
+      logger.info({
+        message: 'Cached custom routes are old, triggering regeneration',
+        type: 'custom-routes-stale',
+        account,
+        ageInHours: Math.floor(dataAge / (60 * 60 * 1000)),
+      })
+
+      // Fire and forget - don't await
+      triggerCustomRoutesGeneration(ctx)
+    }
+
+    // Return cached data
     ctx.status = 200
-    ctx.body = [
-      { name: 'apps-routes', routes: appsRoutes },
-      { name: 'user-routes', routes: userRoutes },
-    ]
-
+    ctx.body = cachedData.data
     ctx.state.useLongCacheControl = true
 
     const diffTime = process.hrtime(startTime)
-    metrics.batch(metricsConfig.customRoutes.success, diffTime)
-    logger.info({ type: metricsConfig.customRoutes.success })
-  } else {
+    metrics.batch(metricsConfig.customRoutes.cached, diffTime)
+    logger.info({
+      message: 'Custom routes served from cache',
+      type: metricsConfig.customRoutes.cached,
+      account,
+      ageInHours: Math.floor(dataAge / (60 * 60 * 1000)),
+      isStale: isOld,
+    })
+  } catch (error) {
     ctx.status = 500
     ctx.body = {
       success: false,
-      error: {
-        appsRoutes: !appsRoutes ? 'Failed to get apps routes' : null,
-        userRoutes: !userRoutes ? 'Failed to get user routes' : null,
-      },
+      error: 'Failed to retrieve custom routes',
     }
 
     const diffTime = process.hrtime(startTime)
     metrics.batch(metricsConfig.customRoutes.failed, diffTime)
-    logger.error({ type: metricsConfig.customRoutes.failed })
+    logger.error({
+      message: 'Error retrieving custom routes',
+      error,
+      type: metricsConfig.customRoutes.failed,
+      account,
+    })
   }
 
   await next()
