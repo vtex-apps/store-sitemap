@@ -1,4 +1,4 @@
-import { Binding, LINKED, TenantClient, VBase } from '@vtex/api'
+import { Binding, LINKED, Logger, TenantClient, VBase } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 
 import {
@@ -118,7 +118,6 @@ export const startCustomRoutesGeneration = async (
   logger.info({
     message: 'Checking for existing custom routes generation lock',
     type: 'custom-routes-lock-check',
-    account,
     lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
     bucket: CONFIG_BUCKET,
     force,
@@ -134,7 +133,6 @@ export const startCustomRoutesGeneration = async (
     logger.warn({
       message: 'Custom routes generation lock found - generation skipped',
       type: 'custom-routes-lock-found',
-      account,
       existingGenerationId: lockFile.generationId,
       lockExpiresAt: lockFile.endDate,
       lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
@@ -147,7 +145,6 @@ export const startCustomRoutesGeneration = async (
       message:
         'Lock found but expired or force flag set - proceeding with generation',
       type: 'custom-routes-lock-expired',
-      account,
       expiredLock: lockFile,
       force,
     })
@@ -155,7 +152,6 @@ export const startCustomRoutesGeneration = async (
     logger.info({
       message: 'No lock found - proceeding with generation',
       type: 'custom-routes-no-lock',
-      account,
       lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
     })
   }
@@ -167,17 +163,20 @@ export const startCustomRoutesGeneration = async (
   logger.info({
     message: `Custom routes generation started by ${caller}`,
     type: 'custom-routes-generation-started',
-    account,
     generationId,
     caller,
     lockExpiresAt: endDate,
   })
 
   try {
-    await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME, {
-      endDate,
-      generationId,
-    })
+    await vbase.saveJSON<GenerationConfig>(
+      CONFIG_BUCKET,
+      CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+      {
+        endDate,
+        generationId,
+      }
+    )
   } catch (error) {
     throw error
   }
@@ -185,7 +184,6 @@ export const startCustomRoutesGeneration = async (
   logger.info({
     message: 'Generation lock file created',
     type: 'custom-routes-lock-created',
-    account,
     lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
     generationId,
     expiresAt: endDate,
@@ -196,7 +194,6 @@ export const startCustomRoutesGeneration = async (
   logger.info({
     message: 'Custom routes generation event dispatched',
     type: 'custom-routes-event-dispatched',
-    account,
     generationId,
     eventKey: 'sitemap.generate:custom-routes',
   })
@@ -204,39 +201,32 @@ export const startCustomRoutesGeneration = async (
 
 export const clearCustomRoutesGenerationLock = async (
   vbase: VBase,
-  account: string,
-  logger?: any
+  logger: Logger
 ) => {
-  if (logger) {
-    logger.info({
-      message: 'Attempting to clear custom routes generation lock',
-      type: 'custom-routes-lock-clear-attempt',
-      account,
-      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
-      bucket: CONFIG_BUCKET,
-    })
-  }
+  logger.info({
+    message: 'Attempting to clear custom routes generation lock',
+    type: 'custom-routes-lock-clear-attempt',
+    lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    bucket: CONFIG_BUCKET,
+  })
 
   try {
-    await vbase.deleteFile(CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME)
-    if (logger) {
-      logger.info({
-        message: 'Custom routes generation lock cleared successfully',
-        type: 'custom-routes-lock-cleared',
-        account,
-        lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
-      })
-    }
+    await vbase.deleteFile(
+      CONFIG_BUCKET,
+      CUSTOM_ROUTES_GENERATION_LOCK_FILENAME
+    )
+    logger.info({
+      message: 'Custom routes generation lock cleared successfully',
+      type: 'custom-routes-lock-cleared',
+      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+    })
   } catch (error) {
     // File might not exist, ignore error but log it
-    if (logger) {
-      logger.info({
-        message: 'Lock file not found or already cleared',
-        type: 'custom-routes-lock-clear-skipped',
-        account,
-        lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
-        error: error.message || error,
-      })
-    }
+    logger.info({
+      message: 'Lock file not found or already cleared',
+      type: 'custom-routes-lock-clear-skipped',
+      lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
+      error: error.message || error,
+    })
   }
 }

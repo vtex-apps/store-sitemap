@@ -19,7 +19,7 @@ const metricsConfig = {
 
 async function triggerCustomRoutesGeneration(ctx: Context) {
   const {
-    vtex: { logger, account },
+    vtex: { logger },
   } = ctx
 
   try {
@@ -27,14 +27,12 @@ async function triggerCustomRoutesGeneration(ctx: Context) {
     logger.info({
       message: 'Custom routes generation event triggered',
       type: 'custom-routes-trigger',
-      account,
     })
   } catch (error) {
     if (error instanceof MultipleCustomRoutesGenerationError) {
       logger.info({
         message: 'Custom routes generation already in progress',
         type: 'custom-routes-already-generating',
-        account,
       })
       throw error
     }
@@ -42,7 +40,6 @@ async function triggerCustomRoutesGeneration(ctx: Context) {
       message: 'Failed to trigger custom routes generation',
       error,
       type: 'custom-routes-trigger-error',
-      account,
     })
     throw error
   }
@@ -52,7 +49,7 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
   const startTime = process.hrtime()
 
   const {
-    vtex: { logger, account },
+    vtex: { logger },
     clients: { vbase },
   } = ctx
 
@@ -69,7 +66,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       logger.info({
         message: 'No cached custom routes found, triggering generation',
         type: 'custom-routes-not-found',
-        account,
         fileName: CUSTOM_ROUTES_FILENAME,
       })
 
@@ -78,14 +74,14 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
 
         ctx.status = 404
         ctx.body = {
-          message: 'Custom routes not available. Generation has been triggered.',
+          message:
+            'Custom routes not available. Generation has been triggered.',
         }
 
         const diffTime = process.hrtime(startTime)
         metrics.batch(metricsConfig.customRoutes.notFound, diffTime)
         logger.info({
           type: metricsConfig.customRoutes.notFound,
-          account,
         })
       } catch (error) {
         if (error instanceof MultipleCustomRoutesGenerationError) {
@@ -99,7 +95,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
           metrics.batch(metricsConfig.customRoutes.generating, diffTime)
           logger.info({
             type: metricsConfig.customRoutes.generating,
-            account,
           })
         } else {
           throw error
@@ -119,7 +114,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       logger.info({
         message: 'Cached custom routes are old, triggering regeneration',
         type: 'custom-routes-stale',
-        account,
         ageInHours: Math.floor(dataAge / (60 * 60 * 1000)),
       })
 
@@ -137,7 +131,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
     logger.info({
       message: 'Custom routes served from cache',
       type: metricsConfig.customRoutes.cached,
-      account,
       ageInHours: Math.floor(dataAge / (60 * 60 * 1000)),
       isStale: isOld,
     })
@@ -154,7 +147,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       message: 'Error retrieving custom routes',
       error,
       type: metricsConfig.customRoutes.failed,
-      account,
     })
   }
 

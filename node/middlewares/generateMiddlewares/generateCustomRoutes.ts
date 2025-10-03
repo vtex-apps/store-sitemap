@@ -8,7 +8,7 @@ import {
 export async function generateCustomRoutes(ctx: EventContext) {
   const {
     clients: { vbase },
-    vtex: { logger, account },
+    vtex: { logger },
   } = ctx
 
   const startTime = process.hrtime()
@@ -17,7 +17,6 @@ export async function generateCustomRoutes(ctx: EventContext) {
     logger.info({
       message: 'Starting custom routes generation',
       type: 'custom-routes-generation',
-      account,
     })
 
     // Create a minimal context-like object for the route functions
@@ -49,32 +48,29 @@ export async function generateCustomRoutes(ctx: EventContext) {
 
     logger.info({
       message: 'Custom routes saved',
-      account,
       appsRoutesCount: appsRoutes.length,
       userRoutesCount: userRoutes.length,
       fileName: CUSTOM_ROUTES_FILENAME,
     })
 
     // Clear generation lock after successful completion
-    await clearCustomRoutesGenerationLock(vbase, account, logger)
+    await clearCustomRoutesGenerationLock(vbase, logger)
 
     const timeDiff = process.hrtime(startTime)
     logger.info({
       message: 'Custom routes generation complete',
       type: 'custom-routes-generation-complete',
-      account,
       duration: timeDiff,
     })
   } catch (error) {
     // Clear generation lock on error as well
-    await clearCustomRoutesGenerationLock(vbase, account, logger)
+    await clearCustomRoutesGenerationLock(vbase, logger)
 
     const timeDiff = process.hrtime(startTime)
     logger.error({
       message: 'Error generating custom routes',
       error,
       type: 'custom-routes-generation-error',
-      account,
       duration: timeDiff,
     })
     throw error
