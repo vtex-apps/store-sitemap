@@ -106,10 +106,7 @@ export const getStoreBindings = async (tenant: TenantClient) => {
   return storeBindings
 }
 
-export const startCustomRoutesGeneration = async (
-  ctx: Context,
-  force?: boolean
-) => {
+export const startCustomRoutesGeneration = async (ctx: Context) => {
   const {
     clients: { vbase, events },
     vtex: { logger, account },
@@ -120,7 +117,6 @@ export const startCustomRoutesGeneration = async (
     type: 'custom-routes-lock-check',
     lockFile: CUSTOM_ROUTES_GENERATION_LOCK_FILENAME,
     bucket: CONFIG_BUCKET,
-    force,
   })
 
   const lockFile = await vbase.getJSON<GenerationConfig>(
@@ -129,7 +125,7 @@ export const startCustomRoutesGeneration = async (
     true
   )
 
-  if (lockFile && validDate(lockFile.endDate) && !force) {
+  if (lockFile && validDate(lockFile.endDate)) {
     logger.warn({
       message: 'Custom routes generation lock found - generation skipped',
       type: 'custom-routes-lock-found',
@@ -142,11 +138,9 @@ export const startCustomRoutesGeneration = async (
 
   if (lockFile) {
     logger.info({
-      message:
-        'Lock found but expired or force flag set - proceeding with generation',
+      message: 'Lock found but expired - proceeding with generation',
       type: 'custom-routes-lock-expired',
       expiredLock: lockFile,
-      force,
     })
   } else {
     logger.info({
