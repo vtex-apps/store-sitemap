@@ -1,9 +1,6 @@
+import { clearCustomRoutesGenerationLock } from '../customRoutes'
 import { getAppsRoutes, getUserRoutes } from '../../services/routes'
-import {
-  clearCustomRoutesGenerationLock,
-  CUSTOM_ROUTES_BUCKET,
-  CUSTOM_ROUTES_FILENAME,
-} from '../../utils'
+import { CUSTOM_ROUTES_BUCKET, CUSTOM_ROUTES_FILENAME } from '../../utils'
 
 export async function generateCustomRoutes(ctx: EventContext) {
   const {
