@@ -23,16 +23,13 @@ async function triggerCustomRoutesGeneration(ctx: Context) {
   } = ctx
 
   try {
-    console.log('Starting custom routes generation')
     await startCustomRoutesGeneration(ctx)
-    console.log('Custom routes generation event triggered')
     logger.info({
       message: 'Custom routes generation event triggered',
       type: 'custom-routes-trigger',
       account,
     })
   } catch (error) {
-    console.error('Error triggering custom routes generation:', error)
     if (error instanceof MultipleCustomRoutesGenerationError) {
       logger.info({
         message: 'Custom routes generation already in progress',
@@ -41,7 +38,6 @@ async function triggerCustomRoutesGeneration(ctx: Context) {
       })
       throw error
     }
-    console.error('Failed to trigger custom routes generation')
     logger.error({
       message: 'Failed to trigger custom routes generation',
       error,
@@ -61,21 +57,14 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
   } = ctx
 
   try {
-    console.log('Attempting to retrieve cached custom routes')
     // Get pre-compiled custom routes from VBase
     const cachedData = await vbase.getJSON<CustomRoutesData>(
       CUSTOM_ROUTES_BUCKET,
       CUSTOM_ROUTES_FILENAME,
       true
     )
-    console.log(
-      'Cached custom routes retrieval complete',
-      `File: ${JSON.stringify(cachedData)}`
-    )
 
     if (!cachedData) {
-      console.log('No cached custom routes found, triggering generation')
-
       // No cached data exists - trigger generation and return 404
       logger.info({
         message: 'No cached custom routes found, triggering generation',
@@ -121,14 +110,11 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       return
     }
 
-    console.log('Found cached custom routes!')
-
     // Check if data is older than 1 day
     const dataAge = Date.now() - cachedData.timestamp
     const isOld = dataAge >= ONE_DAY_MS
 
     if (isOld) {
-      console.log('Cached custom routes are old, triggering regeneration')
       // Data exists but is old - trigger regeneration in background
       logger.info({
         message: 'Cached custom routes are old, triggering regeneration',

@@ -13,7 +13,6 @@ const isTooManyRequestError = (error: any) => {
 
 export async function errors(_: EventContext, next: () => Promise<void>) {
   try {
-    console.log('Entering error handling middleware')
     await next()
   } catch (error) {
     if (isTooManyRequestError(error)) {

@@ -115,7 +115,6 @@ export const startCustomRoutesGeneration = async (
     vtex: { logger, account },
   } = ctx
 
-  console.log('Checking for existing custom routes generation lock', CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME)
   logger.info({
     message: 'Checking for existing custom routes generation lock',
     type: 'custom-routes-lock-check',
@@ -131,18 +130,6 @@ export const startCustomRoutesGeneration = async (
     true
   )
 
-  if (lockFile) {
-    console.log('Existing lock found:', lockFile)
-    if (validDate(lockFile.endDate)) {
-      console.log('Lock is valid')
-    } else {
-      console.log('Lock is expired')
-    }
-  } else {
-    console.log('No existing lock found')
-  }
-
-  console.log('Force flag is', force ? 'set' : 'not set')
   if (lockFile && validDate(lockFile.endDate) && !force) {
     logger.warn({
       message: 'Custom routes generation lock found - generation skipped',
@@ -156,7 +143,6 @@ export const startCustomRoutesGeneration = async (
   }
 
   if (lockFile) {
-    console.log('Lock found but expired or force flag set - proceeding with generation')
     logger.info({
       message:
         'Lock found but expired or force flag set - proceeding with generation',
@@ -166,7 +152,6 @@ export const startCustomRoutesGeneration = async (
       force,
     })
   } else {
-    console.log('No lock found - proceeding with generation')
     logger.info({
       message: 'No lock found - proceeding with generation',
       type: 'custom-routes-no-lock',
@@ -179,7 +164,6 @@ export const startCustomRoutesGeneration = async (
   const caller = ctx.request?.header?.['x-vtex-caller'] || 'unknown'
   const endDate = twentyThreeHoursFromNowMS()
 
-  console.log(`Custom routes generation started by ${caller}`)
   logger.info({
     message: `Custom routes generation started by ${caller}`,
     type: 'custom-routes-generation-started',
@@ -190,18 +174,14 @@ export const startCustomRoutesGeneration = async (
   })
 
   try {
-    console.log('Saving generation lock file...')
     await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, CUSTOM_ROUTES_GENERATION_LOCK_FILENAME, {
       endDate,
       generationId,
     })
-    console.log('Generation lock file created')
   } catch (error) {
-    console.error('Error creating generation lock file:', error)
     throw error
   }
 
-  console.log('Generation lock file created')
   logger.info({
     message: 'Generation lock file created',
     type: 'custom-routes-lock-created',
@@ -211,10 +191,8 @@ export const startCustomRoutesGeneration = async (
     expiresAt: endDate,
   })
 
-  console.log('Dispatching custom routes generation event...')
   events.sendEvent('', 'sitemap.generate:custom-routes', { generationId })
 
-  console.log('Custom routes generation event dispatched')
   logger.info({
     message: 'Custom routes generation event dispatched',
     type: 'custom-routes-event-dispatched',

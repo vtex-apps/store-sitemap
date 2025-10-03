@@ -66,7 +66,6 @@ export async function generateCustomRoutes(ctx: EventContext) {
       duration: timeDiff,
     })
   } catch (error) {
-    console.error('Error generating custom routes:', error)
     // Clear generation lock on error as well
     await clearCustomRoutesGenerationLock(vbase, account, logger)
 
