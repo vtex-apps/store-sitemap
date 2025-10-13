@@ -1,10 +1,11 @@
+import { getDefaultStoreBinding } from '../../resources/bindings'
 import { clearCustomRoutesGenerationLock } from '../customRoutes'
 import { getAppsRoutes, getUserRoutes } from '../../services/routes'
 import { CUSTOM_ROUTES_BUCKET, CUSTOM_ROUTES_FILENAME } from '../../utils'
 
 export async function generateCustomRoutes(ctx: EventContext) {
   const {
-    clients: { vbase },
+    clients: { vbase, tenant },
     vtex: { logger },
   } = ctx
 
@@ -16,10 +17,26 @@ export async function generateCustomRoutes(ctx: EventContext) {
       type: 'custom-routes-generation',
     })
 
+    // Get default store binding for the account
+    const defaultBindingId = await getDefaultStoreBinding(
+      (ctx as unknown) as Context
+    )
+
+    // Get tenant info to construct binding object
+    const tenantInfo = await tenant.info()
+    const binding = tenantInfo.bindings?.find(b => b.id === defaultBindingId)
+
+    if (!binding) {
+      throw new Error(`Default binding ${defaultBindingId} not found`)
+    }
+
     // Create a minimal context-like object for the route functions
     const routeCtx = {
       clients: ctx.clients,
-      state: ctx.state,
+      state: {
+        ...ctx.state,
+        binding,
+      },
       vtex: ctx.vtex,
     } as Context
 
@@ -27,6 +44,12 @@ export async function generateCustomRoutes(ctx: EventContext) {
       getAppsRoutes(routeCtx),
       getUserRoutes(routeCtx),
     ])
+
+    logger.info({
+      message: 'Routes fetched',
+      appsRoutesCount: appsRoutes.length,
+      userRoutesCount: userRoutes.length,
+    })
 
     const customRoutesData: CustomRoutesData = {
       timestamp: Date.now(),

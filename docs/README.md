@@ -175,6 +175,7 @@ The following endpoint provides combined route information in JSON format:
 1. **Custom Routes**
    - Endpoint: `/_v/public/sitemap/custom-routes`
    - Description: Returns a combination of routes defined via CMS and internal pages (excluding product, brands and category routes) and routes defined by installed apps in their `build.json` files.
+   - **Important**: The internal routes collection is limited to 50 pages. If you notice missing routes in the results, review and clean up your internal routes to ensure only necessary routes are saved in the system.
    - Example response:
    ```json
    [
