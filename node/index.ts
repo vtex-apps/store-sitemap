@@ -41,6 +41,7 @@ import { sitemapErrors } from './middlewares/sitemapErrors'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
+const TEN_SECONDS_MS = 10 * 1000
 
 const tenantCacheStorage = new LRUCache<string, Cached>({
   max: 3000,
@@ -76,14 +77,14 @@ const clients: ClientsConfig<Clients> = {
     },
     graphqlServer: {
       concurrency: 10,
-      retries: 1,
+      retries: 1, 
       timeout: EIGHT_SECOND_MS,
     },
     messages: {
       timeout: EIGHT_SECOND_MS,
     },
     rewriter: {
-      timeout: EIGHT_SECOND_MS,
+      timeout: TEN_SECONDS_MS,
     },
     tenant: {
       memoryCache: tenantCacheStorage,

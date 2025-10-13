@@ -3,8 +3,8 @@ import { path as Rpath, startsWith } from 'ramda'
 import { Internal } from 'vtex.rewriter'
 
 import { getBucket, getStoreBindings, hashString } from '../../utils'
-import { Clients } from './../../clients/index'
-import { Rewriter } from './../../clients/rewriter'
+import { Clients } from '../../clients/index'
+import { Rewriter } from '../../clients/rewriter'
 import {
   createFileName,
   currentDate,
@@ -14,7 +14,7 @@ import {
   RAW_DATA_PREFIX,
   REWRITER_ROUTES_INDEX,
   SitemapEntry,
-  SitemapIndex
+  SitemapIndex,
 } from './utils'
 
 const LIST_LIMIT = 300
@@ -91,11 +91,17 @@ const saveRoutes = (routesByBinding: RoutesByBinding, count: number, clients: Cl
   })
 }
 
-export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: () => Promise<void>) {
+export async function generateRewriterRoutes(
+  ctx: EventContext,
+  nextMiddleware: () => Promise<void>
+) {
   if (!ctx.body.count) {
     await initializeSitemap(ctx, REWRITER_ROUTES_INDEX)
   }
-  const { clients: { rewriter, tenant } , body } = ctx
+  const {
+    clients: { rewriter, tenant },
+    body,
+  } = ctx
   const {
     count,
     disableRoutesTerm,
@@ -104,7 +110,7 @@ export async function generateRewriterRoutes(ctx: EventContext, nextMiddleware: 
     report,
   }: RewriterRoutesGenerationEvent = body!
 
-  const response = await rewriter.listInternals(LIST_LIMIT, next)
+  const response = await rewriter.listInternalsWithRetry(LIST_LIMIT, next)
   const routes: Internal[] = response.routes || []
   const responseNext = response.next
 
