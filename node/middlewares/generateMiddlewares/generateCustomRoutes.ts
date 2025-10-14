@@ -3,7 +3,7 @@ import { clearCustomRoutesGenerationLock } from '../customRoutes'
 import { getAppsRoutes, getUserRoutes } from '../../services/routes'
 import { CUSTOM_ROUTES_BUCKET, CUSTOM_ROUTES_FILENAME } from '../../utils'
 
-export async function generateCustomRoutes(ctx: EventContext) {
+export async function generateCustomRoutes(ctx: Context) {
   const {
     clients: { vbase, tenant },
     vtex: { logger },
@@ -18,9 +18,7 @@ export async function generateCustomRoutes(ctx: EventContext) {
     })
 
     // Get default store binding for the account
-    const defaultBindingId = await getDefaultStoreBinding(
-      (ctx as unknown) as Context
-    )
+    const defaultBindingId = await getDefaultStoreBinding(ctx)
 
     // Get tenant info to construct binding object
     const tenantInfo = await tenant.info()

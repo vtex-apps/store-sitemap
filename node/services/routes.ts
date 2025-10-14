@@ -27,7 +27,7 @@ async function fetchInternalRoutes(ctx: Context, limit: number) {
   do {
     pageCount++
     // eslint-disable-next-line no-await-in-loop
-    const response: ListInternalsResponse = await rewriter.listInternals(
+    const response: ListInternalsResponse = await rewriter.listInternalsWithRetry(
       limit,
       nextCursor
     )

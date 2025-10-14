@@ -1,6 +1,7 @@
 import { Logger, VBase } from '@vtex/api'
 
 import { MultipleCustomRoutesGenerationError } from '../errors'
+import { generateCustomRoutes } from './generateMiddlewares/generateCustomRoutes'
 import {
   CONFIG_BUCKET,
   CUSTOM_ROUTES_BUCKET,
@@ -27,7 +28,7 @@ const metricsConfig = {
 
 const startCustomRoutesGeneration = async (ctx: Context) => {
   const {
-    clients: { vbase, events },
+    clients: { vbase },
     vtex: { logger, account },
   } = ctx
 
@@ -102,13 +103,20 @@ const startCustomRoutesGeneration = async (ctx: Context) => {
     expiresAt: endDate,
   })
 
-  events.sendEvent('', 'sitemap.generate:custom-routes', { generationId })
+  // Execute generation in background - don't await
+  generateCustomRoutes(ctx).catch(error => {
+    logger.error({
+      message: 'Background custom routes generation failed',
+      type: 'custom-routes-background-error',
+      generationId,
+      error,
+    })
+  })
 
   logger.info({
-    message: 'Custom routes generation event dispatched',
-    type: 'custom-routes-event-dispatched',
+    message: 'Custom routes generation started in background',
+    type: 'custom-routes-background-started',
     generationId,
-    eventKey: 'sitemap.generate:custom-routes',
   })
 }
 

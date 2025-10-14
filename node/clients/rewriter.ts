@@ -107,9 +107,7 @@ export class Rewriter extends AppGraphQLClient {
     }
   }
 
-  public routesById = (
-    locator: EntityLocator
-  ): Promise<RoutesByBinding[]> =>
+  public routesById = (locator: EntityLocator): Promise<RoutesByBinding[]> =>
     this.graphql
       .query<
         { internal: { routes: RoutesByBinding[] } },

@@ -48,10 +48,6 @@
     "groupEntries": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:group-entries"]
-    },
-    "generateCustomRoutes": {
-      "sender": "vtex.store-sitemap",
-      "keys": ["sitemap.generate:custom-routes"]
     }
   }
 }
