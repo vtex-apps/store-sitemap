@@ -26,16 +26,13 @@ export async function generateCustomRoutes(ctx: EventContext) {
     const tenantInfo = await tenant.info()
     const binding = tenantInfo.bindings?.find(b => b.id === defaultBindingId)
 
-    if (!binding) {
-      throw new Error(`Default binding ${defaultBindingId} not found`)
-    }
-
     // Create a minimal context-like object for the route functions
+    // Always include binding in state, even if null (extended routes require it)
     const routeCtx = {
       clients: ctx.clients,
       state: {
         ...ctx.state,
-        binding,
+        binding: binding ?? null,
       },
       vtex: ctx.vtex,
     } as Context

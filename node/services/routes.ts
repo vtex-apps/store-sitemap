@@ -53,7 +53,17 @@ async function fetchExtendedRoutes(ctx: Context) {
   const {
     state: { binding },
     clients: { vbase },
+    vtex: { logger },
   } = ctx
+
+  // Extended routes require a binding context
+  if (!binding) {
+    logger.info({
+      message: 'Skipping extended routes fetch - no binding context available',
+      type: 'extended-routes-skip',
+    })
+    return []
+  }
 
   const extendedIndex = await vbase.getJSON<SitemapIndex>(
     getBucket('', hashString(binding.id)),
