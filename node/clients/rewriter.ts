@@ -80,18 +80,13 @@ export class Rewriter extends AppGraphQLClient {
     try {
       return await this.listInternals(limit, cursor)
     } catch (error) {
-      const isTimeout =
-        error?.graphQLErrors?.[0]?.message?.includes('timeout') ||
-        error?.message?.includes('timeout') ||
-        error?.code === 'ECONNABORTED'
-
-      if (isTimeout && retryCount < MAX_RETRIES) {
+      if (retryCount < MAX_RETRIES) {
         const delay = RETRY_DELAY_MS * (retryCount + 1) // Exponential backoff
 
         // Log warning if logger is available in context
         if (this.context?.logger) {
           this.context.logger.warn({
-            message: 'listInternals timeout, retrying',
+            message: 'listInternals error, retrying',
             attempt: retryCount + 1,
             maxRetries: MAX_RETRIES,
             delayMs: delay,
@@ -107,7 +102,7 @@ export class Rewriter extends AppGraphQLClient {
         return this.listInternalsWithRetry(limit, cursor, retryCount + 1)
       }
 
-      // If not a timeout error or max retries reached, throw the error
+      // Max retries reached, throw the error
       throw error
     }
   }
