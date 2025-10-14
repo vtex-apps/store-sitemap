@@ -77,7 +77,7 @@ const clients: ClientsConfig<Clients> = {
     },
     graphqlServer: {
       concurrency: 10,
-      retries: 1, 
+      retries: 1,
       timeout: EIGHT_SECOND_MS,
     },
     messages: {
