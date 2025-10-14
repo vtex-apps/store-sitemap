@@ -175,6 +175,7 @@ The following endpoint provides combined route information in JSON format:
 1. **Custom Routes**
    - Endpoint: `/_v/public/sitemap/custom-routes`
    - Description: Returns a combination of routes defined via CMS and internal pages (excluding product, brands and category routes) and routes defined by installed apps in their `build.json` files.
+   - **Important**: The generation of custom-routes is capped under a certain limit. If you notice missing routes in your custom-routes file, please contact VTEX Support.
    - Example response:
    ```json
    [

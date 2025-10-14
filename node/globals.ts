@@ -86,4 +86,12 @@ declare global {
     processedProducts: number
     invalidProducts: number
   }
+
+  interface CustomRoutesData {
+    timestamp: number
+    data: Array<{
+      name: string
+      routes: string[]
+    }>
+  }
 }

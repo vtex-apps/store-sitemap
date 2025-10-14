@@ -143,12 +143,14 @@ async function catalogSitemapEntry(ctx: Context) {
     vtex: { logger },
   } = ctx
 
-  try {
-    ctx.body = await catalog.getSitemap(forwardedHost, forwardedPath)
-    ctx.status = 200
-  } catch (error) {
-    logger.error(`Error fetching catalog sitemap: ${error}`)
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
-  }
+  logger.info({
+    message: 'Fetching catalog sitemap entry',
+    payload: {
+      forwardedHost,
+      forwardedPath,
+    },
+  })
+
+  ctx.body = await catalog.getSitemap(forwardedHost, forwardedPath)
+  ctx.status = 200
 }

@@ -200,22 +200,15 @@ async function catalogSitemap(ctx: Context) {
     vtex: { logger },
   } = ctx
 
-  try {
-    logger.info({
-      message: 'Fetching catalog sitemap',
-      payload: {
-        forwardedHost,
-        forwardedPath,
-        isCrossBorder,
-      },
-    })
+  logger.info({
+    message: 'Fetching catalog sitemap',
+    payload: {
+      forwardedHost,
+      forwardedPath,
+      isCrossBorder,
+    },
+  })
 
-    const sitemapData = await catalog.getSitemap(forwardedHost, forwardedPath)
-
-    ctx.body = sitemapData
-  } catch (error) {
-    logger.error(`Error fetching catalog sitemap: ${error}`)
-    ctx.status = 500
-    ctx.body = 'Internal Server Error'
-  }
+  const sitemapData = await catalog.getSitemap(forwardedHost, forwardedPath)
+  ctx.body = sitemapData
 }

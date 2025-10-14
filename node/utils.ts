@@ -7,8 +7,13 @@ import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
 export const GENERATION_CONFIG_FILE = 'generation.json'
+export const CUSTOM_ROUTES_GENERATION_FILE = 'customRoutesGeneration.json'
 export const EXTENDED_INDEX_FILE = 'extendedIndex.json'
 export const MAX_CALL_STACK_SIZE =  1000
+
+export const CUSTOM_ROUTES_BUCKET = 'custom-routes'
+export const CUSTOM_ROUTES_FILENAME = 'custom-routes.json'
+export const CUSTOM_ROUTES_GENERATION_LOCK_FILENAME = 'generation-lock.json'
 
 export const TENANT_CACHE_TTL_S = 60 * 10
 
@@ -26,7 +31,7 @@ const validBinding = (path: string) => (binding: Binding) => {
   return matchesPath && isStoreBinding
 }
 
-export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) => 
+export const xmlTruncateNodes = ( xml: string[], limit: number = MAX_CALL_STACK_SIZE) =>
   xml.slice(0, limit).join('\n')
 
 export const notFound = <T>(fallback: T) => (error: any): T => {
@@ -82,7 +87,7 @@ export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
 
 export const validDate = (endDate: string) => {
   const date = new Date(endDate)
-  if (date  && date <= new Date() || date.toString() === 'Invalid Date') {
+  if ((date && date <= new Date()) || date.toString() === 'Invalid Date') {
     return false
   }
   return true
