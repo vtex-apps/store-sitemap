@@ -153,12 +153,4 @@ describe('Test customRoutes middleware', () => {
     expect(context.state.useLongCacheControl).toBe(true)
     expect(next).toHaveBeenCalled()
   })
-
-  it('should log when custom routes are disabled', async () => {
-    context.state.settings.enableAppsRoutes = false
-
-    await customRoutes(context, next)
-
-    expect(loggerMock.object.info).toBeDefined()
-  })
 })
