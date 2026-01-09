@@ -186,7 +186,22 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
   const {
     vtex: { logger },
     clients: { vbase },
+    state: { settings },
   } = ctx
+
+  // Check if custom routes are enabled
+  if (!settings.enableAppsRoutes) {
+    logger.info({
+      message: 'Custom routes are disabled',
+      type: 'custom-routes-disabled',
+    })
+    ctx.status = 403
+    ctx.body = {
+      message: 'Custom routes are disabled',
+    }
+    await next()
+    return
+  }
 
   try {
     // Get pre-compiled custom routes from VBase

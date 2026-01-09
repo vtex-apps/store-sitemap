@@ -187,7 +187,7 @@ export default new Service<Clients, State, ParamsContext>({
     sitemap: sitemapPipeline,
     sitemapEntry: sitemapEntryPipeline,
     customRoutes: method({
-      GET: [cache, binding, customRoutes],
+      GET: [settings, cache, binding, customRoutes],
     }),
   },
 })
