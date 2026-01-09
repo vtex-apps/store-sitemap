@@ -89,23 +89,32 @@ describe('Test customRoutes middleware', () => {
     }
   })
 
-  it('should return 403 when enableAppsRoutes is disabled', async () => {
+  it('should filter out apps-routes when enableAppsRoutes is disabled', async () => {
+    const mockData = {
+      data: [
+        { name: 'apps-routes', routes: ['/app-1', '/app-2'] },
+        { name: 'user-routes', routes: ['/user-1', '/user-2'] },
+      ],
+      timestamp: Date.now() - 1000 * 60 * 60, // 1 hour ago
+    }
+    cachedData = mockData
     context.state.settings.enableAppsRoutes = false
 
     await customRoutes(context, next)
 
-    expect(context.status).toBe(403)
-    expect(context.body).toEqual({
-      message: 'Custom routes are disabled',
-    })
+    expect(context.status).toBe(200)
+    expect(context.body).toEqual([
+      { name: 'user-routes', routes: ['/user-1', '/user-2'] },
+    ])
+    expect(context.state.useLongCacheControl).toBe(true)
     expect(next).toHaveBeenCalled()
   })
 
-  it('should return cached data when enableAppsRoutes is enabled and data exists', async () => {
+  it('should return all routes when enableAppsRoutes is enabled', async () => {
     const mockData = {
       data: [
-        { name: 'app1', routes: ['/custom-1', '/custom-2'] },
-        { name: 'app2', routes: ['/custom-3'] },
+        { name: 'apps-routes', routes: ['/app-1', '/app-2'] },
+        { name: 'user-routes', routes: ['/user-1', '/user-2'] },
       ],
       timestamp: Date.now() - 1000 * 60 * 60, // 1 hour ago
     }

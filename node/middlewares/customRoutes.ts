@@ -189,20 +189,6 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
     state: { settings },
   } = ctx
 
-  // Check if custom routes are enabled
-  if (!settings.enableAppsRoutes) {
-    logger.info({
-      message: 'Custom routes are disabled',
-      type: 'custom-routes-disabled',
-    })
-    ctx.status = 403
-    ctx.body = {
-      message: 'Custom routes are disabled',
-    }
-    await next()
-    return
-  }
-
   try {
     // Get pre-compiled custom routes from VBase
     const cachedData = await vbase.getJSON<CustomRoutesData>(
@@ -271,9 +257,14 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       triggerCustomRoutesGeneration(ctx)
     }
 
+    // Filter data based on enableAppsRoutes setting
+    const filteredData = settings.enableAppsRoutes
+      ? cachedData.data
+      : cachedData.data.filter(item => item.name !== 'apps-routes')
+
     // Return cached data
     ctx.status = 200
-    ctx.body = cachedData.data
+    ctx.body = filteredData
     ctx.state.useLongCacheControl = true
 
     const diffTime = process.hrtime(startTime)
