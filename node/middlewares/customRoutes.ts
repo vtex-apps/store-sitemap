@@ -186,6 +186,7 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
   const {
     vtex: { logger },
     clients: { vbase },
+    state: { settings },
   } = ctx
 
   try {
@@ -256,9 +257,14 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       triggerCustomRoutesGeneration(ctx)
     }
 
+    // Filter data based on enableAppsRoutes setting
+    const filteredData = settings.enableAppsRoutes
+      ? cachedData.data
+      : cachedData.data.filter(item => item.name !== 'apps-routes')
+
     // Return cached data
     ctx.status = 200
-    ctx.body = cachedData.data
+    ctx.body = filteredData
     ctx.state.useLongCacheControl = true
 
     const diffTime = process.hrtime(startTime)
