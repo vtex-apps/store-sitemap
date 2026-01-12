@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.18.4] - 2026-01-12
+
 ### Fixed
 
 - Custom routes endpoint now respects `enableAppsRoutes` setting, filtering apps-routes when disabled
