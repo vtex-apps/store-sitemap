@@ -6,10 +6,19 @@ To learn how to generate a sitemap, follow the instructions below.
 
 ## Before you begin
 
-- This app is available for stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app).
-   To check which Edition App is installed on your account, run `vtex edition get`. If it's an older edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) with VTEX Support asking for the installation of the `vtex.edition-store@5.x` Edition App.
+<Steps>
 
-- Adjust the products, navigation, and custom routes that will be included in the sitemap. Check the [Advanced Configuration section](#advanced-configuration) for more information.
+### Use Edition App 3.x or later
+
+Sitemap is available for stores using `vtex.edition-store@3.x` or a later version of the [Edition App](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app).
+
+To check which Edition App is installed on your account, run `vtex edition get`. If it's an older edition, please [open a ticket](https://help-tickets.vtex.com/smartlink/sso/login/zendesk) with VTEX Support asking for the installation of the `vtex.edition-store@5.x` Edition App.
+
+### Configure sitemap content
+
+Adjust the products, navigation, and custom routes that will be included in the sitemap. Check the [Advanced Configuration section](#advanced-configuration) for more information.
+
+</Steps>
 
 ## Instructions
 
@@ -17,19 +26,21 @@ To learn how to generate a sitemap, follow the instructions below.
    
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/) from scratch.
 
-   >⚠️ Remember to replace the values between the curly brackets with the corresponding values of your environment.
+   > ⚠️ Remember to replace the values between the curly brackets with the corresponding values of your environment.
 
 3. Run `vtex install vtex.store-sitemap@2.x` to install the Sitemap app.
 
    > ℹ️ If you're using `vtex.edition-store@5.x`, skip step 3, as the `vtex.store-sitemap@2.x` app is installed by default with this version. Check our [Edition App documentation](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app) to learn more about the different versions.
 
-4. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+4. [Cross-border stores] Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+
+    > ℹ️ If your store is **not cross-border**, skip to step 10. The following steps are performed automatically when you install `vtex.store-sitemap@2.x` in your store. Running the GraphQL queries below will not affect sitemap generation.
    
-5. In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
+5. [Cross-border stores] In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
 
-6. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+6. [Cross-border stores] From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
 
-7. If this isn't the first time you're generating the store sitemap or if no changes have been made to the store routes since the last time you generated the store sitemap, go to step 8. Otherwise, run the following query:
+7. [Cross-border stores] If this isn't the first time you're generating the store sitemap or if no changes have been made to the store routes since the last time you generated the store sitemap, go to step 8. Otherwise, run the following query:
 
    ```gql  
    {
@@ -53,12 +64,9 @@ To learn how to generate a sitemap, follow the instructions below.
    }
    ```
 
-8. Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
+8. [Cross-border stores] Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
 
-9. Run the following query:
-
-  > ℹ️ If your store is **not** cross-border, the sitemap will be automatically updated daily.  
-  > In this case, running this GraphQL query is not necessary and will have no effect on the sitemap generation.
+9. [Cross-border stores] Run the following query:
 
    ```gql
    {
@@ -76,9 +84,9 @@ To learn how to generate a sitemap, follow the instructions below.
    }
    ```
 
-   This means your sitemap will be available in some minutes, after being processed and saved on our database.
+  This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
-   >ℹ️ The time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.
+   > ℹ️ The time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.
    
    If you attempt to send a new request to the Sitemap API during store sitemap generation, the following message will be displayed:
 
@@ -89,13 +97,13 @@ To learn how to generate a sitemap, follow the instructions below.
    
    To force a restart, add the `force` argument to the query, as in `generateSitemap(force: true)`. This will cancel the previous process.
 
-10. Check the sitemap generated for the current workspace you're working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Keep in mind that if you  have a cross-border store, you’ll first see an index with a sitemap for each locale.
+10. Check the sitemap generated for the current workspace you're working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Keep in mind that if you have a cross-border store, you’ll first see an index with a sitemap for each locale.
 
-    >ℹ️ Different `.xml` files are generated based on their entity type (product, category, subcategory, user routes, brand, and department), and each `.xml` file supports a maximum of 5k routes.
+    > ℹ️ Different `.xml` files are generated based on their entity type (product, category, subcategory, user routes, brand, and department), and each `.xml` file supports a maximum of 5k routes.
 
 11. If you're happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
 
-    Once you’ve promoted your workspace, no further actions are needed on your part: you’re ready to check  the store sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` on your browser.
+    Once you've promoted your workspace, no further action is needed on your part: you’re ready to check the store sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` in your browser.
 
 ### Advanced configuration
 
@@ -173,10 +181,13 @@ Beyond generating a complete sitemap, this app exposes specific API endpoints th
 The following endpoint provides combined route information in JSON format:
 
 1. **Custom Routes**
-   - Endpoint: `/_v/public/sitemap/custom-routes`
-   - Description: Returns a combination of routes defined via CMS and internal pages (excluding product, brands and category routes) and routes defined by installed apps in their `build.json` files.
-   - **Important**: The generation of custom-routes is capped under a certain limit. If you notice missing routes in your custom-routes file, please contact VTEX Support.
-   - Example response:
+* Endpoint: `/_v/public/sitemap/custom-routes`
+* Description: Returns a combination of routes defined via CMS and internal pages (excluding product, brands and category routes) and routes defined by installed apps in their `build.json` files.
+
+  >ℹ️ The generation of custom-routes is capped under a certain limit. If you notice missing routes in your custom-routes file, please contact VTEX Support.
+
+* Example response:
+
    ```json
    [
      {
@@ -192,5 +203,4 @@ The following endpoint provides combined route information in JSON format:
 
 #### Using the Endpoint
 
-This endpoint can be accessed via an HTTP GET request to:
-- `https://{workspace}--{account}.myvtex.com/_v/public/sitemap/custom-routes`
+This endpoint can be accessed via an HTTP GET request to `https://{workspace}--{account}.myvtex.com/_v/public/sitemap/custom-routes`.
