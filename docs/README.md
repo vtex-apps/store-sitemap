@@ -188,7 +188,7 @@ If you ever want to remove a custom route, you can execute the following mutatio
 
 The `vtex.store-sitemap` app exposes an API endpoint that allows you to retrieve route data in JSON format. This endpoint is useful for external sitemap generation or custom indexing workflows.
 
-The endpoint returns a combination of routes defined via CMS and internal pages, and routes defined by installed apps in their `build.json` files.
+The endpoint returns a combination of routes defined via CMS and internal pages, and those defined by installed apps in their `build.json` files.
 
 > ⚠️ Product, brand, and category routes are not included.
 
@@ -200,18 +200,22 @@ The endpoint returns a combination of routes defined via CMS and internal pages,
 
 ```
 GET https://{workspace}--{account}.myvtex.com/_v/public/sitemap/custom-routes
+```
+
 **Example response:**
 
->ℹ️ Custom route generation is subject to internal limits. If you notice missing routes in the response, please contact [VTEX Support](https://supporticket.vtex.com/support).
+> ℹ️ Custom route generation is subject to internal limits. If you notice missing routes in the response, please contact [VTEX Support](https://supporticket.vtex.com/support).
+
 
 ```json
-[
-{
-"name": "apps-routes",
-"routes": ["/store-locator/ny", "/store-locator/ca"]
-},
-{
-"name": "user-routes",
-"routes": ["/about-us", "/contact", "/faq"]
-}
-]
+ [
+   {
+     "name": "apps-routes",
+     "routes": ["/store-locator/ny", "/store-locator/ca"]
+   },
+   {
+     "name": "user-routes",
+     "routes": ["/about-us", "/contact", "/faq"]
+   }
+ ]
+```
