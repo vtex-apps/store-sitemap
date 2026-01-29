@@ -2,9 +2,9 @@
 
 [<i class="fa-brands fa-github"></i> Source code](https://github.com/vtex-apps/store-sitemap)
 
-The Sitemap app allows you to generate a `sitemap.xml` file for your store website. After deploying and installing the app on your account, you can create a sitemap to improve store visibility on search engines such as Google. 
+The Sitemap app generates a `sitemap.xml` file for your store website, helping search engines like Google discover and index your pages more efficiently.
 
-To learn how to generate a sitemap, follow the instructions below.
+Once the app is installed and configured, your sitemap is automatically generated and kept up to date based on your store’s routes and settings.
 
 ## Before you begin
 
@@ -42,9 +42,9 @@ Adjust the products, navigation, and custom routes that will be included in the 
 
 ### Cross-border setup
 
-> ℹ️ **Non-cross-border stores can skip this section.** In this case, these steps are performed automatically when you install `vtex.store-sitemap@2.x`. Running the GraphQL queries below will not affect sitemap generation.
+> ℹ️ Skip this section if your store is not cross-border. For non-cross-border stores, these steps are performed automatically when you install `vtex.store-sitemap@2.x`. 
 
-1. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+1. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL Admin IDE.
 
 2. In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
 
@@ -94,7 +94,7 @@ Adjust the products, navigation, and custom routes that will be included in the 
    }
    ```
 
-   This means your sitemap will be available in some minutes, after being processed and saved on our database.
+   This means your sitemap will be available in a few minutes after it's processed and saved in our database.
 
    > ℹ️ The time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.
    
@@ -121,7 +121,7 @@ Adjust the products, navigation, and custom routes that will be included in the 
 
 #### Managing routes
 
-You can manage whether to include products, navigation, apps, and/or routes containing a specific term in your sitemap. To do that,  follow the instructions below:
+You can decide whether to include products, navigation, apps, and/or routes that contain a specific term in your sitemap. To do that,  follow the instructions below:
 
 1. In your browser, type `{workspace}--{account}.myvtex.com/admin`, replacing the values between curly brackets with the corresponding values of your environment, to access the account's Admin of the production workspace you're working on.
    
@@ -154,7 +154,7 @@ For implementation details, check the following instructions:
 
 1. Create or modify your app to respond to the following route `/sitemap/{index-name}.xml` and to return an XML file containing the data that you want the search engine (for example, Google) to index. Replace the values between the curly brackets according to your scenario.
 
-   >ℹ️ We recommend using a pre-generated XML file. Otherwise, the XML file will be built from scratch for every request, consuming more time to complete the task.
+   >ℹ️ We recommend using a pre-generated XML file. Otherwise, the XML file will be built from scratch for every request, which will take longer to complete.
 
 2. [Publish](https://developers.vtex.com/vtex-developer-docs/docs/vtex-io-documentation-publishing-an-app) and install your app in a production workspace.
 
@@ -184,21 +184,28 @@ If you ever want to remove a custom route, you can execute the following mutatio
    }
    ```
 
-### Using Sitemap API Endpoints
+### Fetching custom routes in JSON format
 
-Beyond generating a complete sitemap, this app exposes specific API endpoints that can be used to get route information for external sitemap generation or other needs.
+The `vtex.store-sitemap` app exposes an API endpoint that allows you to retrieve route data in JSON format. This endpoint is useful for external sitemap generation or custom indexing workflows.
 
-#### Available Endpoints
+The endpoint returns a consolidated list of non-catalog routes, including:
+- Routes defined via CMS and internal pages
+- Routes declared by installed apps in their build.json files
 
-The following endpoint provides combined route information in JSON format:
+> ⚠️ Product, brand, and category routes are not included.
 
-1. **Custom Routes**
-* Endpoint: `/_v/public/sitemap/custom-routes`
-* Description: Returns a combination of routes defined via CMS and internal pages (excluding product, brands and category routes) and routes defined by installed apps in their `build.json` files.
+| Method | Endpoint                          |
+|--------|-----------------------------------|
+| `GET`  | `/_v/public/sitemap/custom-routes` |
 
-  >ℹ️ The generation of custom-routes is capped under a certain limit. If you notice missing routes in your custom-routes file, please contact VTEX Support.
+**Example request:**
 
-* Example response:
+```
+GET https://{workspace}--{account}.myvtex.com/_v/public/sitemap/custom-routes
+Accept: application/json
+```
+
+**Example response:**
 
    ```json
    [
@@ -213,6 +220,5 @@ The following endpoint provides combined route information in JSON format:
    ]
    ```
 
-#### Using the Endpoint
-
-This endpoint can be accessed via an HTTP GET request to `https://{workspace}--{account}.myvtex.com/_v/public/sitemap/custom-routes`.
+  >ℹ️ Custom route generation is subject to internal limits. If you notice missing routes in the response, please contact VTEX Support.
+  
