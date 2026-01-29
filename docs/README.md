@@ -24,7 +24,9 @@ Adjust the products, navigation, and custom routes that will be included in the 
 
 ## Instructions
 
-1. Using your terminal and the [VTEX IO CLI](https://vtex.io/docs/recipes/development/vtex-io-cli-installation-and-command-reference/), log in to your account.
+### For all stores
+
+1. Using your terminal and the [VTEX IO CLI](https://developers.vtex.com/docs/guides/vtex-io-documentation-vtex-io-cli-installation-and-command-reference), log in to your account.
    
 2. Run `vtex use {workspaceName} --production` to use a production workspace or [create a production workspace](https://vtex.io/docs/recipes/development/creating-a-production-workspace/) from scratch.
 
@@ -34,17 +36,23 @@ Adjust the products, navigation, and custom routes that will be included in the 
 
    > ℹ️ If you're using `vtex.edition-store@5.x`, skip step 3, as the `vtex.store-sitemap@2.x` app is installed by default with this version. Check our [Edition App documentation](https://developers.vtex.com/docs/guides/vtex-io-documentation-edition-app) to learn more about the different versions.
 
-4. [Cross-border stores] Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
+4. Choose your path:
+   - **Cross-border stores**: Continue to [Cross-border setup](#cross-border-setup) below
+   - **Non-cross-border stores**: Skip to [Verify your sitemap](#verify-your-sitemap)
 
-    > ℹ️ If your store is **not cross-border**, skip to step 10. The following steps are performed automatically when you install `vtex.store-sitemap@2.x` in your store. Running the GraphQL queries below will not affect sitemap generation.
-   
-5. [Cross-border stores] In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
+### Cross-border setup
 
-6. [Cross-border stores] From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+> ℹ️ **Non-cross-border stores can skip this section.** In this case, these steps are performed automatically when you install `vtex.store-sitemap@2.x`. Running the GraphQL queries below will not affect sitemap generation.
 
-7. [Cross-border stores] If this isn't the first time you're generating the store sitemap or if no changes have been made to the store routes since the last time you generated the store sitemap, go to step 8. Otherwise, run the following query:
+1. Run `vtex install vtex.admin-graphql-ide@3.x` to install the GraphQL admin IDE.
 
-   ```gql  
+2. In your browser, access the Admin and go to **Store Setting > Storefront > GraphQL IDE**.
+
+3. From the dropdown list, choose the `vtex.routes-bootstrap@0.x` app.
+
+4. If this isn't the first time you're generating the store sitemap or if no changes have been made to the store routes since the last time you generated the store sitemap, go to step 5. Otherwise, run the following query:
+
+   ```gql  
    {
      bootstrap {
        brands
@@ -66,9 +74,9 @@ Adjust the products, navigation, and custom routes that will be included in the 
    }
    ```
 
-8. [Cross-border stores] Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
+5. Now, from the GraphQL IDE dropdown list, select the `vtex.store-sitemap@2.x` app.
 
-9. [Cross-border stores] Run the following query:
+6. Run the following query:
 
    ```gql
    {
@@ -86,7 +94,7 @@ Adjust the products, navigation, and custom routes that will be included in the 
    }
    ```
 
-  This means your sitemap will be available in some minutes, after being processed and saved on our database.
+   This means your sitemap will be available in some minutes, after being processed and saved on our database.
 
    > ℹ️ The time taken to generate a sitemap is proportional to the number of products. For example, the average time to generate a sitemap for a store with 60k products is 30 minutes. For 5k products, the duration should be about 5 minutes.
    
@@ -99,13 +107,15 @@ Adjust the products, navigation, and custom routes that will be included in the 
    
    To force a restart, add the `force` argument to the query, as in `generateSitemap(force: true)`. This will cancel the previous process.
 
-10. Check the sitemap generated for the current workspace you're working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser. Keep in mind that if you have a cross-border store, you’ll first see an index with a sitemap for each locale.
+### Verify your sitemap
 
-    > ℹ️ Different `.xml` files are generated based on their entity type (product, category, subcategory, user routes, brand, and department), and each `.xml` file supports a maximum of 5k routes.
+1. Check the sitemap generated for the current workspace you're working on by accessing `https://{workspace}--{account}.myvtex.com/sitemap.xml` on your browser.
 
-11. If you're happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
+    > ℹ️ Different `.xml` files are generated based on their entity type (product, category, subcategory, user routes, brand, and department), and each `.xml` file supports a maximum of 5k routes. If you have a cross-border store, you'll first see an index with a sitemap for each locale.
 
-    Once you've promoted your workspace, no further action is needed on your part: you’re ready to check the store sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` in your browser.
+2. If you're happy with the results, run `vtex promote` to promote your workspace and include your sitemap in your master workspace.
+
+    Once you've promoted your workspace, no further action is needed on your part: You're ready to check the store sitemap by accessing `https://{account}.myvtex.com/sitemap.xml` in your browser.
 
 ### Advanced configuration
 
@@ -134,7 +144,7 @@ If you have [custom pages](https://developers.vtex.com/vtex-developer-docs/docs/
    }
    ```
 
-Once everything is set up, go back to **step 4** of the [Instructions](#instructions).
+Once everything is set up, return to the [Instructions](#instructions) and follow the steps for your store type.
 
 #### Extending the sitemap
 
