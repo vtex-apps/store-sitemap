@@ -1,5 +1,7 @@
 # Sitemap
 
+[<i class="fa-brands fa-github"></i> Source code](https://github.com/vtex-apps/store-sitemap)
+
 The Sitemap app allows you to generate a `sitemap.xml` file for your store website. After deploying and installing the app on your account, you can create a sitemap to improve store visibility on search engines such as Google. 
 
 To learn how to generate a sitemap, follow the instructions below.
