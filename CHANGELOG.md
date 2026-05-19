@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+
+- Scope `VtexID` client to `{account}.vtexcommercestable.com.br` and switch to `POST credential/validate?an={account}`, preventing VTEX ID from defaulting to `an=vtex` and accepting tokens from any account (INC-5469-sec, STR-1029)
+- Add explicit `tokenAccount === ctx.vtex.account` guard in `authFromCookie`; cross-account tokens are rejected with a `logger.warn`
+- Remove `canBypass` shortcut that unconditionally granted access to `@vtex.com` emails without a Sphinx admin check
+- Add `outbound-access` policy for `{{account}}.vtexcommercestable.com.br /api/vtexid/credential/validate` in `manifest.json`
+
 ### Changed
 
 - Update DK Catalog platform-flow-id
