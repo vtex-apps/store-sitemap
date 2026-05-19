@@ -18,17 +18,16 @@ export class VtexID extends ExternalClient {
 
   public validateCredential = (token: string): Promise<CredentialValidateResponse> =>
     this.http.post(
-      `credential/validate`,
+      `credential/validate?an=${this.context.account}`,
       { token },
       {
         headers: {
+          Accept: 'application/json',
           'Content-Type': 'application/json',
           'User-Agent': userAgent,
+          'X-VTEX-Proxy-To': `https://${this.context.account}.vtexcommercestable.com.br`,
         },
-        metric: 'vtexid-validate-credential',
-        params: {
-          an: this.context.account,
-        },
+        metric: 'vtexid-authtoken',
       }
     )
 }
