@@ -13,7 +13,13 @@
     ],
     "setupFiles": [
       "<rootDir>/jest/setEnvVars.js"
-    ]
+    ],
+    "moduleNameMapper": {
+      "^@opentelemetry/otlp-exporter-base/node-http$": "<rootDir>/node_modules/@opentelemetry/otlp-exporter-base/build/src/index-node-http.js",
+      "^@opentelemetry/otlp-exporter-base/browser-http$": "<rootDir>/node_modules/@opentelemetry/otlp-exporter-base/build/src/index-browser-http.js",
+      "^@vtex/diagnostics-nodejs$": "<rootDir>/jest/__mocks__/vtexDiagnostics.js",
+      "^@vtex/diagnostics-semconv$": "<rootDir>/jest/__mocks__/vtexDiagnostics.js"
+    }
   },
   "dependencies": {
     "apollo-datasource-rest": "^0.2.1",

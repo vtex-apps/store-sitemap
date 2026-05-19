@@ -104,6 +104,13 @@
         "host": "vtexid.vtex.com.br",
         "path": "/api/vtexid/pub/authenticated/user"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/vtexid/credential/validate"
+      }
     }
   ],
   "credentialType": "absolute",
