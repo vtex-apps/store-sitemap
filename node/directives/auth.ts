@@ -12,11 +12,8 @@ export const authFromCookie = async (ctx: Context) => {
     return 'VtexIdclientAutCookie not found.'
   }
 
-  let credential: { user: string; account: string }
-  try {
-    credential = (await vtexID.validateCredential(vtexIdToken)) ?? { user: '', account: '' }
-  } catch (err) {
-    logger.warn({ message: 'VtexID credential validation failed', error: err })
+  const credential = await vtexID.validateCredential(vtexIdToken)
+  if (!credential) {
     return 'Could not validate token.'
   }
 

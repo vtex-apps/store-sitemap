@@ -12,13 +12,14 @@ const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
 const loggerMock = TypeMoq.Mock.ofType<Logger>()
 
-// Cookie token → { user, account } returned by validateCredential:
-//   '1' → regular admin of testAccount
-//   '2' → non-admin user of testAccount
-//   '3' → @vtex.com user who is NOT a Sphinx admin (canBypass removed)
-//   '4' → @vtex.com user who IS a Sphinx admin
-//   '5' → valid user but token issued for a different account (cross-account)
-//   default → unresolvable token (empty user)
+// Cookie token → value returned by validateCredential:
+//   '1' → { user: 'email@test.com', account: testAccount }  — regular admin
+//   '2' → { user: 'email2@test.com', account: testAccount } — non-admin
+//   '3' → { user: 'email@vtex.com', account: testAccount }  — @vtex.com non-admin
+//   '4' → { user: 'admin@vtex.com', account: testAccount }  — @vtex.com admin
+//   '5' → { user: 'email@test.com', account: 'otherAccount' } — cross-account
+//   '6' → null  — 401 (expired/invalid token, swallowed in client)
+//   default → { user: '', account: '' }  — VTEX ID returned empty user
 
 const TEST_ACCOUNT = 'testAccount'
 
@@ -42,6 +43,8 @@ describe('Test auth directive code', () => {
           return { user: 'admin@vtex.com', account: TEST_ACCOUNT }
         case '5':
           return { user: 'email@test.com', account: 'otherAccount' }
+        case '6':
+          return null
         default:
           return { user: '', account: '' }
       }
@@ -153,27 +156,11 @@ describe('Test auth directive code', () => {
     expect(authorized).toBe('User is not admin and can not access resource.')
   })
 
-  // VtexID throws (e.g. 401 / network error)
-  it('Should return error string when validateCredential throws', async () => {
-    const warnSpy = jest.fn()
-    context.vtex = { ...context.vtex, logger: { ...loggerMock.object, warn: warnSpy } as any }
-
-    const throwingVtexID = class extends vtexIDTypeMock.object {
-      constructor() { super(ioContext.object) }
-      public validateCredential = async (_: string): Promise<any> => {
-        throw new Error('401 Unauthorized')
-      }
-    }
-    // tslint:disable-next-line: max-classes-per-file
-    const ClientsWithThrowingVtexID = class extends Clients {
-      get vtexID() { return this.getOrSet('vtexID', throwingVtexID) }
-      get sphinx() { return this.getOrSet('sphinx', sphinx) }
-    }
-    context.clients = new ClientsWithThrowingVtexID({}, ioContext.object)
-
+  // Client returns null (401 swallowed in VtexID client)
+  it('Should return error string when validateCredential returns null (401)', async () => {
+    context.cookies = { get: (_: string) => '6' } as any
     const authorized = await authFromCookie(context)
     expect(authorized).toBe('Could not validate token.')
-    expect(warnSpy).toHaveBeenCalledWith(expect.objectContaining({ message: 'VtexID credential validation failed' }))
   })
 
 })
