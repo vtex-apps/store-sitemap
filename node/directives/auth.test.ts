@@ -152,4 +152,28 @@ describe('Test auth directive code', () => {
     const authorized = await authFromCookie(context)
     expect(authorized).toBe('User is not admin and can not access resource.')
   })
+
+  // VtexID throws (e.g. 401 / network error)
+  it('Should return error string when validateCredential throws', async () => {
+    const warnSpy = jest.fn()
+    context.vtex = { ...context.vtex, logger: { ...loggerMock.object, warn: warnSpy } as any }
+
+    const throwingVtexID = class extends vtexIDTypeMock.object {
+      constructor() { super(ioContext.object) }
+      public validateCredential = async (_: string): Promise<any> => {
+        throw new Error('401 Unauthorized')
+      }
+    }
+    // tslint:disable-next-line: max-classes-per-file
+    const ClientsWithThrowingVtexID = class extends Clients {
+      get vtexID() { return this.getOrSet('vtexID', throwingVtexID) }
+      get sphinx() { return this.getOrSet('sphinx', sphinx) }
+    }
+    context.clients = new ClientsWithThrowingVtexID({}, ioContext.object)
+
+    const authorized = await authFromCookie(context)
+    expect(authorized).toBe('Could not validate token.')
+    expect(warnSpy).toHaveBeenCalledWith(expect.objectContaining({ message: 'VtexID credential validation failed' }))
+  })
+
 })
