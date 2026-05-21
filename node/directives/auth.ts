@@ -1,14 +1,10 @@
 import { defaultFieldResolver, GraphQLField } from 'graphql'
 import { SchemaDirectiveVisitor } from 'graphql-tools'
 
-const canBypass = (email: string) => {
-  return email.includes('@vtex.com')
-}
-
 export const authFromCookie = async (ctx: Context) => {
   const {
     clients: { sphinx, vtexID },
-    vtex: { authToken },
+    vtex: { account, logger },
   } = ctx
 
   const vtexIdToken = ctx.cookies.get('VtexIdclientAutCookie')
@@ -16,14 +12,24 @@ export const authFromCookie = async (ctx: Context) => {
     return 'VtexIdclientAutCookie not found.'
   }
 
-  const { user: email } =
-    (await vtexID.getIdUser(vtexIdToken, authToken)) ||  { user: '' }
+  const credential = await vtexID.validateCredential(vtexIdToken)
+  if (!credential) {
+    return 'Could not validate token.'
+  }
+
+  const { user: email, account: tokenAccount } = credential
+
   if (!email) {
     return 'Could not find user specified by token.'
   }
 
-  if (canBypass(email)) {
-    return true
+  if (tokenAccount !== account) {
+    logger.warn({
+      message: 'Cross-account VtexIdclientAutCookie rejected',
+      account,
+      tokenAccount,
+    })
+    return 'Cross-account token rejected.'
   }
 
   const isAdminUser = await sphinx.isAdmin(email)
