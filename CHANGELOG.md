@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.18.7] - 2026-05-21
+
 ### Security
 
 - Scope `VtexID` client to `{account}.vtexcommercestable.com.br` and switch to `POST credential/validate?an={account}`, preventing VTEX ID from defaulting to `an=vtex` and accepting tokens from any account (INC-5469-sec, STR-1029)
