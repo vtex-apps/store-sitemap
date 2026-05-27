@@ -1,6 +1,6 @@
 import { getDefaultStoreBinding } from '../../resources/bindings'
 import { clearCustomRoutesGenerationLock } from '../customRoutes'
-import { getAppsRoutes, getUserRoutes } from '../../services/routes'
+import { getAppsRoutes, getCmsRoutes, getUserRoutes } from '../../services/routes'
 import { CUSTOM_ROUTES_BUCKET, CUSTOM_ROUTES_FILENAME } from '../../utils'
 
 export async function generateCustomRoutes(ctx: Context) {
@@ -35,14 +35,16 @@ export async function generateCustomRoutes(ctx: Context) {
       vtex: ctx.vtex,
     } as Context
 
-    const [appsRoutes, userRoutes] = await Promise.all([
+    const [appsRoutes, userRoutes, cmsRoutes] = await Promise.all([
       getAppsRoutes(routeCtx),
       getUserRoutes(routeCtx),
+      getCmsRoutes(routeCtx),
     ])
 
     logger.info({
       message: 'Routes fetched',
       appsRoutesCount: appsRoutes.length,
+      cmsRoutesCount: cmsRoutes.length,
       userRoutesCount: userRoutes.length,
     })
 
@@ -51,6 +53,7 @@ export async function generateCustomRoutes(ctx: Context) {
       data: [
         { name: 'apps-routes', routes: appsRoutes },
         { name: 'user-routes', routes: userRoutes },
+        { name: 'cms-routes', routes: cmsRoutes },
       ],
     }
 
