@@ -83,7 +83,7 @@ describe('Test settings middleware', () => {
     expect(context.state.enabledIndexFiles).toStrictEqual([])
   })
 
-  it('Should include CMS_ROUTES_INDEX when enableCmsRoutes is true', async () => {
+  it('Should NOT include CMS_ROUTES_INDEX in enabledIndexFiles when enableCmsRoutes is true (CMS uses its own bucket)', async () => {
     const appClient = context.clients.apps as any
     appClient.settings = {
       enableAppsRoutes: false,
@@ -92,7 +92,8 @@ describe('Test settings middleware', () => {
       enableProductRoutes: false,
     }
     await settings(context, next)
-    expect(context.state.enabledIndexFiles).toStrictEqual([CMS_ROUTES_INDEX])
+    expect(context.state.enabledIndexFiles).not.toContain(CMS_ROUTES_INDEX)
+    expect(context.state.enabledIndexFiles).toStrictEqual([])
   })
 
   it('Should omit CMS_ROUTES_INDEX when enableCmsRoutes is false (default rollout state)', async () => {

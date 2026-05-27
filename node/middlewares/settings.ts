@@ -1,7 +1,6 @@
 import { appIdToAppAtMajor } from '@vtex/api'
 import {
   APPS_ROUTES_INDEX,
-  CMS_ROUTES_INDEX,
   PRODUCT_ROUTES_INDEX,
   REWRITER_ROUTES_INDEX,
 } from './generateMiddlewares/utils'
@@ -27,10 +26,13 @@ const DEFAULT_SETTINGS: Settings = {
   ignoreBindings: false,
 }
 
+// CMS routes use a dedicated per-binding bucket (spec Decision 1) and are
+// composed into /sitemap.xml via cmsRoutesPromise in sitemap.ts — not via
+// enabledIndexFiles / the shared production bucket.
 const INDEX_MAP: Record<keyof Settings, string> = {
   disableRoutesTerm: '',
   enableAppsRoutes: APPS_ROUTES_INDEX,
-  enableCmsRoutes: CMS_ROUTES_INDEX,
+  enableCmsRoutes: '',
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
   ignoreBindings: '',

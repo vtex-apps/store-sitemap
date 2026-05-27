@@ -69,8 +69,8 @@ export const isValidCmsRoute = (
 export const CMS_ROUTES_DEFAULT_CHANGEFREQ: ChangeFreq = 'weekly'
 export const CMS_ROUTES_DEFAULT_PRIORITY = 0.5
 
-const toRoute = (internal: Internal): Route => ({
-  alternates: [],
+const toRoute = (internal: Internal, alternates: AlternateRoute[]): Route => ({
+  alternates,
   changefreq: CMS_ROUTES_DEFAULT_CHANGEFREQ,
   id: internal.id,
   imagePath: internal.imagePath || undefined,
@@ -123,14 +123,27 @@ const partitionByBinding = (
   internals: Internal[],
   disableRoutesTerm: string
 ): Map<string, Route[]> => {
-  const byBinding = new Map<string, Route[]>()
+  const byId = new Map<string, Internal[]>()
   for (const internal of internals) {
     if (!isValidCmsRoute(internal, disableRoutesTerm)) {
       continue
     }
-    const bucket = byBinding.get(internal.binding) || []
-    bucket.push(toRoute(internal))
-    byBinding.set(internal.binding, bucket)
+    const group = byId.get(internal.id) ?? []
+    group.push(internal)
+    byId.set(internal.id, group)
+  }
+
+  const byBinding = new Map<string, Route[]>()
+  for (const group of byId.values()) {
+    const alternates: AlternateRoute[] = group.map(i => ({
+      bindingId: i.binding,
+      path: i.from,
+    }))
+    for (const internal of group) {
+      const bucket = byBinding.get(internal.binding) ?? []
+      bucket.push(toRoute(internal, alternates))
+      byBinding.set(internal.binding, bucket)
+    }
   }
   return byBinding
 }

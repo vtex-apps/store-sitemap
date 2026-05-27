@@ -208,6 +208,70 @@ describe('generateCmsRoutes', () => {
     expect(collectPaths(bindingTwoEntries)).toEqual(['/nossa-historia'])
   })
 
+  it('populates alternates across bindings for the same logical page id (US-3)', async () => {
+    const internals = [
+      { binding: '1', from: '/our-story', id: 'cms-1', type: 'userRoute' },
+      { binding: '2', from: '/nossa-historia', id: 'cms-1', type: 'userRoute' },
+    ] as Internal[]
+
+    const context = buildContext({ internals })
+    await generateCmsRoutes(context, next)
+
+    const expectedAlternates = [
+      { bindingId: '1', path: '/our-story' },
+      { bindingId: '2', path: '/nossa-historia' },
+    ]
+
+    const { vbase } = context.clients
+    const bindingOneIndex = await vbase.getJSON<SitemapIndex>(
+      bucketFor('1'),
+      CMS_ROUTES_INDEX,
+      true
+    )
+    const bindingOneEntry = await vbase.getJSON<SitemapEntry>(
+      bucketFor('1'),
+      bindingOneIndex.index[0],
+      true
+    )
+    expect(bindingOneEntry.routes[0].alternates).toEqual(expectedAlternates)
+
+    const bindingTwoIndex = await vbase.getJSON<SitemapIndex>(
+      bucketFor('2'),
+      CMS_ROUTES_INDEX,
+      true
+    )
+    const bindingTwoEntry = await vbase.getJSON<SitemapEntry>(
+      bucketFor('2'),
+      bindingTwoIndex.index[0],
+      true
+    )
+    expect(bindingTwoEntry.routes[0].alternates).toEqual(expectedAlternates)
+  })
+
+  it('sets alternates to a single self entry when the page exists in only one binding', async () => {
+    const internals = [
+      { binding: '1', from: '/our-story', id: 'cms-1', type: 'userRoute' },
+    ] as Internal[]
+
+    const context = buildContext({ internals })
+    await generateCmsRoutes(context, next)
+
+    const { vbase } = context.clients
+    const index = await vbase.getJSON<SitemapIndex>(
+      bucketFor('1'),
+      CMS_ROUTES_INDEX,
+      true
+    )
+    const entry = await vbase.getJSON<SitemapEntry>(
+      bucketFor('1'),
+      index.index[0],
+      true
+    )
+    expect(entry.routes[0].alternates).toEqual([
+      { bindingId: '1', path: '/our-story' },
+    ])
+  })
+
   it('excludes framework-generated types (product, department, category, subcategory, brand) from cms-routes', async () => {
     const internals = [
       { binding: '1', from: '/p/123', id: 'p1', type: 'product' },
