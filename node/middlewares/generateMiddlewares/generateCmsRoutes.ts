@@ -64,12 +64,19 @@ export const isValidCmsRoute = (
   return true
 }
 
+// Defaults for sitemap protocol tags applied to every CMS route (FR-5).
+// They can be overridden once hCMS exposes per-page values (Decision 3).
+export const CMS_ROUTES_DEFAULT_CHANGEFREQ: ChangeFreq = 'weekly'
+export const CMS_ROUTES_DEFAULT_PRIORITY = 0.5
+
 const toRoute = (internal: Internal): Route => ({
   alternates: [],
+  changefreq: CMS_ROUTES_DEFAULT_CHANGEFREQ,
   id: internal.id,
   imagePath: internal.imagePath || undefined,
   imageTitle: internal.imageTitle || undefined,
   path: internal.from,
+  priority: CMS_ROUTES_DEFAULT_PRIORITY,
 })
 
 // Rough JSON byte size estimate — adequate as a proxy for serialized output

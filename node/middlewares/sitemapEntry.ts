@@ -8,43 +8,134 @@ import { SitemapEntry } from './generateMiddlewares/utils'
 const getBinding = (bindingId: string, bindings: Binding[]) =>
   bindings.find(binding => binding.id === bindingId)
 
+// Default binding identification: prefer the first store-targeted binding, fall
+// back to the first binding in the matching list. This is the same convention
+// used by `resources/bindings.ts` (the "first store binding" fallback path).
+const getDefaultMatchingBinding = (
+  matchingBindings: Binding[]
+): Binding | undefined =>
+  matchingBindings.find(b => b.targetProduct === 'vtex-storefront') ??
+  matchingBindings[0]
+
+interface LocaleHrefArgs {
+  alternate: AlternateRoute
+  alternateBinding: Binding
+  bindingAddress?: string
+  currentBindingId: string
+  forwardedHost: string
+  rootPath: string
+}
+
+const buildLocaleHref = ({
+  alternate,
+  alternateBinding,
+  bindingAddress,
+  currentBindingId,
+  forwardedHost,
+  rootPath,
+}: LocaleHrefArgs): string => {
+  if (alternate.bindingId === currentBindingId) {
+    const querystring = bindingAddress
+      ? `?__bindingAddress=${bindingAddress}`
+      : ''
+    return `https://${forwardedHost}${rootPath}${alternate.path}${querystring}`
+  }
+  if (bindingAddress) {
+    return `https://${forwardedHost}${alternate.path}?__bindingAddress=${alternateBinding.canonicalBaseAddress}`
+  }
+  return `https://${alternateBinding.canonicalBaseAddress}${alternate.path}`
+}
+
+const buildLocalization = (
+  ctx: Context,
+  route: Route
+): string => {
+  const {
+    state: {
+      binding,
+      bindingAddress,
+      forwardedHost,
+      rootPath,
+      matchingBindings,
+    },
+  } = ctx
+
+  // Single-binding store → emit no alternates (behavior preserved).
+  if (!matchingBindings || matchingBindings.length <= 1) {
+    return ''
+  }
+  if (!route.alternates || route.alternates.length === 0) {
+    return ''
+  }
+
+  const lines: string[] = []
+  for (const alternate of route.alternates) {
+    const alternateBinding = getBinding(alternate.bindingId, matchingBindings)
+    if (!alternateBinding) {
+      continue
+    }
+    const href = buildLocaleHref({
+      alternate,
+      alternateBinding,
+      bindingAddress,
+      currentBindingId: binding.id,
+      forwardedHost,
+      rootPath,
+    })
+    const locale = alternateBinding.defaultLocale
+    lines.push(
+      `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
+    )
+  }
+
+  const defaultBinding = getDefaultMatchingBinding(matchingBindings)
+  if (defaultBinding) {
+    const defaultAlternate =
+      route.alternates.find(a => a.bindingId === defaultBinding.id) ??
+      ({ bindingId: defaultBinding.id, path: route.path } as AlternateRoute)
+    const defaultHref = buildLocaleHref({
+      alternate: defaultAlternate,
+      alternateBinding: defaultBinding,
+      bindingAddress,
+      currentBindingId: binding.id,
+      forwardedHost,
+      rootPath,
+    })
+    lines.push(
+      `<xhtml:link rel="alternate" hreflang="x-default" href="${defaultHref}"/>`
+    )
+  }
+
+  return lines.join('\n')
+}
+
 export const URLEntry = (
   ctx: Context,
   route: Route,
   lastUpdated: string
 ): string => {
-  const { state: {
-    binding,
-    bindingAddress,
-    forwardedHost,
-    rootPath,
-    matchingBindings,
-  },
+  const {
+    state: { bindingAddress, forwardedHost, rootPath },
   } = ctx
   const querystring = bindingAddress
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
-  const localization = route.alternates && route.alternates.length > 1
-    ? route.alternates.map(
-      ({ bindingId, path }) => {
-        const alternateBinding = getBinding(bindingId, matchingBindings)
-        if (bindingId === binding.id || !alternateBinding) {
-            return ''
-          }
-          const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
-          const href = querystring
-            ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
-            : `https://${canonicalBaseAddress}${path}`
-          return `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
-        }
-       )
-      .join('\n')
+  const localization = buildLocalization(ctx, route)
+  const lastmodValue = route.lastmod || lastUpdated
+  const changefreqTag = route.changefreq
+    ? `<changefreq>${route.changefreq}</changefreq>`
     : ''
+  const priorityTag =
+    typeof route.priority === 'number'
+      ? `<priority>${route.priority.toFixed(1)}</priority>`
+      : ''
   let entry = `
       <loc>${loc}</loc>
       ${localization}
-      <lastmod>${lastUpdated}</lastmod>
+      <lastmod>${lastmodValue}</lastmod>
+      ${changefreqTag}
+      ${priorityTag}
     `
   if (route.imagePath && route.imageTitle) {
     // add image metainfo
