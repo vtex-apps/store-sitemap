@@ -1,6 +1,6 @@
 # Include CMS routes in Sitemap generation for FastStore
 
-> **Status**: Approved
+> **Status**: Done
 > **Created**: 2026-05-27
 > **Jira**: [SFS-3123](https://vtex-dev.atlassian.net/browse/SFS-3123)
 > **PRD**: [Sitemap generation in FastStore](https://docs.google.com/document/d/18QrjAJmGpfLJCW-br5a2Tw-rAvC57biKAl5Z2_4djiM/edit)
