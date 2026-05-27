@@ -16,6 +16,7 @@ import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
 import { errors } from './middlewares/errors'
 import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
+import { generateCmsRoutes } from './middlewares/generateMiddlewares/generateCmsRoutes'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
 import { generateRewriterRoutes } from './middlewares/generateMiddlewares/generateRewriterRoutes'
 import {
@@ -122,6 +123,18 @@ export default new Service<Clients, State, ParamsContext>({
       isCrossBorder,
       generationPrepare,
       generateAppsRoutes,
+    ],
+    /**
+     * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
+     * Use the REST API endpoints instead.
+     */
+    generateCmsRoutes: [
+      throttle,
+      errors,
+      settings,
+      isCrossBorder,
+      generationPrepare,
+      generateCmsRoutes,
     ],
     /**
      * @deprecated This event is being deprecated. Sitemap generation in this major version will not be triggered by events.
