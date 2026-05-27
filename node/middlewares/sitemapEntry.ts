@@ -2,7 +2,12 @@ import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
-import { SITEMAP_URL } from '../utils'
+import {
+  CMS_ROUTES_PREFIX,
+  getBucket,
+  hashString,
+  SITEMAP_URL,
+} from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
 
 const getBinding = (bindingId: string, bindings: Binding[]) =>
@@ -165,7 +170,7 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
 async function legacySitemapEntry(ctx: Context) {
   const {
     clients: { vbase },
-    state: { forwardedPath, bucket },
+    state: { forwardedPath, bucket, binding, settings },
     vtex: { logger },
   } = ctx
 
@@ -196,11 +201,23 @@ async function legacySitemapEntry(ctx: Context) {
   )
 
   const fileName = path.split('.')[0]
-  const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
+  let maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
     bucket,
     fileName,
     true
   )
+
+  // Fall back to the cms-routes bucket — CMS sub-sitemaps live in their own
+  // dedicated bucket (Decision 1), so requests for `/sitemap/cms-routes-N.xml`
+  // do not find a match in the production bucket above.
+  if (!maybeRoutesInfo && settings?.enableCmsRoutes && binding?.id) {
+    const cmsBucket = getBucket(CMS_ROUTES_PREFIX, hashString(binding.id))
+    maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
+      cmsBucket,
+      fileName,
+      true
+    )
+  }
 
   if (!maybeRoutesInfo) {
     ctx.status = 404

@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio'
 
 import { MultipleSitemapGenerationError } from '../errors'
 import {
+  CMS_ROUTES_PREFIX,
   EXTENDED_INDEX_FILE,
   xmlTruncateNodes,
   getBucket,
@@ -9,7 +10,11 @@ import {
   SitemapNotFound,
   startSitemapGeneration,
 } from '../utils'
-import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
+import {
+  CMS_ROUTES_INDEX,
+  currentDate,
+  SitemapIndex,
+} from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -50,6 +55,7 @@ const sitemapIndex = async (ctx: Context) => {
       bucket,
       rootPath,
       bindingAddress,
+      settings,
     },
     clients: { vbase },
   } = ctx
@@ -61,6 +67,18 @@ const sitemapIndex = async (ctx: Context) => {
     }
   )
 
+  // CMS routes are stored in a dedicated bucket (Decision 1 of the spec) and
+  // only read when the rollout flag is on (invariant 9 — settings gating). The
+  // read is fire-and-forget on absence: missing CMS index simply means there
+  // are no extra sub-sitemaps to append.
+  const cmsRoutesPromise = settings?.enableCmsRoutes
+    ? vbase.getJSON<SitemapIndex>(
+        getBucket(CMS_ROUTES_PREFIX, hashString(binding.id)),
+        CMS_ROUTES_INDEX,
+        true
+      )
+    : Promise.resolve(null as SitemapIndex | null)
+
   const rawIndexFiles = await Promise.all([
     ...enabledIndexFiles.map(indexFile =>
       vbase.getJSON<SitemapIndex>(bucket, indexFile, true)
@@ -70,9 +88,10 @@ const sitemapIndex = async (ctx: Context) => {
       EXTENDED_INDEX_FILE,
       true
     ),
+    cmsRoutesPromise,
   ])
 
-  const indexFiles = rawIndexFiles.filter(Boolean)
+  const indexFiles = rawIndexFiles.filter(Boolean) as SitemapIndex[]
 
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
