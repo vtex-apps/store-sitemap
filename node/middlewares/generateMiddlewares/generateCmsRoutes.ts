@@ -31,7 +31,7 @@ const FRAMEWORK_OWNED_TYPES = new Set([
 // per FR-3 (regardless of merchant toggle).
 const MANDATORY_EXCLUDED_TYPE_FRAGMENTS = ['login', 'error']
 
-const isCmsOriginType = (rawType: string | undefined): boolean => {
+export const isCmsOriginType = (rawType: string | undefined): boolean => {
   const type = (rawType || '').toLowerCase()
   if (!type) {
     return false
@@ -48,7 +48,10 @@ const isCmsOriginType = (rawType: string | undefined): boolean => {
   return true
 }
 
-const isValidCmsRoute = (internal: Internal, disableRoutesTerm: string): boolean => {
+export const isValidCmsRoute = (
+  internal: Internal,
+  disableRoutesTerm: string
+): boolean => {
   if (internal.disableSitemapEntry) {
     return false
   }
