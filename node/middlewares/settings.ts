@@ -1,6 +1,7 @@
 import { appIdToAppAtMajor } from '@vtex/api'
 import {
   APPS_ROUTES_INDEX,
+  CMS_ROUTES_INDEX,
   PRODUCT_ROUTES_INDEX,
   REWRITER_ROUTES_INDEX,
 } from './generateMiddlewares/utils'
@@ -9,6 +10,7 @@ export interface Settings {
   enableAppsRoutes: boolean
   enableProductRoutes: boolean
   enableNavigationRoutes: boolean
+  enableCmsRoutes: boolean
   ignoreBindings: boolean
   disableRoutesTerm: string
 }
@@ -16,17 +18,19 @@ export interface Settings {
 const VTEX_APP_ID = process.env.VTEX_APP_ID!
 const VTEX_APP_AT_MAJOR = appIdToAppAtMajor(VTEX_APP_ID)
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: Settings = {
   disableRoutesTerm: '',
   enableAppsRoutes: true,
+  enableCmsRoutes: false,
   enableNavigationRoutes: true,
   enableProductRoutes: true,
   ignoreBindings: false,
 }
 
-const INDEX_MAP = {
+const INDEX_MAP: Record<keyof Settings, string> = {
   disableRoutesTerm: '',
   enableAppsRoutes: APPS_ROUTES_INDEX,
+  enableCmsRoutes: CMS_ROUTES_INDEX,
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
   ignoreBindings: '',
