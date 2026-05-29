@@ -195,6 +195,7 @@ async function legacySitemap(ctx: Context) {
           throw catchErr
         }
       })
+      return
     }
     throw err
   }
