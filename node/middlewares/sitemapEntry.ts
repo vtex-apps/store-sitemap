@@ -2,52 +2,160 @@ import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
+import {
+  serveCmsEntryFromCandidateBuckets,
+  serveCmsEntryFromVBase,
+} from '../services/cmsServing'
 import { SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
 
 const getBinding = (bindingId: string, bindings: Binding[]) =>
   bindings.find(binding => binding.id === bindingId)
 
+const getDefaultMatchingBinding = (
+  matchingBindings: Binding[]
+): Binding | undefined =>
+  matchingBindings.find(b => b.targetProduct === 'vtex-storefront') ??
+  matchingBindings[0]
+
+interface LocaleHrefArgs {
+  alternate: AlternateRoute
+  alternateBinding: Binding
+  bindingAddress?: string
+  currentBindingId: string
+  forwardedHost: string
+  rootPath: string
+}
+
+const buildLocaleHref = ({
+  alternate,
+  alternateBinding,
+  bindingAddress,
+  currentBindingId,
+  forwardedHost,
+  rootPath,
+}: LocaleHrefArgs): string => {
+  if (alternate.bindingId === currentBindingId) {
+    const querystring = bindingAddress
+      ? `?__bindingAddress=${bindingAddress}`
+      : ''
+    return `https://${forwardedHost}${rootPath}${alternate.path}${querystring}`
+  }
+  if (bindingAddress) {
+    return `https://${forwardedHost}${alternate.path}?__bindingAddress=${alternateBinding.canonicalBaseAddress}`
+  }
+  return `https://${alternateBinding.canonicalBaseAddress}${alternate.path}`
+}
+
+const buildLocalization = (
+  ctx: Context,
+  route: Route
+): string => {
+  const {
+    state: {
+      binding,
+      bindingAddress,
+      forwardedHost,
+      rootPath,
+      matchingBindings,
+    },
+  } = ctx
+
+  if (!matchingBindings || matchingBindings.length <= 1) {
+    return ''
+  }
+  if (!route.alternates || route.alternates.length === 0) {
+    return ''
+  }
+
+  const lines: string[] = []
+  for (const alternate of route.alternates) {
+    const alternateBinding = getBinding(alternate.bindingId, matchingBindings)
+    if (!alternateBinding) {
+      continue
+    }
+    const href = buildLocaleHref({
+      alternate,
+      alternateBinding,
+      bindingAddress,
+      currentBindingId: binding.id,
+      forwardedHost,
+      rootPath,
+    })
+    const locale = alternateBinding.defaultLocale
+    lines.push(
+      `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
+    )
+  }
+
+  const defaultBinding = getDefaultMatchingBinding(matchingBindings)
+  if (defaultBinding) {
+    const defaultAlternate =
+      route.alternates.find(a => a.bindingId === defaultBinding.id) ??
+      ({ bindingId: defaultBinding.id, path: route.path } as AlternateRoute)
+    const defaultHref = buildLocaleHref({
+      alternate: defaultAlternate,
+      alternateBinding: defaultBinding,
+      bindingAddress,
+      currentBindingId: binding.id,
+      forwardedHost,
+      rootPath,
+    })
+    lines.push(
+      `<xhtml:link rel="alternate" hreflang="x-default" href="${defaultHref}"/>`
+    )
+  }
+
+  return lines.join('\n')
+}
+
+const renderSitemapEntryXml = (
+  ctx: Context,
+  routesInfo: SitemapEntry
+): string => {
+  const $ = cheerio.load(
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
+    {
+      xmlMode: true,
+    }
+  )
+  const { routes, lastUpdated } = routesInfo
+  const entryXML = routes.map((route: Route) =>
+    URLEntry(ctx, route, lastUpdated)
+  )
+  $('urlset').append(entryXML.join('\n'))
+  return $.xml()
+}
+
 export const URLEntry = (
   ctx: Context,
   route: Route,
   lastUpdated: string
 ): string => {
-  const { state: {
-    binding,
-    bindingAddress,
-    forwardedHost,
-    rootPath,
-    matchingBindings,
-  },
+  const {
+    state: { bindingAddress, forwardedHost, rootPath },
   } = ctx
   const querystring = bindingAddress
     ? `?__bindingAddress=${bindingAddress}`
     : ''
   const loc = `https://${forwardedHost}${rootPath}${route.path}${querystring}`
-  const localization = route.alternates && route.alternates.length > 1
-    ? route.alternates.map(
-      ({ bindingId, path }) => {
-        const alternateBinding = getBinding(bindingId, matchingBindings)
-        if (bindingId === binding.id || !alternateBinding) {
-            return ''
-          }
-          const { canonicalBaseAddress, defaultLocale: locale } = alternateBinding
-          const href = querystring
-            ? `https://${forwardedHost}${path}?__bindingAddress=${canonicalBaseAddress}`
-            : `https://${canonicalBaseAddress}${path}`
-          return `<xhtml:link rel="alternate" hreflang="${locale}" href="${href}"/>`
-        }
-       )
-      .join('\n')
+  const localization = buildLocalization(ctx, route)
+  const lastmodValue = route.lastmod || lastUpdated
+  const changefreqTag = route.changefreq
+    ? `<changefreq>${route.changefreq}</changefreq>`
     : ''
+  const priorityTag =
+    typeof route.priority === 'number'
+      ? `<priority>${route.priority.toFixed(1)}</priority>`
+      : ''
   let entry = `
       <loc>${loc}</loc>
       ${localization}
-      <lastmod>${lastUpdated}</lastmod>
+      <lastmod>${lastmodValue}</lastmod>
+      ${changefreqTag}
+      ${priorityTag}
     `
   if (route.imagePath && route.imageTitle) {
-    // add image metainfo
     entry = `
     <image:image>
       <image:loc>${route.imagePath}</image:loc>
@@ -73,7 +181,6 @@ export async function sitemapEntry(ctx: Context, next: () => Promise<void>) {
 
 async function legacySitemapEntry(ctx: Context) {
   const {
-    clients: { vbase },
     state: { forwardedPath, bucket },
     vtex: { logger },
   } = ctx
@@ -96,19 +203,11 @@ async function legacySitemapEntry(ctx: Context) {
   }
 
   const { path } = sitemapParams
-
-  const $: any = cheerio.load(
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-    {
-      xmlMode: true,
-    }
-  )
-
   const fileName = path.split('.')[0]
-  const maybeRoutesInfo = await vbase.getJSON<SitemapEntry>(
-    bucket,
+  const maybeRoutesInfo = await serveCmsEntryFromCandidateBuckets(
+    ctx,
     fileName,
-    true
+    bucket
   )
 
   if (!maybeRoutesInfo) {
@@ -125,14 +224,7 @@ async function legacySitemapEntry(ctx: Context) {
     return
   }
 
-  const { routes, lastUpdated } = maybeRoutesInfo as SitemapEntry
-  const entryXML = routes.map((route: Route) =>
-    URLEntry(ctx, route, lastUpdated)
-  )
-
-  $('urlset').append(entryXML.join('\n'))
-
-  ctx.body = $.xml()
+  ctx.body = renderSitemapEntryXml(ctx, maybeRoutesInfo)
 }
 
 async function catalogSitemapEntry(ctx: Context) {
@@ -150,6 +242,21 @@ async function catalogSitemapEntry(ctx: Context) {
       forwardedPath,
     },
   })
+
+  const sitemapRoute = new RouteParser(SITEMAP_URL)
+  const sitemapParams = sitemapRoute.match(forwardedPath)
+
+  if (sitemapParams) {
+    const { path } = sitemapParams
+    const fileName = path.split('.')[0]
+    const maybeRoutesInfo = await serveCmsEntryFromVBase(ctx, fileName)
+
+    if (maybeRoutesInfo) {
+      ctx.body = renderSitemapEntryXml(ctx, maybeRoutesInfo)
+      ctx.status = 200
+      return
+    }
+  }
 
   ctx.body = await catalog.getSitemap(forwardedHost, forwardedPath)
   ctx.status = 200

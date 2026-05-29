@@ -3,18 +3,28 @@ import { uniqBy } from 'ramda'
 import { Product, SalesChannel } from 'vtex.catalog-graphql'
 
 import { Messages } from '../../clients/messages'
-import { CONFIG_BUCKET, getBucket, hashString, TENANT_CACHE_TTL_S } from '../../utils'
+import {
+  CONFIG_BUCKET,
+  getBucket,
+  hashString,
+  TENANT_CACHE_TTL_S,
+} from '../../utils'
 
 export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 
 export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 export const APPS_ROUTES_INDEX = 'appsRoutesIndex.json'
+export const CMS_ROUTES_INDEX = 'cmsRoutesIndex.json'
+export const CONTENT_PLATFORM_ROUTES_INDEX = 'contentPlatformRoutesIndex.json'
 
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
 export const GENERATE_REWRITER_ROUTES_EVENT = 'sitemap.generate:rewriter-routes'
 export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
 export const GENERATE_APPS_ROUTES_EVENT = 'sitemap.generate:apps-routes'
+export const GENERATE_CMS_ROUTES_EVENT = 'sitemap.generate:cms-routes'
+export const GENERATE_CONTENT_PLATFORM_ROUTES_EVENT =
+  'sitemap.generate:content-platform-routes'
 export const GROUP_ENTRIES_EVENT = 'sitemap.generate:group-entries'
 
 export const DEFAULT_CONFIG: Config = {
@@ -42,6 +52,90 @@ export const uniq = <T>(array: T[]) => array.filter((value, idx) => array.indexO
 export const createFileName = (entity: string, count: number) => `${entity}-${count}`
 
 export const splitFileName = (file: string) => file.split('-')
+
+// Rough JSON byte size estimate — adequate as a proxy for serialized output
+// because XML produced from each Route is within a constant factor of its JSON.
+export const estimateRouteBytes = (route: Route): number =>
+  JSON.stringify(route).length
+
+export interface ChunkAccumulator {
+  chunks: Route[][]
+  current: Route[]
+  currentBytes: number
+}
+
+export const newAccumulator = (): ChunkAccumulator => ({
+  chunks: [],
+  current: [],
+  currentBytes: 0,
+})
+
+export const pushRoute = (
+  acc: ChunkAccumulator,
+  route: Route,
+  maxUrlsPerFile: number,
+  maxBytesPerFile: number
+) => {
+  const routeBytes = estimateRouteBytes(route)
+  const wouldExceedUrls = acc.current.length >= maxUrlsPerFile
+  const wouldExceedBytes =
+    acc.current.length > 0 &&
+    acc.currentBytes + routeBytes > maxBytesPerFile
+  if (wouldExceedUrls || wouldExceedBytes) {
+    acc.chunks.push(acc.current)
+    acc.current = []
+    acc.currentBytes = 0
+  }
+  acc.current.push(route)
+  acc.currentBytes += routeBytes
+}
+
+export const flushAccumulator = (acc: ChunkAccumulator): Route[][] => {
+  if (acc.current.length > 0) {
+    acc.chunks.push(acc.current)
+    acc.current = []
+    acc.currentBytes = 0
+  }
+  return acc.chunks
+}
+
+export const saveRoutesChunks = async (
+  ctx: Context | EventContext,
+  bindingId: string,
+  routes: Route[],
+  bucketPrefix: string,
+  fileNamePrefix: string,
+  indexFile: string,
+  maxUrlsPerFile: number,
+  maxBytesPerFile: number
+): Promise<number> => {
+  const {
+    clients: { vbase },
+  } = ctx
+  const bucket = getBucket(bucketPrefix, hashString(bindingId))
+  const acc = newAccumulator()
+  for (const route of routes) {
+    pushRoute(acc, route, maxUrlsPerFile, maxBytesPerFile)
+  }
+  const chunks = flushAccumulator(acc)
+  const lastUpdated = currentDate()
+  const fileNames: string[] = []
+  // Sequential writes keep order predictable across runs (determinism per invariant 6).
+  for (let i = 0; i < chunks.length; i += 1) {
+    const fileName = createFileName(fileNamePrefix, i)
+    // eslint-disable-next-line no-await-in-loop
+    await vbase.saveJSON<SitemapEntry>(bucket, fileName, {
+      lastUpdated,
+      routes: chunks[i],
+    })
+    fileNames.push(fileName)
+  }
+  await vbase.saveJSON<SitemapIndex>(bucket, indexFile, {
+    index: fileNames,
+    lastUpdated,
+  })
+  return fileNames.length
+}
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 

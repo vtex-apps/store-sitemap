@@ -1,8 +1,27 @@
 import { Internal, ListInternalsResponse } from 'vtex.rewriter'
 import { flatten } from 'ramda'
 
-import { SitemapIndex } from '../middlewares/generateMiddlewares/utils'
-import { EXTENDED_INDEX_FILE, getBucket, hashString } from '../utils'
+import {
+  SitemapIndex,
+} from '../middlewares/generateMiddlewares/utils'
+import {
+  EXTENDED_INDEX_FILE,
+  getBucket,
+  hashString,
+} from '../utils'
+import {
+  readCmsRoutesFromIndex,
+  resolveActiveCmsSource,
+} from './cmsSources'
+import { fetchEligibleHcmsSlugs } from './hcmsRoutes'
+
+// Re-export CMS source helpers for consumers that import from routes.ts.
+export {
+  ActiveCmsSource,
+  resolveActiveCmsSource,
+  resolveCmsBucket,
+  readCmsIndex,
+} from './cmsSources'
 
 const STORE_SITEMAP_BUILD_FILE = '/dist/vtex.store-sitemap/build.json'
 
@@ -56,7 +75,6 @@ async function fetchExtendedRoutes(ctx: Context) {
     vtex: { logger },
   } = ctx
 
-  // Extended routes require a binding context
   if (!binding) {
     logger.info({
       message: 'Skipping extended routes fetch - no binding context available',
@@ -88,9 +106,7 @@ export async function getUserRoutes(ctx: Context) {
     .filter(isValidRoute)
     .map(route => route.from)
 
-  const userRoutes = [...validInternalRoutes, ...extendedRoutes]
-
-  return userRoutes
+  return [...validInternalRoutes, ...extendedRoutes]
 }
 
 export async function getAppsRoutes(ctx: Context) {
@@ -112,4 +128,30 @@ export async function getAppsRoutes(ctx: Context) {
   )
 
   return flatten<string>(routes)
+}
+
+export async function getCmsRoutes(ctx: Context): Promise<string[]> {
+  const {
+    state: { settings },
+  } = ctx
+
+  if (resolveActiveCmsSource(settings) !== 'hcms') {
+    return []
+  }
+
+  return fetchEligibleHcmsSlugs(ctx)
+}
+
+export async function getContentPlatformRoutes(ctx: Context): Promise<string[]> {
+  const {
+    state: { binding, settings },
+    clients: { vbase },
+  } = ctx
+
+  const activeSource = resolveActiveCmsSource(settings)
+  if (activeSource !== 'content-platform' || !binding?.id) {
+    return []
+  }
+
+  return readCmsRoutesFromIndex(activeSource, vbase, binding.id)
 }
