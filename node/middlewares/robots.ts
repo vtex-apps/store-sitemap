@@ -20,7 +20,7 @@ const getRobotForBinding = async (
   try {
     await apps.getApp(appId)
   } catch (err) {
-    notFound(undefined)(err)
+    return notFound(undefined)(err)
   }
 
   const buildFile = await apps.getAppJSON<Partial<RobotsFile> | null>(
