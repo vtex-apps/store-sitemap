@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- `robots` middleware now correctly falls back to the legacy robots data source when the account's `robots` app is not installed, instead of incorrectly reading a published-but-not-installed app's `build.json` from the registry
+
 ## [2.18.7] - 2026-05-21
 
 ### Security
