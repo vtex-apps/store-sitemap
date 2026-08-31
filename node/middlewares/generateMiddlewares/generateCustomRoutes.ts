@@ -1,6 +1,11 @@
 import { getDefaultStoreBinding } from '../../resources/bindings'
 import { clearCustomRoutesGenerationLock } from '../customRoutes'
-import { getAppsRoutes, getUserRoutes } from '../../services/routes'
+import {
+  getAppsRoutes,
+  getCmsRoutes,
+  getContentPlatformRoutes,
+  getUserRoutes,
+} from '../../services/routes'
 import { CUSTOM_ROUTES_BUCKET, CUSTOM_ROUTES_FILENAME } from '../../utils'
 
 export async function generateCustomRoutes(ctx: Context) {
@@ -35,22 +40,33 @@ export async function generateCustomRoutes(ctx: Context) {
       vtex: ctx.vtex,
     } as Context
 
-    const [appsRoutes, userRoutes] = await Promise.all([
+    const [appsRoutes, userRoutes, cmsRoutes, contentPlatformRoutes] = await Promise.all([
       getAppsRoutes(routeCtx),
       getUserRoutes(routeCtx),
+      getCmsRoutes(routeCtx),
+      getContentPlatformRoutes(routeCtx),
     ])
 
     logger.info({
       message: 'Routes fetched',
       appsRoutesCount: appsRoutes.length,
+      cmsRoutesCount: cmsRoutes.length,
+      contentPlatformRoutesCount: contentPlatformRoutes.length,
       userRoutesCount: userRoutes.length,
     })
 
+    // Both CMS sources are always written to the cache; the served-time
+    // mutex filter in `customRoutes.ts` decides which one is exposed for
+    // any given request (spec Decision 8 / FR-10). Each `get*Routes`
+    // service already returns `[]` for the inactive source, so the
+    // payload reflects the active surface at generation time.
     const customRoutesData: CustomRoutesData = {
       timestamp: Date.now(),
       data: [
         { name: 'apps-routes', routes: appsRoutes },
         { name: 'user-routes', routes: userRoutes },
+        { name: 'cms-routes', routes: cmsRoutes },
+        { name: 'content-platform-routes', routes: contentPlatformRoutes },
       ],
     }
 

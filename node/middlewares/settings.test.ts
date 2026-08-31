@@ -2,7 +2,7 @@ import { Apps, IOContext, Logger, RequestTracingConfig } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
-import { APPS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
+import { APPS_ROUTES_INDEX, CMS_ROUTES_INDEX, PRODUCT_ROUTES_INDEX, REWRITER_ROUTES_INDEX } from './generateMiddlewares/utils'
 import { settings } from './settings'
 
 const appsTypeMock = TypeMoq.Mock.ofInstance(Apps)
@@ -81,5 +81,35 @@ describe('Test settings middleware', () => {
     }
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([])
+  })
+
+  it('Should NOT include CMS_ROUTES_INDEX in enabledIndexFiles when enableCmsRoutes is true (CMS uses its own bucket)', async () => {
+    const appClient = context.clients.apps as any
+    appClient.settings = {
+      enableAppsRoutes: false,
+      enableCmsRoutes: true,
+      enableNavigationRoutes: false,
+      enableProductRoutes: false,
+    }
+    await settings(context, next)
+    expect(context.state.enabledIndexFiles).not.toContain(CMS_ROUTES_INDEX)
+    expect(context.state.enabledIndexFiles).toStrictEqual([])
+  })
+
+  it('Should omit CMS_ROUTES_INDEX when enableCmsRoutes is false (default rollout state)', async () => {
+    const appClient = context.clients.apps as any
+    appClient.settings = {
+      enableAppsRoutes: true,
+      enableCmsRoutes: false,
+      enableNavigationRoutes: true,
+      enableProductRoutes: true,
+    }
+    await settings(context, next)
+    expect(context.state.enabledIndexFiles).not.toContain(CMS_ROUTES_INDEX)
+    expect(context.state.enabledIndexFiles).toStrictEqual([
+      APPS_ROUTES_INDEX,
+      REWRITER_ROUTES_INDEX,
+      PRODUCT_ROUTES_INDEX,
+    ])
   })
 })

@@ -45,6 +45,14 @@
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:apps-routes"]
     },
+    "generateCmsRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:cms-routes"]
+    },
+    "generateContentPlatformRoutes": {
+      "sender": "vtex.store-sitemap",
+      "keys": ["sitemap.generate:content-platform-routes"]
+    },
     "groupEntries": {
       "sender": "vtex.store-sitemap",
       "keys": ["sitemap.generate:group-entries"]

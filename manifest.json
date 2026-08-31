@@ -111,6 +111,20 @@
         "host": "{{account}}.vtexcommercestable.com.br",
         "path": "/api/vtexid/credential/validate"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/content-platform/data/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.myvtex.com",
+        "path": "/_v/cms/api/*"
+      }
     }
   ],
   "credentialType": "absolute",
@@ -138,6 +152,53 @@
         "description": "This will enable the app routes source, adding to the final sitemap routes defined and exported by the routes.json files from apps built by the store@0.x builder.",
         "type": "boolean",
         "default": true
+      },
+      "enableCmsRoutes": {
+        "title": "Enable CMS routes source (FastStore)",
+        "description": "When enabled, pages published in the VTEX Headless CMS (legacy) are sourced from the CMS builder REST API (`{account}.myvtex.com/_v/cms/api/{projectId}/{contentType}`) and included in the generated sitemap. Routable content types are configurable via `hcmsContentTypes`; the CMS project id via `hcmsProjectId`. Each page is included when published, has an `seo.slug`, and its `seo.canonical` does not point elsewhere. Mutually exclusive with `enableContentPlatformRoutes` — when both are true, Content Platform wins. Defaults to false during rollout.",
+        "type": "boolean",
+        "default": false
+      },
+      "hcmsProjectId": {
+        "title": "Headless CMS project id",
+        "description": "CMS builder project identifier passed to the Headless CMS REST API (path segment `{projectId}`). Defaults to `faststore`, which matches stores that did not customize the CMS builder. Only consumed when `enableCmsRoutes` is on.",
+        "type": "string",
+        "default": "faststore"
+      },
+      "hcmsContentTypes": {
+        "title": "Headless CMS routable content types",
+        "description": "Allowlist of Headless CMS content types ingested into the sitemap. Each type is paginated via the CMS builder API and its pages are emitted using `settings.seo.slug`. Defaults to `[\"landingPage\"]`; add the ids of any other routable content types the store created. Only consumed when `enableCmsRoutes` is on.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "landingPage"
+        ]
+      },
+      "enableContentPlatformRoutes": {
+        "title": "Enable Content Platform routes source (FastStore v3)",
+        "description": "When enabled, pages published in the new VTEX CMS (Content Platform) are sourced from the Data Plane REST API (`{account}.vtexcommercestable.com.br/api/content-platform/data/*`, production-only) and included in the generated sitemap. Routable content types are configurable via `contentPlatformContentTypes`; the store id (FastStore project) via `contentPlatformStoreId`. Per-entry reads honour `seo.slug` and exclude entries whose `seo.canonical` points elsewhere. ETag-cached. Mutually exclusive with `enableCmsRoutes` — when both are true, this flag wins.",
+        "type": "boolean",
+        "default": false
+      },
+      "contentPlatformStoreId": {
+        "title": "Content Platform store id",
+        "description": "FastStore project identifier passed to the Content Platform Data Plane (path segment `{storeId}`). Defaults to `faststore`, which matches stores that did not customize `contentSource.project`. Only consumed when `enableContentPlatformRoutes` is on.",
+        "type": "string",
+        "default": "faststore"
+      },
+      "contentPlatformContentTypes": {
+        "title": "Content Platform routable content types",
+        "description": "Allowlist of Content Platform content types ingested into the sitemap. Each entry is queried via `listEntries` and hydrated per item to pick up `seo.slug` / `seo.canonical`. Defaults to the predefined FastStore types (`landingPage`, `home`); add the keys of any custom routable types the store created. Only consumed when `enableContentPlatformRoutes` is on.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "default": [
+          "landingPage",
+          "home"
+        ]
       },
       "disableRoutesTerm": {
         "title": "Disable routes from userRoutes with the following string",

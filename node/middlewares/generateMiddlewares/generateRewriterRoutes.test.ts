@@ -95,7 +95,7 @@ describe('Test rewriter routes generation', () => {
       return []
     }
 
-    public listInternals = async (_: number, cursor: Maybe<string>) => {
+    public listInternalsWithRetry = async (_: number, cursor: Maybe<string>) => {
       switch(cursor) {
         case 'NEXT':
           return {
@@ -192,6 +192,7 @@ describe('Test rewriter routes generation', () => {
         event: GENERATE_REWRITER_ROUTES_EVENT,
         payload: {
           count: 1,
+          disableRoutesTerm: undefined,
           generationId: '1',
           next: 'NEXT',
           report: { category: 1, 'user-canonical': 1, userRoute: 1 },

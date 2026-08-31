@@ -1,6 +1,8 @@
 import * as cheerio from 'cheerio'
 
 import { MultipleSitemapGenerationError } from '../errors'
+import { mergeActiveCmsIndexIntoCatalogXml } from '../services/cmsServing'
+import { readCmsIndex, resolveActiveCmsSource } from '../services/cmsSources'
 import {
   EXTENDED_INDEX_FILE,
   xmlTruncateNodes,
@@ -9,7 +11,10 @@ import {
   SitemapNotFound,
   startSitemapGeneration,
 } from '../utils'
-import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
+import {
+  currentDate,
+  SitemapIndex,
+} from './generateMiddlewares/utils'
 
 const sitemapIndexEntry = (
   forwardedHost: string,
@@ -50,6 +55,7 @@ const sitemapIndex = async (ctx: Context) => {
       bucket,
       rootPath,
       bindingAddress,
+      settings,
     },
     clients: { vbase },
   } = ctx
@@ -61,6 +67,9 @@ const sitemapIndex = async (ctx: Context) => {
     }
   )
 
+  const activeCmsSource = resolveActiveCmsSource(settings)
+  const cmsIndexPromise = readCmsIndex(activeCmsSource, vbase, binding.id)
+
   const rawIndexFiles = await Promise.all([
     ...enabledIndexFiles.map(indexFile =>
       vbase.getJSON<SitemapIndex>(bucket, indexFile, true)
@@ -70,9 +79,10 @@ const sitemapIndex = async (ctx: Context) => {
       EXTENDED_INDEX_FILE,
       true
     ),
+    cmsIndexPromise,
   ])
 
-  const indexFiles = rawIndexFiles.filter(Boolean)
+  const indexFiles = rawIndexFiles.filter(Boolean) as SitemapIndex[]
 
   if (indexFiles.length === 0) {
     throw new SitemapNotFound('Sitemap not found')
@@ -165,7 +175,7 @@ async function legacySitemap(ctx: Context) {
   })
 
   const hasBindingIdentifier = rootPath || bindingAddress
-  let $: any
+  let $: ReturnType<typeof cheerio.load>
   try {
     if (hasBindingIdentifier || settings.ignoreBindings) {
       $ = await sitemapIndex(ctx)
@@ -180,11 +190,12 @@ async function legacySitemap(ctx: Context) {
       ctx.status = 404
       ctx.body = 'Generating sitemap...'
       ctx.vtex.logger.error(err.message)
-      await startSitemapGeneration(ctx).catch(err => {
-        if (!(err instanceof MultipleSitemapGenerationError)) {
-          throw err
+      await startSitemapGeneration(ctx).catch(catchErr => {
+        if (!(catchErr instanceof MultipleSitemapGenerationError)) {
+          throw catchErr
         }
       })
+      return
     }
     throw err
   }
@@ -196,7 +207,10 @@ async function catalogSitemap(ctx: Context) {
   const {
     clients: { catalog },
     headers: { 'x-forwarded-host': forwardedHost },
-    state: { isCrossBorder, forwardedPath },
+    state: {
+      forwardedPath,
+      isCrossBorder,
+    },
     vtex: { logger },
   } = ctx
 
@@ -210,5 +224,5 @@ async function catalogSitemap(ctx: Context) {
   })
 
   const sitemapData = await catalog.getSitemap(forwardedHost, forwardedPath)
-  ctx.body = sitemapData
+  ctx.body = await mergeActiveCmsIndexIntoCatalogXml(sitemapData, ctx)
 }
