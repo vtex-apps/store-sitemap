@@ -149,7 +149,7 @@ describe('Test sitemap entry', () => {
     ))
   })
 
-  it('Should create a correct sitemap entry with localization', async () => {
+  it('Should create a correct sitemap entry with localization (self + x-default per spec Decision 5)', async () => {
     const alternates: AlternateRoute[] = [
       {
         bindingId: '1',
@@ -172,14 +172,16 @@ describe('Test sitemap entry', () => {
     expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
     `<url>
       <loc>https://host.com/pear</loc>
+      <xhtml:link rel="alternate" hreflang="en-US" href="https://host.com/pear"/>
       <xhtml:link rel="alternate" hreflang="pt-BR" href="https://www.host.com/br/pera"/>
       <xhtml:link rel="alternate" hreflang="de-DE" href="https://www.host.com/de/brine"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://host.com/pear"/>
       <lastmod>2019-12-04</lastmod>
      </url>`
     ))
   })
 
-  it('Should create a correct sitemap entry with localization with binding address querystring', async () => {
+  it('Should create a correct sitemap entry with localization with binding address querystring (self + x-default)', async () => {
     const alternates: AlternateRoute[] = [
       {
         bindingId: '1',
@@ -209,11 +211,122 @@ describe('Test sitemap entry', () => {
     expect(removeSpaces(entry)).toStrictEqual(removeSpaces(
     `<url>
       <loc>https://host.com/pear?__bindingAddress=www.host.com/es</loc>
+      <xhtml:link rel="alternate" hreflang="en-US" href="https://host.com/pear?__bindingAddress=www.host.com/es"/>
       <xhtml:link rel="alternate" hreflang="pt-BR" href="https://host.com/pera?__bindingAddress=www.host.com/br"/>
       <xhtml:link rel="alternate" hreflang="de-DE" href="https://host.com/brine?__bindingAddress=www.host.com/de"/>
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://host.com/pear?__bindingAddress=www.host.com/es"/>
       <lastmod>2019-12-04</lastmod>
      </url>`
     ))
+  })
+
+  it('Should emit no alternates for a single-binding store (US-3 negative case)', async () => {
+    const alternates: AlternateRoute[] = [
+      {
+        bindingId: '1',
+        path: '/pear',
+      },
+    ]
+    const route: Route = {
+      ...defaultRoute,
+      alternates,
+    }
+    const singleBindingContext = {
+      ...context,
+      state: {
+        ...context.state,
+        matchingBindings: [
+          {
+            canonicalBaseAddress: 'www.host.com',
+            defaultLocale: 'en-US',
+            id: '1',
+          },
+        ] as any[],
+      },
+    }
+    const entry = URLEntry(singleBindingContext, route, defaultLastUpdated)
+    expect(entry).not.toContain('xhtml:link')
+    expect(entry).not.toContain('x-default')
+  })
+
+  it('Should emit x-default pointing at the default binding even when current binding is not the default (US-3)', async () => {
+    const alternates: AlternateRoute[] = [
+      {
+        bindingId: '1',
+        path: '/pear',
+      },
+      {
+        bindingId: '2',
+        path: '/pera',
+      },
+      {
+        bindingId: '3',
+        path: '/brine',
+      },
+    ]
+    const route: Route = {
+      ...defaultRoute,
+      alternates,
+    }
+    const ptBrCurrent = {
+      ...context,
+      state: {
+        ...context.state,
+        binding: { id: '2' } as any,
+      },
+    }
+    const entry = URLEntry(ptBrCurrent, route, defaultLastUpdated)
+    // self alternate uses forwardedHost
+    expect(entry).toContain(
+      '<xhtml:link rel="alternate" hreflang="pt-BR" href="https://host.com/pera"/>'
+    )
+    // x-default points at the FIRST matching binding (default), via its canonicalBaseAddress
+    expect(entry).toContain(
+      '<xhtml:link rel="alternate" hreflang="x-default" href="https://www.host.com/pear"/>'
+    )
+  })
+
+  it('Should emit changefreq and priority tags when the route declares them (FR-5)', async () => {
+    const route: Route = {
+      ...defaultRoute,
+      changefreq: 'daily',
+      priority: 0.8,
+    }
+    const singleBindingContext = {
+      ...context,
+      state: {
+        ...context.state,
+        matchingBindings: [
+          {
+            canonicalBaseAddress: 'www.host.com',
+            defaultLocale: 'en-US',
+            id: '1',
+          },
+        ] as any[],
+      },
+    }
+    const entry = URLEntry(singleBindingContext, route, defaultLastUpdated)
+    expect(entry).toContain('<changefreq>daily</changefreq>')
+    expect(entry).toContain('<priority>0.8</priority>')
+  })
+
+  it('Should NOT emit changefreq/priority when the route omits them (backwards compat invariant 7)', async () => {
+    const singleBindingContext = {
+      ...context,
+      state: {
+        ...context.state,
+        matchingBindings: [
+          {
+            canonicalBaseAddress: 'www.host.com',
+            defaultLocale: 'en-US',
+            id: '1',
+          },
+        ] as any[],
+      },
+    }
+    const entry = URLEntry(singleBindingContext, defaultRoute, defaultLastUpdated)
+    expect(entry).not.toContain('<changefreq>')
+    expect(entry).not.toContain('<priority>')
   })
 
   it('Should create a correct sitemap entry with root path', async () => {

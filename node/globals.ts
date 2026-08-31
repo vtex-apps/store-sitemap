@@ -40,12 +40,27 @@ declare global {
     pageType: string
   }
 
+  type ChangeFreq =
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never'
+
   interface Route {
     id: string
     path: string,
     alternates?: AlternateRoute[]
     imagePath?: string
     imageTitle?: string
+    // Optional sitemap protocol tags (sitemaps.org/protocol). When present they
+    // are emitted by URLEntry; absent → tag is omitted, preserving backwards
+    // compatibility with sources that do not annotate routes.
+    changefreq?: ChangeFreq
+    priority?: number
+    lastmod?: string
   }
 
   interface AlternateRoute {

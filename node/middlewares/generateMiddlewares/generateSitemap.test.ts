@@ -73,6 +73,7 @@ describe('Test generate sitemap', () => {
         settings: {
           disableRoutesTerm: '',
           enableAppsRoutes: true,
+          enableCmsRoutes: true,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
@@ -108,6 +109,7 @@ describe('Test generate sitemap', () => {
     context.state.settings = {
       disableRoutesTerm: '',
       enableAppsRoutes: true,
+      enableCmsRoutes: true,
       enableNavigationRoutes: true,
       enableProductRoutes: false,
       ignoreBindings: false,
@@ -130,6 +132,7 @@ describe('Test generate sitemap', () => {
     context.state.settings = {
       disableRoutesTerm: '',
       enableAppsRoutes: false,
+      enableCmsRoutes: true,
       enableNavigationRoutes: false,
       enableProductRoutes: true,
       ignoreBindings: false,

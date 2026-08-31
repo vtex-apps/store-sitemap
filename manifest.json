@@ -139,6 +139,12 @@
         "type": "boolean",
         "default": true
       },
+      "enableCmsRoutes": {
+        "title": "Enable CMS routes source (FastStore)",
+        "description": "When enabled, pages published in VTEX hCMS — including PDPs, PLPs, landing pages and any other custom-slug page — are included in the generated sitemap. Each URL declares its locale alternates (hreflang + x-default) when the store is multi-binding. Defaults to false during rollout.",
+        "type": "boolean",
+        "default": false
+      },
       "disableRoutesTerm": {
         "title": "Disable routes from userRoutes with the following string",
         "description": "Routes that include the string below will be excluded from the sitemap. Useful for selecting which pages will be in that folder.",

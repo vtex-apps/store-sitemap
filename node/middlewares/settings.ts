@@ -9,6 +9,7 @@ export interface Settings {
   enableAppsRoutes: boolean
   enableProductRoutes: boolean
   enableNavigationRoutes: boolean
+  enableCmsRoutes: boolean
   ignoreBindings: boolean
   disableRoutesTerm: string
 }
@@ -16,17 +17,22 @@ export interface Settings {
 const VTEX_APP_ID = process.env.VTEX_APP_ID!
 const VTEX_APP_AT_MAJOR = appIdToAppAtMajor(VTEX_APP_ID)
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: Settings = {
   disableRoutesTerm: '',
   enableAppsRoutes: true,
+  enableCmsRoutes: false,
   enableNavigationRoutes: true,
   enableProductRoutes: true,
   ignoreBindings: false,
 }
 
-const INDEX_MAP = {
+// CMS routes use a dedicated per-binding bucket (spec Decision 1) and are
+// composed into /sitemap.xml via cmsRoutesPromise in sitemap.ts — not via
+// enabledIndexFiles / the shared production bucket.
+const INDEX_MAP: Record<keyof Settings, string> = {
   disableRoutesTerm: '',
   enableAppsRoutes: APPS_ROUTES_INDEX,
+  enableCmsRoutes: '',
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
   ignoreBindings: '',

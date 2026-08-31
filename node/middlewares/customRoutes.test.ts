@@ -77,6 +77,7 @@ describe('Test customRoutes middleware', () => {
         settings: {
           disableRoutesTerm: '',
           enableAppsRoutes: true,
+          enableCmsRoutes: false,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
@@ -151,6 +152,47 @@ describe('Test customRoutes middleware', () => {
     expect(context.status).toBe(200)
     expect(context.body).toEqual(mockData.data)
     expect(context.state.useLongCacheControl).toBe(true)
+    expect(next).toHaveBeenCalled()
+  })
+
+  it('should expose cms-routes when enableCmsRoutes is true', async () => {
+    const mockData = {
+      data: [
+        { name: 'apps-routes', routes: ['/app-1'] },
+        { name: 'user-routes', routes: ['/user-1'] },
+        { name: 'cms-routes', routes: ['/our-story', '/black-friday'] },
+      ],
+      timestamp: Date.now() - 1000 * 60 * 60,
+    }
+    cachedData = mockData
+    context.state.settings.enableCmsRoutes = true
+
+    await customRoutes(context, next)
+
+    expect(context.status).toBe(200)
+    expect(context.body).toEqual(mockData.data)
+    expect(next).toHaveBeenCalled()
+  })
+
+  it('should omit cms-routes when enableCmsRoutes is false (rollout-gated)', async () => {
+    const mockData = {
+      data: [
+        { name: 'apps-routes', routes: ['/app-1'] },
+        { name: 'user-routes', routes: ['/user-1'] },
+        { name: 'cms-routes', routes: ['/our-story'] },
+      ],
+      timestamp: Date.now() - 1000 * 60 * 60,
+    }
+    cachedData = mockData
+    context.state.settings.enableCmsRoutes = false
+
+    await customRoutes(context, next)
+
+    expect(context.status).toBe(200)
+    expect(context.body).toEqual([
+      { name: 'apps-routes', routes: ['/app-1'] },
+      { name: 'user-routes', routes: ['/user-1'] },
+    ])
     expect(next).toHaveBeenCalled()
   })
 })
