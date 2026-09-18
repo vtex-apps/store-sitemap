@@ -1,10 +1,11 @@
-import { Binding, IOContext, Logger, VBase } from '@vtex/api'
+import { Binding, Catalog, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
 import { sitemapEntry, URLEntry } from './sitemapEntry'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const catalogTypeMock = TypeMoq.Mock.ofInstance(Catalog)
 const contextMock = TypeMoq.Mock.ofType<Context>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -49,6 +50,19 @@ describe('Test sitemap entry', () => {
     }
   }
 
+  const getSitemapMock = jest.fn()
+
+  // tslint:disable-next-line:max-classes-per-file
+  const catalog = class CatalogMock extends catalogTypeMock.object {
+    constructor() {
+      super(ioContext.object)
+    }
+
+    public getSitemap = async (host: string, path = 'sitemap.xml') => {
+      return getSitemapMock(host, path)
+    }
+  }
+
   // tslint:disable-next-line:no-empty
   const next = async (): Promise<void> => {
   }
@@ -63,6 +77,11 @@ describe('Test sitemap entry', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      get catalog(): any {
+        return this.getOrSet('catalog', catalog)
+      }
+
       get vbase() {
         return this.getOrSet('vbase', vbase)
       }
@@ -79,6 +98,7 @@ describe('Test sitemap entry', () => {
         bucket: 'bucket',
         forwardedHost: 'host.com',
         forwardedPath: '/sitemap/file1.xml',
+        isCrossBorder: true,
         matchingBindings: [
           {
             canonicalBaseAddress: 'www.host.com',
@@ -97,6 +117,14 @@ describe('Test sitemap entry', () => {
           },
         ] as Binding[],
         rootPath: '',
+        settings: {
+          disableRoutesTerm: '',
+          enableAppsRoutes: true,
+          enableNavigationRoutes: true,
+          enableProductRoutes: true,
+          ignoreBindings: false,
+          useRootPathInSitemapUrls: false,
+        },
       },
       vtex: {
         ...ioContext.object,
@@ -267,5 +295,67 @@ describe('Test sitemap entry', () => {
       <lastmod>2019-12-04</lastmod>
      </url>`
     ))
+  })
+
+  describe('catalog sitemap entry', () => {
+    const catalogState = (overrides: Partial<State> = {}): State => ({
+      ...context.state,
+      forwardedPath: '/sitemap/file1.xml',
+      isCrossBorder: false,
+      ...overrides,
+    })
+
+    beforeEach(() => {
+      getSitemapMock.mockReset()
+      getSitemapMock.mockResolvedValue('<urlset/>')
+    })
+
+    it('Should forward only the host when the root path setting is off', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '/br',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: false,
+          },
+        }),
+      }
+      await sitemapEntry(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('host.com', '/sitemap/file1.xml')
+      expect(thisContext.status).toStrictEqual(200)
+      expect(thisContext.body).toStrictEqual('<urlset/>')
+    })
+
+    it('Should append the root path to the forwarded host when the setting is on', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '/br',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: true,
+          },
+        }),
+      }
+      await sitemapEntry(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('host.com/br', '/sitemap/file1.xml')
+      expect(thisContext.body).toStrictEqual('<urlset/>')
+    })
+
+    it('Should keep the host when the setting is on but the root path is empty', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: true,
+          },
+        }),
+      }
+      await sitemapEntry(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('host.com', '/sitemap/file1.xml')
+    })
   })
 })

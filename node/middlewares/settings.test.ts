@@ -82,4 +82,21 @@ describe('Test settings middleware', () => {
     await settings(context, next)
     expect(context.state.enabledIndexFiles).toStrictEqual([])
   })
+
+  it('Should default useRootPathInSitemapUrls to false and accept it from app settings', async () => {
+    await settings(context, next)
+    expect(context.state.settings.useRootPathInSitemapUrls).toBe(false)
+    expect(context.state.enabledIndexFiles).toStrictEqual([APPS_ROUTES_INDEX, REWRITER_ROUTES_INDEX, PRODUCT_ROUTES_INDEX])
+
+    const appClient = context.clients.apps as any
+    appClient.settings = {
+      enableAppsRoutes: false,
+      enableNavigationRoutes: false,
+      enableProductRoutes: false,
+      useRootPathInSitemapUrls: true,
+    }
+    await settings(context, next)
+    expect(context.state.settings.useRootPathInSitemapUrls).toBe(true)
+    expect(context.state.enabledIndexFiles).toStrictEqual([])
+  })
 })
