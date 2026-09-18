@@ -76,6 +76,7 @@ describe('Test generate sitemap', () => {
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
+          useRootPathInSitemapUrls: false,
         },
       },
       vtex: {
@@ -111,6 +112,7 @@ describe('Test generate sitemap', () => {
       enableNavigationRoutes: true,
       enableProductRoutes: false,
       ignoreBindings: false,
+      useRootPathInSitemapUrls: false,
     }
 
     await generateSitemap(context)
@@ -133,6 +135,7 @@ describe('Test generate sitemap', () => {
       enableNavigationRoutes: false,
       enableProductRoutes: true,
       ignoreBindings: false,
+      useRootPathInSitemapUrls: false,
     }
 
     await generateSitemap(context)
