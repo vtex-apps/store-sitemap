@@ -69,6 +69,22 @@ export const hashString = (str: string) => {
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
 
+/**
+ * Base used when delegating the sitemap to the catalog.
+ *
+ * The catalog composes the URLs from the forwarded host, so the normalized
+ * root path is appended only when the opt-in setting is enabled and the
+ * header was present.
+ */
+export const getSitemapBase = (
+  forwardedHost: string,
+  rootPath: string,
+  useRootPathInSitemapUrls: boolean
+) =>
+  useRootPathInSitemapUrls && rootPath
+    ? `${forwardedHost}${rootPath}`
+    : forwardedHost
+
 export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
   const { clients: { vbase, events }, vtex: { logger } } = ctx
   const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
