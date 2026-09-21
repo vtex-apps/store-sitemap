@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+- Optional `useRootPathInSitemapUrls` setting to include the normalized `x-vtex-root-path` in catalog-generated sitemap URLs
+
 ## [2.18.8] - 2026-08-26
 
 ### Fixed

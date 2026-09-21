@@ -80,6 +80,7 @@ describe('Test customRoutes middleware', () => {
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
+          useRootPathInSitemapUrls: false,
         },
       },
       vtex: {

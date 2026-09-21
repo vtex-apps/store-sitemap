@@ -11,6 +11,7 @@ export interface Settings {
   enableNavigationRoutes: boolean
   ignoreBindings: boolean
   disableRoutesTerm: string
+  useRootPathInSitemapUrls: boolean
 }
 
 const VTEX_APP_ID = process.env.VTEX_APP_ID!
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS = {
   enableNavigationRoutes: true,
   enableProductRoutes: true,
   ignoreBindings: false,
+  useRootPathInSitemapUrls: false,
 }
 
 const INDEX_MAP = {
@@ -30,6 +32,7 @@ const INDEX_MAP = {
   enableNavigationRoutes: REWRITER_ROUTES_INDEX,
   enableProductRoutes: PRODUCT_ROUTES_INDEX,
   ignoreBindings: '',
+  useRootPathInSitemapUrls: '',
 }
 
 export async function settings(

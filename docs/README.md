@@ -131,6 +131,12 @@ You can decide whether to include products, navigation, apps, and/or routes that
 
    ![sitemap-admin](https://github.com/vtexdocs/dev-portal-content/assets/112641072/649f7dcf-583d-497f-a69c-4cfc3d8a805a)
 
+#### Including a root path in sitemap URLs
+
+For a non-cross-border store published under a root path, such as `https://www.example.com/br`, enable **Use root path in sitemap URLs** in the Sitemap app settings. When this option is enabled and the request includes the `x-vtex-root-path` header, the app includes the normalized root path in the URLs returned by the catalog sitemap.
+
+Leave this option disabled if the storefront is published at the domain root or the edge configuration does not provide `x-vtex-root-path`.
+
 #### Enabling custom routes
 
 If you have [custom pages](https://developers.vtex.com/vtex-developer-docs/docs/vtex-io-documentation-creating-a-new-custom-page) configured in a `routes.json` file and want them included in the store sitemap, add `isSitemapEntry=true` as a prop of the routes you want to include in the sitemap. Example:

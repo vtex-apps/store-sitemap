@@ -3,11 +3,12 @@ import * as cheerio from 'cheerio'
 import { MultipleSitemapGenerationError } from '../errors'
 import {
   EXTENDED_INDEX_FILE,
-  xmlTruncateNodes,
   getBucket,
+  getSitemapBase,
   hashString,
   SitemapNotFound,
   startSitemapGeneration,
+  xmlTruncateNodes,
 } from '../utils'
 import { currentDate, SitemapIndex } from './generateMiddlewares/utils'
 
@@ -195,10 +196,15 @@ async function legacySitemap(ctx: Context) {
 async function catalogSitemap(ctx: Context) {
   const {
     clients: { catalog },
-    headers: { 'x-forwarded-host': forwardedHost },
-    state: { isCrossBorder, forwardedPath },
+    state: { forwardedHost, forwardedPath, isCrossBorder, rootPath, settings },
     vtex: { logger },
   } = ctx
+
+  const sitemapBase = getSitemapBase(
+    forwardedHost,
+    rootPath,
+    settings.useRootPathInSitemapUrls
+  )
 
   logger.info({
     message: 'Fetching catalog sitemap',
@@ -206,9 +212,10 @@ async function catalogSitemap(ctx: Context) {
       forwardedHost,
       forwardedPath,
       isCrossBorder,
+      sitemapBase,
     },
   })
 
-  const sitemapData = await catalog.getSitemap(forwardedHost, forwardedPath)
+  const sitemapData = await catalog.getSitemap(sitemapBase, forwardedPath)
   ctx.body = sitemapData
 }

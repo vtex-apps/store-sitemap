@@ -8,10 +8,12 @@ import {
 } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
+import { Catalog } from '../clients/catalog'
 import { EXTENDED_INDEX_FILE } from '../utils'
 import { sitemap } from './sitemap'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
+const catalogTypeMock = TypeMoq.Mock.ofInstance(Catalog)
 const contextMock = TypeMoq.Mock.ofType<Context>()
 const ioContext = TypeMoq.Mock.ofType<IOContext>()
 const state = TypeMoq.Mock.ofType<State>()
@@ -62,6 +64,19 @@ describe('Test sitemap middleware', () => {
     }
   }
 
+  const getSitemapMock = jest.fn()
+
+  // tslint:disable-next-line:max-classes-per-file
+  const catalog = class CatalogMock extends catalogTypeMock.object {
+    constructor() {
+      super(ioContext.object)
+    }
+
+    public getSitemap = async (host: string, path = 'sitemap.xml') => {
+      return getSitemapMock(host, path)
+    }
+  }
+
   const next = jest.fn()
 
   const matchingBindings = [
@@ -85,6 +100,10 @@ describe('Test sitemap middleware', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
+      get catalog(): any {
+        return this.getOrSet('catalog', catalog)
+      }
+
       get vbase() {
         return this.getOrSet('vbase', vbase)
       }
@@ -107,6 +126,7 @@ describe('Test sitemap middleware', () => {
         ],
         forwardedHost: 'www.host.com',
         forwardedPath: '/sitemap/file1.xml',
+        isCrossBorder: true,
         matchingBindings: [matchingBindings[0]],
         rootPath: '',
         settings: {
@@ -115,6 +135,7 @@ describe('Test sitemap middleware', () => {
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
+          useRootPathInSitemapUrls: false,
         },
       },
       vtex: {
@@ -339,5 +360,66 @@ describe('Test sitemap middleware', () => {
       </sitemapindex>`
       )
     )
+  })
+
+  describe('catalog sitemap', () => {
+    const catalogState = (overrides: Partial<State> = {}): State => ({
+      ...context.state,
+      forwardedHost: 'shop.samsung.com',
+      forwardedPath: '/sitemap.xml',
+      isCrossBorder: false,
+      ...overrides,
+    })
+
+    beforeEach(() => {
+      getSitemapMock.mockReset()
+      getSitemapMock.mockResolvedValue('<sitemapindex/>')
+    })
+
+    it('Should forward only the host when the root path setting is off', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '/br',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: false,
+          },
+        }),
+      }
+      await sitemap(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('shop.samsung.com', '/sitemap.xml')
+    })
+
+    it('Should append the root path to the forwarded host when the setting is on', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '/br',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: true,
+          },
+        }),
+      }
+      await sitemap(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('shop.samsung.com/br', '/sitemap.xml')
+      expect(thisContext.body).toStrictEqual('<sitemapindex/>')
+    })
+
+    it('Should keep the host when the setting is on but the root path is empty', async () => {
+      const thisContext = {
+        ...context,
+        state: catalogState({
+          rootPath: '',
+          settings: {
+            ...context.state.settings,
+            useRootPathInSitemapUrls: true,
+          },
+        }),
+      }
+      await sitemap(thisContext, next)
+      expect(getSitemapMock).toHaveBeenCalledWith('shop.samsung.com', '/sitemap.xml')
+    })
   })
 })

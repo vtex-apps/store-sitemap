@@ -14,6 +14,7 @@ import { Clients } from './clients'
 import { Authorization } from './directives/auth'
 import { binding } from './middlewares/binding'
 import { cache } from './middlewares/cache'
+import { customRoutes } from './middlewares/customRoutes'
 import { errors } from './middlewares/errors'
 import { generateAppsRoutes } from './middlewares/generateMiddlewares/generateAppsRoutes'
 import { generateProductRoutes } from './middlewares/generateMiddlewares/generateProductRoutes'
@@ -32,11 +33,10 @@ import { robots } from './middlewares/robots'
 import { settings } from './middlewares/settings'
 import { sitemap } from './middlewares/sitemap'
 import { sitemapEntry } from './middlewares/sitemapEntry'
+import { sitemapErrors } from './middlewares/sitemapErrors'
 import { tenant } from './middlewares/tenant'
 import { throttle } from './middlewares/throttle'
 import { resolvers } from './resolvers'
-import { customRoutes } from './middlewares/customRoutes'
-import { sitemapErrors } from './middlewares/sitemapErrors'
 
 const THREE_SECONDS_MS = 3 * 1000
 const EIGHT_SECOND_MS = 8 * 1000
@@ -104,6 +104,7 @@ const sitemapPipeline = [
 ]
 const sitemapEntryPipeline = [
   sitemapErrors,
+  settings,
   prepare,
   isCrossBorder,
   sitemapEntry,

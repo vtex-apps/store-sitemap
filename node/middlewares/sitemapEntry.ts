@@ -2,7 +2,7 @@ import { Binding } from '@vtex/api'
 import * as cheerio from 'cheerio'
 import RouteParser from 'route-parser'
 
-import { SITEMAP_URL } from '../utils'
+import { getSitemapBase, SITEMAP_URL } from '../utils'
 import { SitemapEntry } from './generateMiddlewares/utils'
 
 const getBinding = (bindingId: string, bindings: Binding[]) =>
@@ -138,19 +138,25 @@ async function legacySitemapEntry(ctx: Context) {
 async function catalogSitemapEntry(ctx: Context) {
   const {
     clients: { catalog },
-    headers: { 'x-forwarded-host': forwardedHost },
-    state: { forwardedPath },
+    state: { forwardedHost, forwardedPath, rootPath, settings },
     vtex: { logger },
   } = ctx
+
+  const sitemapBase = getSitemapBase(
+    forwardedHost,
+    rootPath,
+    settings.useRootPathInSitemapUrls
+  )
 
   logger.info({
     message: 'Fetching catalog sitemap entry',
     payload: {
       forwardedHost,
       forwardedPath,
+      sitemapBase,
     },
   })
 
-  ctx.body = await catalog.getSitemap(forwardedHost, forwardedPath)
+  ctx.body = await catalog.getSitemap(sitemapBase, forwardedPath)
   ctx.status = 200
 }
