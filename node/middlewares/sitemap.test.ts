@@ -1,4 +1,4 @@
-import { Binding, Catalog, IOContext, Logger, VBase } from '@vtex/api'
+import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import {
@@ -8,6 +8,7 @@ import {
 } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
+import { Catalog } from '../clients/catalog'
 import { EXTENDED_INDEX_FILE } from '../utils'
 import { sitemap } from './sitemap'
 
@@ -99,7 +100,6 @@ describe('Test sitemap middleware', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       get catalog(): any {
         return this.getOrSet('catalog', catalog)
       }

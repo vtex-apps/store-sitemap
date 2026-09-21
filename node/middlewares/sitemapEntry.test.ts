@@ -1,7 +1,8 @@
-import { Binding, Catalog, IOContext, Logger, VBase } from '@vtex/api'
+import { Binding, IOContext, Logger, VBase } from '@vtex/api'
 import * as TypeMoq from 'typemoq'
 
 import { Clients } from '../clients'
+import { Catalog } from '../clients/catalog'
 import { sitemapEntry, URLEntry } from './sitemapEntry'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
@@ -77,7 +78,6 @@ describe('Test sitemap entry', () => {
   beforeEach(() => {
     // tslint:disable-next-line: max-classes-per-file
     const ClientsImpl = class ClientsMock extends Clients {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       get catalog(): any {
         return this.getOrSet('catalog', catalog)
       }
