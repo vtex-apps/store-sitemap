@@ -85,9 +85,6 @@ describe('Test startSitemapGeneration', () => {
         ...contextMock.object,
         clients: new ClientsImpl({}, ioContext.object),
         query: {},
-        request: {
-          header: {},
-        } as any,
         state: {
           ...state.object,
           binding: {

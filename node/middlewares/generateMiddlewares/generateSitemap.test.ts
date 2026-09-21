@@ -23,7 +23,6 @@ const DEFAULT_APPS_ROUTES_PAYLOAD = {
 
 const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
   count: 0,
-  disableRoutesTerm: '',
   generationId: '1',
   next: null,
   report: {},
