@@ -61,6 +61,7 @@ describe('Test generation prepare', () => {
       clients: new ClientsImpl({}, ioContext.object),
       state: {
         ...state.object,
+        isCrossBorder: true,
       },
       vtex: {
         ...ioContext.object,

@@ -95,6 +95,9 @@ describe('Test rewriter routes generation', () => {
       return []
     }
 
+    public listInternalsWithRetry = (limit: number, cursor: Maybe<string>) =>
+      this.listInternals(limit, cursor)
+
     public listInternals = async (_: number, cursor: Maybe<string>) => {
       switch(cursor) {
         case 'NEXT':
@@ -169,6 +172,7 @@ describe('Test rewriter routes generation', () => {
       ...contextMock.object,
       body: {
         count: 0,
+        disableRoutesTerm: '',
         generationId: '1',
         next: null,
         report: {},
@@ -192,6 +196,7 @@ describe('Test rewriter routes generation', () => {
         event: GENERATE_REWRITER_ROUTES_EVENT,
         payload: {
           count: 1,
+          disableRoutesTerm: '',
           generationId: '1',
           next: 'NEXT',
           report: { category: 1, 'user-canonical': 1, userRoute: 1 },
