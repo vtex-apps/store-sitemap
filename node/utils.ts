@@ -1,8 +1,6 @@
 import { Binding, LINKED, TenantClient } from '@vtex/api'
 import { any, startsWith } from 'ramda'
 
-import { MultipleSitemapGenerationError } from './errors'
-import { GENERATE_SITEMAP_EVENT } from './middlewares/generateMiddlewares/utils'
 
 export const CONFIG_BUCKET = `${LINKED ? 'linked' : ''}configuration`
 export const CONFIG_FILE = 'config.json'
@@ -18,8 +16,6 @@ export const CUSTOM_ROUTES_GENERATION_LOCK_FILENAME = 'generation-lock.json'
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'
-
-const fiveDaysFromNowMS = () => `${new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)}`
 
 const validBinding = (path: string) => (binding: Binding) => {
   const isStoreBinding = binding.targetProduct === STORE_PRODUCT
@@ -69,20 +65,22 @@ export const hashString = (str: string) => {
 
 export const getBucket = (prefix: string, bucketName: string) => `${prefix}_${bucketName}`
 
-export const startSitemapGeneration = async (ctx: Context, force?: boolean) => {
-  const { clients: { vbase, events }, vtex: { logger } } = ctx
-  const config = await vbase.getJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, true)
-  if (config && validDate(config.endDate) && !force) {
-    throw new MultipleSitemapGenerationError(config.endDate)
-  }
-  const generationId = (Math.random() * 10000).toString()
-  const caller = ctx.request.header['x-vtex-caller']
-  logger.info({ message: `New generation started by ${caller}`, generationId })
-  await vbase.saveJSON<GenerationConfig>(CONFIG_BUCKET, GENERATION_CONFIG_FILE, {
-    endDate: fiveDaysFromNowMS(),
-    generationId,
+/*
+ * TODO: remove this function, its callers (prepare, sitemap middlewares and the
+ * generateSitemap query/route/event) and the generation middlewares once the
+ * `deprecated-generate-sitemap` logs show no account still calling it.
+ */
+export const startSitemapGeneration = async (ctx: Context, _force?: boolean) => {
+  const {
+    vtex: { account, workspace, logger },
+  } = ctx
+  logger.warn({
+    account,
+    caller: ctx.request.header['x-vtex-caller'],
+    message: 'Sitemap generation is no longer needed, skipping',
+    type: 'deprecated-generate-sitemap',
+    workspace,
   })
-  events.sendEvent('', GENERATE_SITEMAP_EVENT, { generationId })
 }
 
 export const validDate = (endDate: string) => {

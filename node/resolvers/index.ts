@@ -1,4 +1,3 @@
-import { startSitemapGeneration } from '../utils'
 import { deleteIndex, saveIndex } from './mutations'
 
 export const resolvers = {
@@ -7,12 +6,28 @@ export const resolvers = {
     saveIndex,
   },
   Query: {
+    /* Generation was replaced by another solution; log callers before removing the query. */
     generateSitemap: async (
       _: {},
       { force }: { force?: boolean },
       ctx: Context
     ) => {
-      await startSitemapGeneration(ctx, force)
+      const {
+        vtex: { account, workspace, logger },
+        headers,
+      } = ctx
+
+      logger.warn({
+        account,
+        force,
+        message:
+          'Deprecated generateSitemap GraphQL query called, generation is no longer needed',
+        origin: headers['x-forwarded-for'],
+        type: 'deprecated-generate-sitemap',
+        userAgent: headers['user-agent'],
+        workspace,
+      })
+
       return true
     },
   },
