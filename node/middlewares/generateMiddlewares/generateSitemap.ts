@@ -1,9 +1,3 @@
-import {
-  GENERATE_APPS_ROUTES_EVENT,
-  GENERATE_PRODUCT_ROUTES_EVENT,
-  GENERATE_REWRITER_ROUTES_EVENT,
-} from './utils'
-
 /* Generation was replaced by another solution; log callers before removing the route. */
 export async function generateSitemapFromREST(ctx: Context) {
   const {
@@ -26,33 +20,18 @@ export async function generateSitemapFromREST(ctx: Context) {
   ctx.body = 'Sitemap generation through this route is no longer necessary.'
 }
 
-const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
-  count: 0,
-  next: null,
-  report: {},
-}
-
+/* TODO: remove with the other deprecated generation code once the logs show no callers. */
 export async function generateSitemap(ctx: EventContext) {
-  const { clients: { events }, body: { generationId }, state: { settings } }  = ctx
-  const disableRoutesTerm = settings.disableRoutesTerm
-  if (settings.enableNavigationRoutes) {
-    events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
-      ...DEFAULT_REWRITER_ROUTES_PAYLOAD,
-      disableRoutesTerm,
-      generationId,
-    } as RewriterRoutesGenerationEvent)
-  }
+  const {
+    vtex: { account, workspace, logger },
+    body,
+  } = ctx
 
-  if (settings.enableProductRoutes) {
-    events.sendEvent('', GENERATE_PRODUCT_ROUTES_EVENT, {
-      generationId,
-      invalidProducts: 0,
-      page: 1,
-      processedProducts: 0,
-    } as ProductRoutesGenerationEvent)
-  }
-
-  if (settings.enableAppsRoutes) {
-    events.sendEvent('', GENERATE_APPS_ROUTES_EVENT, { generationId })
-  }
+  logger.warn({
+    account,
+    generationId: body?.generationId,
+    message: 'Deprecated sitemap.generate event received, generation is no longer needed',
+    type: 'deprecated-generate-sitemap',
+    workspace,
+  })
 }

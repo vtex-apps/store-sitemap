@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 - `/generate-sitemap` route no longer starts a sitemap generation; it now logs a `deprecated-generate-sitemap` warning with the caller info and returns a message saying it is no longer necessary
 - `generateSitemap` GraphQL query no longer starts a sitemap generation; it logs the same `deprecated-generate-sitemap` warning and returns `true`
+- `startSitemapGeneration` (called by the `sitemap.xml` middlewares) and the `sitemap.generate` event handler no longer trigger a generation or send events; they log the same `deprecated-generate-sitemap` warning
 
 ## [2.18.8] - 2026-08-26
 
