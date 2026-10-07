@@ -1,24 +1,29 @@
-import { startSitemapGeneration } from '../../utils'
-import { MultipleSitemapGenerationError } from './../../errors'
-
 import {
   GENERATE_APPS_ROUTES_EVENT,
   GENERATE_PRODUCT_ROUTES_EVENT,
   GENERATE_REWRITER_ROUTES_EVENT,
 } from './utils'
 
+/* Generation was replaced by another solution; log callers before removing the route. */
 export async function generateSitemapFromREST(ctx: Context) {
+  const {
+    vtex: { account, workspace, logger },
+    query,
+    headers,
+  } = ctx
+
+  logger.warn({
+    account,
+    message: 'Deprecated /generate-sitemap route called, generation is no longer needed',
+    origin: headers['x-forwarded-for'],
+    query,
+    type: 'deprecated-generate-sitemap',
+    userAgent: headers['user-agent'],
+    workspace,
+  })
+
   ctx.status = 200
-  try {
-    await startSitemapGeneration(ctx, ctx.query.__force !== undefined)
-  } catch (err) {
-    if (err instanceof MultipleSitemapGenerationError) {
-      ctx.status = 202
-      ctx.body = err.message
-      return
-    }
-    throw err
-  }
+  ctx.body = 'Sitemap generation through this route is no longer necessary.'
 }
 
 const DEFAULT_REWRITER_ROUTES_PAYLOAD = {

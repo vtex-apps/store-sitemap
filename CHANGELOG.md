@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- `/generate-sitemap` route no longer starts a sitemap generation; it now logs a `deprecated-generate-sitemap` warning with the caller info and returns a message saying it is no longer necessary
+
 ## [2.18.8] - 2026-08-26
 
 ### Fixed
