@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- Add the `ViewProduct` policy to `manifest.json`, required by `vtex.catalog-graphql` (>= 1.108) for the `product` query used when generating product routes
+
 ## [2.18.8] - 2026-08-26
 
 ### Fixed
