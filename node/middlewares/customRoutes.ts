@@ -257,10 +257,18 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       triggerCustomRoutesGeneration(ctx)
     }
 
-    // Filter data based on enableAppsRoutes setting
-    const filteredData = settings.enableAppsRoutes
-      ? cachedData.data
-      : cachedData.data.filter(item => item.name !== 'apps-routes')
+    // Filter data based on which sources are enabled. When a flag is off the
+    // corresponding section is omitted entirely so consumers see the feature
+    // as if it did not exist (invariant 9 — settings gating).
+    const filteredData = cachedData.data.filter(item => {
+      if (item.name === 'apps-routes' && !settings.enableAppsRoutes) {
+        return false
+      }
+      if (item.name === 'cms-routes' && !settings.enableCmsRoutes) {
+        return false
+      }
+      return true
+    })
 
     // Return cached data
     ctx.status = 200

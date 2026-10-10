@@ -1,6 +1,7 @@
 import { Internal, ListInternalsResponse } from 'vtex.rewriter'
 import { flatten } from 'ramda'
 
+import { isValidCmsRoute } from '../middlewares/generateMiddlewares/generateCmsRoutes'
 import { SitemapIndex } from '../middlewares/generateMiddlewares/utils'
 import { EXTENDED_INDEX_FILE, getBucket, hashString } from '../utils'
 
@@ -112,4 +113,30 @@ export async function getAppsRoutes(ctx: Context) {
   )
 
   return flatten<string>(routes)
+}
+
+/**
+ * Return the flat list of CMS-origin route paths that pass the CMS sitemap
+ * filter. Mirrors `getUserRoutes` shape (paths across all bindings) so it can
+ * be embedded directly in the `customRoutes` JSON cache.
+ *
+ * Filter logic is shared with `generateCmsRoutes` (the XML pipeline) via
+ * `isValidCmsRoute`, keeping both views consistent (invariant 6 — determinism).
+ */
+export async function getCmsRoutes(ctx: Context): Promise<string[]> {
+  const {
+    state: { settings },
+  } = ctx
+
+  // When the rollout flag is off this feature behaves as if it did not exist
+  // (invariant 9 — settings gating); skip the Rewriter calls entirely.
+  if (!settings?.enableCmsRoutes) {
+    return []
+  }
+
+  const disableRoutesTerm = settings.disableRoutesTerm || ''
+  const internalRoutes = await fetchInternalRoutes(ctx, LIST_LIMIT)
+  return internalRoutes
+    .filter(internal => isValidCmsRoute(internal, disableRoutesTerm))
+    .map(internal => internal.from)
 }

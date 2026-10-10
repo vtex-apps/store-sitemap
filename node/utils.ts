@@ -15,6 +15,12 @@ export const CUSTOM_ROUTES_BUCKET = 'custom-routes'
 export const CUSTOM_ROUTES_FILENAME = 'custom-routes.json'
 export const CUSTOM_ROUTES_GENERATION_LOCK_FILENAME = 'generation-lock.json'
 
+// CMS routes — per Google's sitemap protocol limits (50k URLs / 50 MB per file).
+// These ceilings drive the chunking in generateCmsRoutes.
+export const CMS_ROUTES_MAX_URLS_PER_FILE = 50000
+export const CMS_ROUTES_MAX_BYTES_PER_FILE = 50 * 1024 * 1024
+export const CMS_ROUTES_PREFIX = 'cms-routes'
+
 export const TENANT_CACHE_TTL_S = 60 * 10
 
 export const STORE_PRODUCT = 'vtex-storefront'

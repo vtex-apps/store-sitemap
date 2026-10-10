@@ -3,12 +3,13 @@ import * as TypeMoq from 'typemoq'
 
 import {
   APPS_ROUTES_INDEX,
+  CMS_ROUTES_INDEX,
   PRODUCT_ROUTES_INDEX,
   REWRITER_ROUTES_INDEX,
 } from './generateMiddlewares/utils'
 
 import { Clients } from '../clients'
-import { EXTENDED_INDEX_FILE } from '../utils'
+import { CMS_ROUTES_PREFIX, EXTENDED_INDEX_FILE, getBucket, hashString } from '../utils'
 import { sitemap } from './sitemap'
 
 const vbaseTypeMock = TypeMoq.Mock.ofInstance(VBase)
@@ -22,6 +23,9 @@ const removeSpaces = (str: string) => str.replace(/(\r\n|\n|\r|\s)/gm, '')
 describe('Test sitemap middleware', () => {
   let context: Context
   let hasExtendedFiles: boolean
+  let hasCmsRoutesFiles: boolean
+
+  const cmsBucket = getBucket(CMS_ROUTES_PREFIX, hashString('1'))
 
   const vbase = class VBaseMock extends vbaseTypeMock.object {
     constructor() {
@@ -29,10 +33,18 @@ describe('Test sitemap middleware', () => {
     }
 
     public getJSON = async <T>(
-      _: string,
+      bucket: string,
       file: string,
       __?: boolean | undefined
     ): Promise<T> => {
+      if (file === CMS_ROUTES_INDEX && bucket === cmsBucket) {
+        return ((hasCmsRoutesFiles
+          ? {
+              index: ['cms-routes-0'],
+              lastUpdated: '2019-12-04',
+            }
+          : null) as unknown) as T
+      }
       switch (file) {
         case APPS_ROUTES_INDEX:
           return ({
@@ -91,6 +103,7 @@ describe('Test sitemap middleware', () => {
     }
 
     hasExtendedFiles = false
+    hasCmsRoutesFiles = false
     context = {
       ...contextMock.object,
       clients: new ClientsImpl({}, ioContext.object),
@@ -107,11 +120,13 @@ describe('Test sitemap middleware', () => {
         ],
         forwardedHost: 'www.host.com',
         forwardedPath: '/sitemap/file1.xml',
+        isCrossBorder: true,
         matchingBindings: [matchingBindings[0]],
         rootPath: '',
         settings: {
           disableRoutesTerm: '',
           enableAppsRoutes: true,
+          enableCmsRoutes: false,
           enableNavigationRoutes: true,
           enableProductRoutes: true,
           ignoreBindings: false,
@@ -339,5 +354,21 @@ describe('Test sitemap middleware', () => {
       </sitemapindex>`
       )
     )
+  })
+
+  it('Should append cms-routes sub-sitemaps to <sitemapindex> when enableCmsRoutes is on (US-1)', async () => {
+    hasCmsRoutesFiles = true
+    context.state.settings.enableCmsRoutes = true
+    await sitemap(context, next)
+    expect(context.body).toContain(
+      '<loc>https://www.host.com/sitemap/cms-routes-0.xml</loc>'
+    )
+  })
+
+  it('Should NOT read or append cms-routes when enableCmsRoutes is off (invariant 9)', async () => {
+    hasCmsRoutesFiles = true
+    context.state.settings.enableCmsRoutes = false
+    await sitemap(context, next)
+    expect(context.body).not.toContain('cms-routes-0')
   })
 })

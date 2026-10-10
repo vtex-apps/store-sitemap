@@ -10,11 +10,13 @@ export const RAW_DATA_PREFIX = `${LINKED ? 'L' : ''}C`
 export const REWRITER_ROUTES_INDEX = 'rewriterRoutesIndex.json'
 export const PRODUCT_ROUTES_INDEX = 'productRoutesIndex.json'
 export const APPS_ROUTES_INDEX = 'appsRoutesIndex.json'
+export const CMS_ROUTES_INDEX = 'cmsRoutesIndex.json'
 
 export const GENERATE_SITEMAP_EVENT = 'sitemap.generate'
 export const GENERATE_REWRITER_ROUTES_EVENT = 'sitemap.generate:rewriter-routes'
 export const GENERATE_PRODUCT_ROUTES_EVENT = 'sitemap.generate:product-routes'
 export const GENERATE_APPS_ROUTES_EVENT = 'sitemap.generate:apps-routes'
+export const GENERATE_CMS_ROUTES_EVENT = 'sitemap.generate:cms-routes'
 export const GROUP_ENTRIES_EVENT = 'sitemap.generate:group-entries'
 
 export const DEFAULT_CONFIG: Config = {

@@ -10,6 +10,36 @@ interface RobotsFile {
 
 const SITEMAP_BUILD_FILE = 'dist/vtex.store-sitemap/build.json'
 
+// Multiline, case-insensitive — matches "Sitemap:" anywhere in the file at the
+// start of a (possibly indented) line. Mirrors how robots.txt parsers detect
+// the directive.
+const SITEMAP_DIRECTIVE_REGEX = /^\s*Sitemap\s*:/im
+
+/**
+ * Idempotently inject a `Sitemap:` directive into a robots.txt body.
+ *
+ * - Returns the body unchanged when a `Sitemap:` line is already present
+ *   (case-insensitive, leading-whitespace-tolerant — Decision 6 of the spec).
+ * - When the body is empty/undefined, returns a single-line file containing
+ *   the directive.
+ * - Otherwise appends the directive after a blank line, preserving content.
+ *
+ * Pure helper — exported for unit testing (US-4 acceptance criteria).
+ */
+export const ensureSitemapDirective = (
+  robotsBody: string | undefined,
+  sitemapUrl: string
+): string => {
+  if (!robotsBody) {
+    return `Sitemap: ${sitemapUrl}\n`
+  }
+  if (SITEMAP_DIRECTIVE_REGEX.test(robotsBody)) {
+    return robotsBody
+  }
+  const trimmed = robotsBody.replace(/\s+$/, '')
+  return `${trimmed}\n\nSitemap: ${sitemapUrl}\n`
+}
+
 const getRobotForBinding = async (
   bindingId: string,
   account: string,
@@ -49,6 +79,14 @@ export async function robots(ctx: Context) {
   }
   if (!data || !binding?.id) {
     data = await robotsDataSource.fromLegacy(account)
+  }
+
+  // Decision 6 of the spec: guarantee a `Sitemap:` directive is present so
+  // crawlers can always discover the sitemap. Idempotent — never duplicates an
+  // existing directive added manually by the merchant.
+  const forwardedHost = ctx.get('x-forwarded-host')
+  if (forwardedHost) {
+    data = ensureSitemapDirective(data, `https://${forwardedHost}/sitemap.xml`)
   }
 
   ctx.set('Content-Type', 'text/plain')
