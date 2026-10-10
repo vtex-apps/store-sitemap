@@ -1,6 +1,10 @@
 import { Logger, VBase } from '@vtex/api'
 
 import { MultipleCustomRoutesGenerationError } from '../errors'
+import {
+  resolveActiveCmsSource,
+  shouldIncludeCustomRoutesSection,
+} from '../services/cmsSources'
 import { generateCustomRoutes } from './generateMiddlewares/generateCustomRoutes'
 import {
   CONFIG_BUCKET,
@@ -257,10 +261,20 @@ export async function customRoutes(ctx: Context, next: () => Promise<void>) {
       triggerCustomRoutesGeneration(ctx)
     }
 
-    // Filter data based on enableAppsRoutes setting
-    const filteredData = settings.enableAppsRoutes
-      ? cachedData.data
-      : cachedData.data.filter(item => item.name !== 'apps-routes')
+    // Filter data based on which sources are enabled. When a flag is off the
+    // corresponding section is omitted entirely so consumers see the feature
+    // as if it did not exist (invariant 9 — settings gating). Mutual
+    // exclusivity (Decision 8 / FR-10 / invariant 10) drops `cms-routes`
+    // whenever Content Platform is the active source, even if the legacy
+    // flag also happens to be on, so the response advertises only ONE CMS
+    // section per request.
+    const activeCmsSource = resolveActiveCmsSource(settings)
+    const filteredData = cachedData.data.filter(item => {
+      if (item.name === 'apps-routes' && !settings.enableAppsRoutes) {
+        return false
+      }
+      return shouldIncludeCustomRoutesSection(item.name, activeCmsSource)
+    })
 
     // Return cached data
     ctx.status = 200

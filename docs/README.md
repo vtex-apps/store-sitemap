@@ -184,6 +184,12 @@ If you want to remove a custom route, execute the following mutation, which take
    }
    ```
 
+### CMS routes (FastStore)
+
+If your store runs on FastStore, you can include pages created in VTEX headless CMS — PDPs, PLPs, landing pages, and custom-slug pages — directly in the generated sitemap by enabling the `enableCmsRoutes` setting.
+
+For a complete setup guide, see [CMS routes in sitemap (FastStore)](./CMS_ROUTES.md).
+
 ### Fetching custom routes in JSON format
 
 The `vtex.store-sitemap` app exposes an API endpoint that allows you to retrieve route data in JSON format. This endpoint is useful for external sitemap generation or custom indexing workflows.

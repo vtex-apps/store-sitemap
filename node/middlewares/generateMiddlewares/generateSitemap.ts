@@ -1,3 +1,8 @@
+import {
+  getCmsGenerateEvent,
+  logCmsMutualExclusivityIfNeeded,
+  resolveActiveCmsSource,
+} from '../../services/cmsSources'
 import { startSitemapGeneration } from '../../utils'
 import { MultipleSitemapGenerationError } from './../../errors'
 
@@ -28,7 +33,12 @@ const DEFAULT_REWRITER_ROUTES_PAYLOAD = {
 }
 
 export async function generateSitemap(ctx: EventContext) {
-  const { clients: { events }, body: { generationId }, state: { settings } }  = ctx
+  const {
+    clients: { events },
+    body: { generationId },
+    state: { settings },
+    vtex: { logger },
+  } = ctx
   const disableRoutesTerm = settings.disableRoutesTerm
   if (settings.enableNavigationRoutes) {
     events.sendEvent('', GENERATE_REWRITER_ROUTES_EVENT, {
@@ -49,5 +59,13 @@ export async function generateSitemap(ctx: EventContext) {
 
   if (settings.enableAppsRoutes) {
     events.sendEvent('', GENERATE_APPS_ROUTES_EVENT, { generationId })
+  }
+
+  logCmsMutualExclusivityIfNeeded(settings, logger)
+
+  const activeCmsSource = resolveActiveCmsSource(settings)
+  const cmsEvent = getCmsGenerateEvent(activeCmsSource)
+  if (cmsEvent) {
+    events.sendEvent('', cmsEvent, { generationId })
   }
 }
