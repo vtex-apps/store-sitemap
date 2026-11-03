@@ -1,7 +1,4 @@
 import { ConflictsResolver, inflightURL, InstanceOptions, IOContext, IOResponse, RequestTracingConfig, VBase } from '@vtex/api'
-import {
-  IgnoreNotFoundRequestConfig,
-} from '@vtex/api/lib/HttpClient/middlewares/notFound'
 import { AxiosError } from 'axios'
 
 interface Headers { [key: string]: string | number }
@@ -30,7 +27,7 @@ export class CVBase extends VBase {
         requestSpanNameSuffix: metric,
         ...tracingConfig?.tracing,
       },
-    } as IgnoreNotFoundRequestConfig)
+    })
       .catch(async (error: AxiosError<T>) => {
         const { response } = error
         if (response && response.status === 409 && conflictsResolver) {
