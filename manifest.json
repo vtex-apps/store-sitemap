@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema",
   "name": "store-sitemap",
   "vendor": "vtex",
-  "version": "2.18.4-hkignore",
+  "version": "2.18.4-hkignore.1",
   "title": "Sitemap",
   "description": "Sitemap for vtex.store",
   "mustUpdateAt": "2019-08-01",
@@ -44,6 +44,9 @@
     },
     {
       "name": "vtex.catalog-graphql:resolve-graphql"
+    },
+    {
+      "name": "ViewProduct"
     },
     {
       "name": "colossus-fire-event"

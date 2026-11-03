@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [2.18.4-hkignore.1] - 2026-11-03
+
+### Fixed
+
+- Add the `ViewProduct` policy to `manifest.json`, required by `vtex.catalog-graphql` (>= 1.108) for the `product` query used when generating product routes. Same fix as `2.18.9`, applied on top of the `2.16.7` code base that the `2.18.4-hkignore` build is frozen on.
+
 ## [2.16.7] - 2025-04-15
 
 ### Fixed
