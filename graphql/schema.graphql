@@ -3,6 +3,6 @@ type Query {
 }
 
 type Mutation {
-  saveIndex(index: String!, binding: String): Boolean!
-  deleteIndex(index: String!, binding: String): Boolean!
+  saveIndex(index: String!, binding: String): Boolean! @requiresAuth
+  deleteIndex(index: String!, binding: String): Boolean! @requiresAuth
 }
