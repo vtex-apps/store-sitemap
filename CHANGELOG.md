@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Security
+
+- Require authentication and same-account administrator access for `saveIndex` and `deleteIndex`.
+
 ## [2.18.9] - 2026-10-09
 
 ### Fixed
