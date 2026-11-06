@@ -148,6 +148,8 @@ Once everything is set up, return to the [Instructions](#instructions) and follo
 
 #### Extending the sitemap
 
+The `saveIndex` and `deleteIndex` mutations require a valid `VtexIdclientAutCookie` cookie for an administrator of the account. Sign in to the account's Admin before running these operations in the GraphQL IDE.
+
 To add custom routes created by an app (for example, the ones created by [`store-locator`](https://github.com/vtex-apps/store-locator)) to the store sitemap, the app must respond to an XML file containing a list of the routes created by that app. Finally, add the path of your app's XML file to the store sitemap index.
 
 For implementation details, check the following instructions:
